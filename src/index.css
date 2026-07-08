@@ -254,9 +254,42 @@ code {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
+@layer base {
+  :root {
+    --background: 172 45% 12%;        /* #112B29 */
+    --foreground: 60 100% 99%;        /* #FFFFF9 */
+
+    --card: 172 40% 15%;              /* slightly lifted surface */
+    --card-foreground: 60 100% 99%;
+
+    --primary: 28 35% 55%;            /* #B58B67 — used for buttons/accents */
+    --primary-foreground: 172 45% 12%;
+
+    --secondary: 172 35% 18%;
+    --secondary-foreground: 60 100% 99%;
+
+    --muted: 172 30% 20%;
+    --muted-foreground: 28 25% 65%;
+
+    --accent: 28 35% 55%;
+    --accent-foreground: 172 45% 12%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 60 100% 99%;
+
+    --border: 172 25% 22%;
+    --input: 172 25% 22%;
+    --ring: 28 35% 55%;
+
+    --radius: 0.75rem;
+  }
+}
+
+
 @layer base {
   * {
-    @apply border-border outline-ring/50;}
+    @apply border-border;}
   body {
     @apply bg-background text-foreground;}
   html {
