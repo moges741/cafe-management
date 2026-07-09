@@ -8,9 +8,7 @@ import { setUser, clearUser } from './authSlice'
 export default function SessionInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
 
-  // This fires GET /auth/me exactly once when the app mounts
-  // isLoading = still waiting for the response
-  // isError = the cookie was missing/invalid → user is a guest
+
   const { data, isLoading, isError } = useGetMeQuery()
 
   useEffect(() => {
@@ -23,8 +21,6 @@ export default function SessionInitializer({ children }: { children: React.React
     }
   }, [data, isLoading, isError, dispatch])
 
-  // While we're checking, show nothing (or a splash screen later)
-  // This is what prevents the "flash of login page" problem
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
