@@ -6,6 +6,7 @@ import KitchenDisplayPage from '@/pages/kitchen/KitchenDisplayPage'
 import CashierPosPage from '@/pages/cashier/CashierPosPage'
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import ProtectedRoute from './ProtectedRoute'
+import ProductDetailPage from '@/pages/customer/ProductDetailPage'
 
 export default function AppRouter() {
   return (
@@ -35,6 +36,8 @@ export default function AppRouter() {
             <AdminDashboardPage />
           </ProtectedRoute>
         } />
+        <Route path="/menu/:id" element={<ProductDetailPage />} />
+        
       </Routes>
     </BrowserRouter>
   )
