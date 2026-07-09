@@ -7,7 +7,9 @@ import CashierPosPage from '@/pages/cashier/CashierPosPage'
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import ProtectedRoute from './ProtectedRoute'
 import ProductDetailPage from '@/pages/customer/ProductDetailPage'
-
+import CartPage from '@/pages/customer/CartPage'
+import CheckoutPage from '@/pages/customer/CheckoutPage'
+import PaymentSuccessPage from '@/pages/customer/PaymentSuccessPage'
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -37,7 +39,9 @@ export default function AppRouter() {
           </ProtectedRoute>
         } />
         <Route path="/menu/:id" element={<ProductDetailPage />} />
-        
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/payment/success" element={<PaymentSuccessPage />} />
       </Routes>
     </BrowserRouter>
   )

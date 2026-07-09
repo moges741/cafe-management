@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAppSelector } from '@/app/hooks'
+import type { RootState } from '@/app/store'
 
 interface ProtectedRouteProps {
   children:     React.ReactNode
@@ -7,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user, isAuthenticated, isInitializing } = useAppSelector(state => state.auth)
+  const { user, isAuthenticated, isInitializing } = useAppSelector((state: RootState) => state.auth)
 
   // Still checking session — don't decide anything yet
   if (isInitializing) return null
