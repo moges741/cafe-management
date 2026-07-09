@@ -46,10 +46,10 @@ export const authApi = baseApi.injectEndpoints({
     // We don't have a dedicated "who am I" endpoint yet on the backend —
     // this calls the users/me pattern. If your backend doesn't have this,
     // flag it and we'll add a lightweight GET /auth/me endpoint
-    getMe: builder.query<User, void>({
-      query: () => '/auth/me',
-      providesTags: ['User'],
-    }),
+   getMe: builder.query<User, void>({
+  query: () => '/auth/me',
+  providesTags: ['User'],
+}),
   }),
 })
 
