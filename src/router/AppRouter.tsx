@@ -10,6 +10,7 @@ import ProductDetailPage from '@/pages/customer/ProductDetailPage'
 import CartPage from '@/pages/customer/CartPage'
 import CheckoutPage from '@/pages/customer/CheckoutPage'
 import PaymentSuccessPage from '@/pages/customer/PaymentSuccessPage'
+import OrderTrackingPage from '@/pages/customer/OrderTrackingPage'
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -42,6 +43,8 @@ export default function AppRouter() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
+        <Route path="/order/:id/track" element={<OrderTrackingPage />} />
+        
       </Routes>
     </BrowserRouter>
   )
