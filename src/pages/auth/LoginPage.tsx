@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useLoginMutation } from '@/features/auth/authApi'
 import { loginSchema, type LoginFormData } from './schemas'
-
+import { authApi } from '@/features/auth/authApi'
+import { useAppDispatch } from '@/app/hooks'
 export default function LoginPage() {
   const navigate = useNavigate()
 
@@ -25,24 +26,31 @@ export default function LoginPage() {
   })
 
   // This runs only after Zod validation passes
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      await login(data).unwrap()
-      // .unwrap() converts RTK Query's result object into a normal
-      // promise that throws on failure — lets us use try/catch naturally
+ const dispatch = useAppDispatch()
+
+const onSubmit = async (data: LoginFormData) => {
+  try {
+    await login(data).unwrap()
+
+    // Force RTK Query to refetch /auth/me now that we have a fresh cookie
+    // This populates Redux with the real user + role immediately
+    const result = await dispatch(authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true }))
+
+    if ('data' in result && result.data) {
+      const role = result.data.role.name
 
       toast.success('Logged in')
 
-      // Backend doesn't tell us the role directly from /login yet
-      // (cookies are HttpOnly, we can't decode the JWT client-side)
-      // so for now redirect to a neutral landing page —
-      // once GET /auth/me exists, we redirect based on role instead
-      navigate('/')
-    } catch (err: any) {
-      toast.error(err?.data?.error?.message ?? 'Login failed')
+      // Now we can route based on actual role
+      if (role === 'admin' || role === 'manager') navigate('/admin')
+      else if (role === 'kitchen') navigate('/kitchen')
+      else if (role === 'cashier') navigate('/cashier')
+      else navigate('/menu')
     }
+  } catch (err: any) {
+    toast.error(err?.data?.error?.message ?? 'Login failed')
   }
-
+}
   return (
     <div className="min-h-screen flex bg-background">
       <div className="hidden lg:flex lg:w-1/2 relative bg-background border-r border-border p-10 flex-col justify-between">
