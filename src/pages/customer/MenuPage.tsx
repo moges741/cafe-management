@@ -5,7 +5,7 @@ import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { MENU_TABS } from '@/features/categories/categoryFilters'
 import { cn } from '@/lib/utils'
 
-const BRANCH_ID = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' // TODO: from branch context later
+const BRANCH_ID = 'cc058c8e-73a7-4357-82d9-03182feab651' // TODO: from branch context later
 
 type Product = {
   id: string
