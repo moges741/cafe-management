@@ -2,23 +2,24 @@ import { useEffect } from 'react'
 import { useAppDispatch } from '@/app/hooks'
 import { useGetMeQuery } from './authApi'
 import { setUser, clearUser } from './authSlice'
+import { socketActions } from '@/features/socket/socketMiddleware'
 
-// Renders nothing visible — its only job is to sync
-// "am I logged in?" from the backend into Redux on app start
 export default function SessionInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
-
-
   const { data, isLoading, isError } = useGetMeQuery()
 
   useEffect(() => {
-    if (isLoading) return // wait for the request to finish
+    if (isLoading) return
 
     if (data) {
       dispatch(setUser(data))
     } else if (isError) {
       dispatch(clearUser())
     }
+
+    // Connect the socket regardless of guest/logged-in —
+    // guests can still track an order they just placed
+    dispatch(socketActions.connect())
   }, [data, isLoading, isError, dispatch])
 
   if (isLoading) {
