@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
+import MenuPage from '@/pages/customer/MenuPage'
+import KitchenDisplayPage from '@/pages/kitchen/KitchenDisplayPage'
+import CashierPosPage from '@/pages/cashier/CashierPosPage'
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
+import ProtectedRoute from './ProtectedRoute'
 
 export default function AppRouter() {
   return (
@@ -8,7 +13,28 @@ export default function AppRouter() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* More routes added as each phase builds them */}
+
+        {/* Customer — any logged-in or guest user can browse the menu */}
+        <Route path="/menu" element={<MenuPage />} />
+        <Route path="/" element={<MenuPage />} />
+
+        <Route path="/kitchen" element={
+          <ProtectedRoute allowedRoles={['kitchen', 'admin']}>
+            <KitchenDisplayPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/cashier" element={
+          <ProtectedRoute allowedRoles={['cashier', 'admin']}>
+            <CashierPosPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin" element={
+          <ProtectedRoute allowedRoles={['admin', 'manager']}>
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   )
