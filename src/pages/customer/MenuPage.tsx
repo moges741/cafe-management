@@ -4,6 +4,7 @@ import { useGetProductsQuery } from '@/features/products/productsApi'
 import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { MENU_TABS } from '@/features/categories/categoryFilters'
 import { cn } from '@/lib/utils'
+import CartBadge from '@/components/shared/CartBadge'
 
 const BRANCH_ID = 'cc058c8e-73a7-4357-82d9-03182feab651' // TODO: from branch context later
 
@@ -50,6 +51,8 @@ export default function MenuPage() {
 
   return (
     <div className="min-h-screen bg-background">
+
+        <CartBadge />
       {/* ── Hero header ── */}
       <div className="relative px-6 pt-10 pb-8 border-b border-border">
         <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">
