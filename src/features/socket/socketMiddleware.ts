@@ -66,11 +66,30 @@ export const socketMiddleware: Middleware = (store) => {
     socket.on('notification', (payload: any) => {
       toast(payload.message, { icon: '🔔' })
     })
-  }
+    socket.on('kitchen.new_order', (payload: any) => {
+        console.log('🔴 kitchen.new_order RECEIVED:', payload) // ADD THIS
+        const order = payload.data
+        store.dispatch(upsertOrder({
+          id: order.id, orderNumber: order.orderNumber,
+          status: order.status, branchId: order.branchId,
+        }))
+        toast.success(`New order: ${order.orderNumber}`)
+      })
+  
+  
+  
+    }
 
   // This returned function runs for EVERY action dispatched in the app
   return (next) => (action: any) => {
     switch (action.type) {
+      case 'socket/joinKitchen':
+            console.log('🔵 Joining kitchen room for branch:', action.payload) // ADD THIS
+            socket.emit('kitchen.join', { branchId: action.payload }, () => {
+              console.log('🟢 Kitchen room joined successfully') // ADD THIS
+    store.dispatch(roomJoined(`kitchen:${action.payload}`))
+  })
+  break
       case 'socket/connectRequested':
         attachListeners()
         if (!socket.connected) socket.connect()

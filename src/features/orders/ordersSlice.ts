@@ -5,6 +5,7 @@ interface TrackedOrder {
   orderNumber: string
   status:      string
   branchId:    string
+  createdAt?:  string
 }
 
 interface OrdersState {
