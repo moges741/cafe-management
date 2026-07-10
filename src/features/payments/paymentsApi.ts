@@ -18,7 +18,12 @@ export const paymentsApi = baseApi.injectEndpoints({
       query: (body) => ({ url: '/payments/initialize', method: 'POST', body }),
       invalidatesTags: ['Payment'],
     }),
+
+    confirmCashPayment: builder.mutation<any, { orderId: string }>({
+  query: (body) => ({ url: '/payments/cash-confirm', method: 'POST', body }),
+  invalidatesTags: ['Order', 'Payment'],
+}),
   }),
 })
 
-export const { useInitializePaymentMutation } = paymentsApi
+export const { useInitializePaymentMutation, useConfirmCashPaymentMutation } = paymentsApi
