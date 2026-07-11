@@ -5,12 +5,13 @@ import ordersReducer from '../features/orders/ordersSlice'
 import socketReducer from '../features/socket/socketSlice'
 import { baseApi } from '../lib/api'
 import { socketMiddleware } from '../features/socket/socketMiddleware'
-
+import aiChatReducer from '../features/ai/aiChatSlice'
 export const store = configureStore({
   reducer: {
     auth:                   authReducer,
     cart:                    cartReducer,
     orders:                  ordersReducer,
+    aiChat:                  aiChatReducer,
     socket:                  socketReducer,
     [baseApi.reducerPath]:   baseApi.reducer,
   },
