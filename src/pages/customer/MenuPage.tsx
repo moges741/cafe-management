@@ -52,7 +52,15 @@ export default function MenuPage() {
   return (
     <div className="min-h-screen bg-background">
 
+        <div className="fixed top-0 right-0 z-50 p-4">
         <CartBadge />
+        </div>
+      <Link
+  to="/ai-order"
+  className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/40 text-primary text-sm"
+>
+  Order with AI assistant →
+</Link>
       {/* ── Hero header ── */}
       <div className="relative px-6 pt-10 pb-8 border-b border-border">
         <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">
