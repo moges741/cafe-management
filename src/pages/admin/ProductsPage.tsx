@@ -29,7 +29,7 @@ export default function ProductsPage() {
     try {
       await createProduct({
         name, description, categoryId,
-        price: Number(price),
+        price: price,
         branchId: BRANCH_ID,
       }).unwrap()
       toast.success('Product created')

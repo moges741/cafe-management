@@ -63,4 +63,4 @@ uploadProductImages: builder.mutation<Product, { id: string; formData: FormData 
   }),
 })
 
-export const { useGetProductsQuery, useGetProductByIdQuery } = productsApi
+export const { useGetProductsQuery, useGetProductByIdQuery, useCreateProductMutation, useUpdateProductMutation, useToggleAvailabilityMutation, useUploadProductImagesMutation } = productsApi
