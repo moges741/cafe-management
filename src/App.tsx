@@ -6,8 +6,8 @@ import AiAssistantWidget from './features/ai/AiAssistantWidget'
 function App() {
   return (
     <SessionInitializer>
-      <AppRouter />
       <AiAssistantWidget />
+      <AppRouter />
       <Toaster position="top-center" />
     </SessionInitializer>
   )

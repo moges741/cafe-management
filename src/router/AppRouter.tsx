@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import {  Routes, Route } from 'react-router-dom'
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
 import MenuPage from '@/pages/customer/MenuPage'
@@ -11,10 +11,8 @@ import CartPage from '@/pages/customer/CartPage'
 import CheckoutPage from '@/pages/customer/CheckoutPage'
 import PaymentSuccessPage from '@/pages/customer/PaymentSuccessPage'
 import OrderTrackingPage from '@/pages/customer/OrderTrackingPage'
-import AiChatPage from '@/pages/customer/AiChatPage'
 export default function AppRouter() {
   return (
-    <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -45,9 +43,7 @@ export default function AppRouter() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/order/:id/track" element={<OrderTrackingPage />} />
-        <Route path="/ai-order" element={<AiChatPage />} />
         
       </Routes>
-    </BrowserRouter>
   )
 }
