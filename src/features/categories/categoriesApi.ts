@@ -14,6 +14,19 @@ export const categoriesApi = baseApi.injectEndpoints({
       query: () => '/categories',
       providesTags: ['Category'],
     }),
+    createCategory: builder.mutation<Category, { name: string; description?: string }>({
+  query: (body) => ({ url: '/categories', method: 'POST', body }),
+  invalidatesTags: ['Category'],
+}),
+
+uploadCategoryImage: builder.mutation<Category, { id: string; formData: FormData }>({
+  query: ({ id, formData }) => ({
+    url:    `/categories/${id}/image`,
+    method: 'PATCH',
+    body:   formData,
+  }),
+  invalidatesTags: ['Category'],
+}),
   }),
 })
 

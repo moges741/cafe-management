@@ -21,7 +21,21 @@ export interface Order {
   totalAmount: string
   branchId:    string
 }
+export interface OrderItemDetail {
+  productId:   string
+  productName: string
+  categoryId:  string
+  quantity:    number
+}
 
+export interface Order {
+  id:          string
+  orderNumber: string
+  status:      string
+  totalAmount: string
+  branchId:    string
+  items?:      OrderItemDetail[] // ← only useful if backend actually returns this
+}
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     createOrder: builder.mutation<Order, CreateOrderRequest>({

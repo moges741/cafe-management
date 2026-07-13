@@ -37,6 +37,29 @@ export const productsApi = baseApi.injectEndpoints({
       query: (id) => `/products/${id}`,
       providesTags: (_res, _err, id) => [{ type: 'Product', id }],
     }),
+    createProduct: builder.mutation<Product, Partial<Product>>({
+  query: (body) => ({ url: '/products', method: 'POST', body }),
+  invalidatesTags: ['Product'],
+}),
+
+updateProduct: builder.mutation<Product, { id: string; data: Partial<Product> }>({
+  query: ({ id, data }) => ({ url: `/products/${id}`, method: 'PATCH', body: data }),
+  invalidatesTags: ['Product'],
+}),
+
+toggleAvailability: builder.mutation<Product, string>({
+  query: (id) => ({ url: `/products/${id}/toggle-availability`, method: 'PATCH' }),
+  invalidatesTags: ['Product'],
+}),
+
+uploadProductImages: builder.mutation<Product, { id: string; formData: FormData }>({
+  query: ({ id, formData }) => ({
+    url:    `/products/${id}/images`,
+    method: 'POST',
+    body:   formData,
+  }),
+  invalidatesTags: ['Product'],
+}),
   }),
 })
 
