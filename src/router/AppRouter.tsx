@@ -9,8 +9,8 @@ import PaymentSuccessPage from '@/pages/customer/PaymentSuccessPage'
 import OrderTrackingPage from '@/pages/customer/OrderTrackingPage'
 import KitchenDisplayPage from '@/pages/kitchen/KitchenDisplayPage'
 import CashierPosPage from '@/pages/cashier/CashierPosPage'
-import WaiterPage from '@/pages/waiter/WaiterPage'
-import BaristaPage from '@/pages/barista/BaristaPage'
+// import WaiterPage from '@/pages/waiter/WaiterPage'
+// import BaristaPage from '@/pages/barista/BaristaPage'
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import AnalyticsPage from '@/pages/admin/AnalyticsPage'
 import InventoryPage from '@/pages/admin/InventoryPage'
@@ -39,12 +39,12 @@ export default function AppRouter() {
         <Route path="/cashier" element={
           <ProtectedRoute allowedRoles={['cashier', 'admin']}><CashierPosPage /></ProtectedRoute>
         } />
-        <Route path="/waiter" element={
+        {/* <Route path="/waiter" element={
           <ProtectedRoute allowedRoles={['waiter', 'admin']}><WaiterPage /></ProtectedRoute>
         } />
         <Route path="/barista" element={
           <ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaPage /></ProtectedRoute>
-        } />
+        } /> */}
 
         {/* Admin/manager — sidebar shell with nested pages */}
         <Route path="/admin" element={
