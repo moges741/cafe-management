@@ -6,16 +6,34 @@ export interface Category {
   description: string | null
   imageUrl:    string | null
   isActive:    boolean
+  _count?:     { products: number }
+}
+
+interface GetCategoriesParams {
+  includeInactive?: boolean
 }
 
 export const categoriesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getCategories: builder.query<Category[], void>({
-      query: () => '/categories',
+    getCategories: builder.query<Category[], GetCategoriesParams | void>({
+      query: (params) => ({
+        url: '/categories',
+        params: params?.includeInactive ? { includeInactive: 'true' } : undefined,
+      }),
       providesTags: ['Category'],
     }),
     createCategory: builder.mutation<Category, { name: string; description?: string }>({
   query: (body) => ({ url: '/categories', method: 'POST', body }),
+  invalidatesTags: ['Category'],
+}),
+
+updateCategory: builder.mutation<Category, { id: string; data: { name: string; description?: string } }>({
+  query: ({ id, data }) => ({ url: `/categories/${id}`, method: 'PATCH', body: data }),
+  invalidatesTags: ['Category'],
+}),
+
+deleteCategory: builder.mutation<Category, string>({
+  query: (id) => ({ url: `/categories/${id}`, method: 'DELETE' }),
   invalidatesTags: ['Category'],
 }),
 
@@ -30,4 +48,4 @@ uploadCategoryImage: builder.mutation<Category, { id: string; formData: FormData
   }),
 })
 
-export const { useGetCategoriesQuery } = categoriesApi
+export const { useGetCategoriesQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation, useUploadCategoryImageMutation } = categoriesApi

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import {  Routes, Route } from 'react-router-dom'
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
 import MenuPage from '@/pages/customer/MenuPage'
@@ -14,8 +14,14 @@ import BaristaPage from '@/pages/barista/BaristaPage'
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import AnalyticsPage from '@/pages/admin/AnalyticsPage'
 import InventoryPage from '@/pages/admin/InventoryPage'
+import CategoriesPage from '../pages/admin/CategoriesPage'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import ProtectedRoute from './ProtectedRoute'
+import ProductsPage from '@/pages/admin/ProductsPage'
+import StaffPage from '@/pages/admin/StaffPage'
+import ProductCreatePage from '@/pages/admin/ProductCreatePage'
+import OrdersPage from '@/pages/admin/OrdersPage'
+import BranchesPage from '@/pages/admin/BranchesPage'
 
 export default function AppRouter() {
   return (
@@ -53,6 +59,12 @@ export default function AppRouter() {
           <Route index element={<AdminDashboardPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="inventory" element={<InventoryPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="products" element={<ProductsPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="branches" element={<BranchesPage />} />
+          <Route path="staff" element={<StaffPage />} />
+          <Route path="products/new" element={<ProductCreatePage />} />
         </Route>
       </Routes>
    

@@ -23,9 +23,16 @@ export interface Order {
 }
 export interface OrderItemDetail {
   productId:   string
-  productName: string
-  categoryId:  string
   quantity:    number
+  notes?:      string | null
+  product?:    {
+    id: string
+    name: string
+    price?: string | number
+    categoryId?: string | null
+  }
+  productName?: string
+  categoryId?:  string
 }
 
 export interface Order {
@@ -34,7 +41,17 @@ export interface Order {
   status:      string
   totalAmount: string
   branchId:    string
+  type?:       'dine_in' | 'takeaway'
+  tableNumber?: number | null
+  notes?:      string | null
+  createdAt?:  string
+  customer?:   { id: string; email: string } | null
   items?:      OrderItemDetail[] // ← only useful if backend actually returns this
+}
+
+interface GetOrdersParams {
+  branchId?: string
+  status?: string
 }
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -48,8 +65,8 @@ export const ordersApi = baseApi.injectEndpoints({
       providesTags: (_r, _e, id) => [{ type: 'Order', id }],
     }),
 
-    getOrders: builder.query<Order[], void>({
-      query: () => '/orders',
+    getOrders: builder.query<Order[], GetOrdersParams | void>({
+      query: (params) => ({ url: '/orders', params }),
       providesTags: ['Order'],
     }),
 

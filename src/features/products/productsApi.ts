@@ -37,7 +37,9 @@ export const productsApi = baseApi.injectEndpoints({
       query: (id) => `/products/${id}`,
       providesTags: (_res, _err, id) => [{ type: 'Product', id }],
     }),
-    createProduct: builder.mutation<Product, Partial<Product>>({
+ createProduct: builder.mutation<Product, {
+  name: string; description?: string; price: number; categoryId: string; branchId: string
+}>({
   query: (body) => ({ url: '/products', method: 'POST', body }),
   invalidatesTags: ['Product'],
 }),
@@ -47,20 +49,20 @@ updateProduct: builder.mutation<Product, { id: string; data: Partial<Product> }>
   invalidatesTags: ['Product'],
 }),
 
-toggleAvailability: builder.mutation<Product, string>({
+
+uploadProductImages: builder.mutation<Product, { id: string; formData: FormData }>({
+  query: ({ id, formData }) => ({ url: `/products/${id}/images`, method: 'POST', body: formData }),
+  invalidatesTags: ['Product'],
+}),
+
+
+toggleProductAvailability: builder.mutation<Product, string>({
   query: (id) => ({ url: `/products/${id}/toggle-availability`, method: 'PATCH' }),
   invalidatesTags: ['Product'],
 }),
 
-uploadProductImages: builder.mutation<Product, { id: string; formData: FormData }>({
-  query: ({ id, formData }) => ({
-    url:    `/products/${id}/images`,
-    method: 'POST',
-    body:   formData,
-  }),
-  invalidatesTags: ['Product'],
-}),
+
   }),
 })
 
-export const { useGetProductsQuery, useGetProductByIdQuery, useCreateProductMutation, useUpdateProductMutation, useToggleAvailabilityMutation, useUploadProductImagesMutation } = productsApi
+export const { useGetProductsQuery, useGetProductByIdQuery, useUpdateProductMutation, useToggleProductAvailabilityMutation, useCreateProductMutation, useUploadProductImagesMutation } = productsApi

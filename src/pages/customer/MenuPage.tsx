@@ -6,7 +6,7 @@ import { MENU_TABS } from '@/features/categories/categoryFilters'
 import { cn } from '@/lib/utils'
 import CartBadge from '@/components/shared/CartBadge'
 
-const BRANCH_ID = 'cc058c8e-73a7-4357-82d9-03182feab651' // TODO: from branch context later
+const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 type Product = {
   id: string

@@ -1,120 +1,60 @@
-import { useState } from 'react'
-import { Plus, Upload, ToggleLeft, ToggleRight } from 'lucide-react'
-import { useGetProductsQuery, useCreateProductMutation, useToggleAvailabilityMutation, useUploadProductImagesMutation } from '@/features/products/productsApi'
-import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
+import { Link } from 'react-router-dom'
+import { Plus, ImageOff } from 'lucide-react'
+import { useGetProductsQuery, useToggleProductAvailabilityMutation } from '@/features/products/productsApi'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import toast from 'react-hot-toast'
+import { cn } from '@/lib/utils'
 
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 export default function ProductsPage() {
-  const { data: products = [] } = useGetProductsQuery({ branchId: BRANCH_ID })
-  const { data: categories = [] } = useGetCategoriesQuery()
-  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation()
-  const [toggleAvailability] = useToggleAvailabilityMutation()
-  const [uploadImages] = useUploadProductImagesMutation()
-
-  const [showForm, setShowForm] = useState(false)
-  const [name, setName] = useState('')
-  const [price, setPrice] = useState('')
-  const [categoryId, setCategoryId] = useState('')
-  const [description, setDescription] = useState('')
-
-  const handleCreate = async () => {
-    if (!name || !price || !categoryId) {
-      toast.error('Fill in name, price, and category')
-      return
-    }
-    try {
-      await createProduct({
-        name, description, categoryId,
-        price: price,
-        branchId: BRANCH_ID,
-      }).unwrap()
-      toast.success('Product created')
-      setName(''); setPrice(''); setCategoryId(''); setDescription('')
-      setShowForm(false)
-    } catch (err: any) {
-      toast.error(err?.data?.error?.message ?? 'Could not create product')
-    }
-  }
-
-  const handleImageUpload = async (productId: string, files: FileList | null) => {
-    if (!files || files.length === 0) return
-    const formData = new FormData()
-    formData.append('coverImage', files[0])
-    try {
-      await uploadImages({ id: productId, formData }).unwrap()
-      toast.success('Image uploaded')
-    } catch {
-      toast.error('Upload failed')
-    }
-  }
+  const { data: products = [], isLoading } = useGetProductsQuery({ branchId: BRANCH_ID })
+  const [toggleAvailability] = useToggleProductAvailabilityMutation()
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Products</h1>
-        <Button onClick={() => setShowForm(s => !s)}>
-          <Plus size={15} className="mr-1.5" /> New product
-        </Button>
+        <Link to="/admin/products/new">
+          <Button>
+            <Plus size={15} className="mr-1.5" /> New product
+          </Button>
+        </Link>
       </div>
 
-      {showForm && (
-        <div className="bg-card border border-border rounded-2xl p-5 mb-6 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Input placeholder="Product name" value={name} onChange={e => setName(e.target.value)} />
-            <Input placeholder="Price (ETB)" type="number" value={price} onChange={e => setPrice(e.target.value)} />
-          </div>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
-          >
-            <option value="">Select category</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-          <Input placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} />
-          <Button onClick={handleCreate} disabled={isCreating}>
-            {isCreating ? 'Creating...' : 'Create product'}
-          </Button>
+      {isLoading && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="aspect-square rounded-2xl bg-card animate-pulse" />)}
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {products.map((product) => (
-          <div key={product.id} className="flex items-center gap-4 border border-border rounded-xl p-3 bg-card">
-            <div className="w-14 h-14 rounded-lg bg-secondary overflow-hidden shrink-0">
-              {product.imageUrl && <img src={product.imageUrl} alt="" className="w-full h-full object-cover" />}
+          <Link
+            key={product.id}
+            to={`/admin/products/${product.id}/edit`}
+            className="group rounded-2xl border border-border bg-card overflow-hidden block"
+          >
+            <div className="aspect-square bg-secondary flex items-center justify-center">
+              {product.imageUrl ? (
+                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+              ) : (
+                <ImageOff size={22} className="text-muted-foreground" />
+              )}
             </div>
-
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">{product.name}</p>
-              <p className="text-xs" style={{ color: '#B58B67' }}>
-                {product.category?.name} — {Number(product.price).toFixed(0)} ETB
-              </p>
+            <div className="p-3">
+              <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+              <p className="text-xs text-primary mt-0.5">{Number(product.price).toFixed(0)} ETB</p>
+              <button
+                onClick={(e) => { e.preventDefault(); toggleAvailability(product.id) }}
+                className={cn(
+                  'mt-2 text-[11px] px-2 py-0.5 rounded-full inline-block',
+                  product.isAvailable ? 'bg-primary/20 text-primary' : 'bg-destructive/20 text-destructive'
+                )}
+              >
+                {product.isAvailable ? 'Available' : 'Unavailable'}
+              </button>
             </div>
-
-            <label className="cursor-pointer text-xs flex items-center gap-1 text-primary shrink-0">
-              <Upload size={13} />
-              Image
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleImageUpload(product.id, e.target.files)}
-              />
-            </label>
-
-            <button
-              onClick={() => toggleAvailability(product.id)}
-              className="shrink-0 text-primary"
-              aria-label="Toggle availability"
-            >
-              {product.isAvailable ? <ToggleRight size={22} /> : <ToggleLeft size={22} className="text-muted-foreground" />}
-            </button>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

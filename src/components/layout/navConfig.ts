@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Package, ChefHat, Users, BarChart3,
-  UtensilsCrossed, Coffee, ClipboardList, Boxes, Store
+  UtensilsCrossed, Coffee, ClipboardList, Boxes, Store, Tags
 } from 'lucide-react'
 
 export interface NavItem {
@@ -16,6 +16,7 @@ export const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { label: 'Dashboard',  path: '/admin',            icon: LayoutDashboard },
     { label: 'Analytics',  path: '/admin/analytics',  icon: BarChart3 },
     { label: 'Inventory',  path: '/admin/inventory',  icon: Boxes },
+    { label: 'Categories', path: '/admin/categories', icon: Tags },
     { label: 'Products',   path: '/admin/products',   icon: Package },
     { label: 'Orders',     path: '/admin/orders',     icon: ClipboardList },
     { label: 'Staff',      path: '/admin/staff',      icon: Users },
@@ -25,6 +26,7 @@ export const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { label: 'Dashboard',  path: '/admin',            icon: LayoutDashboard },
     { label: 'Analytics',  path: '/admin/analytics',  icon: BarChart3 },
     { label: 'Inventory',  path: '/admin/inventory',  icon: Boxes },
+    { label: 'Categories', path: '/admin/categories', icon: Tags },
     { label: 'Orders',     path: '/admin/orders',     icon: ClipboardList },
   ],
   cashier: [
