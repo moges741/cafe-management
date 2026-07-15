@@ -46,7 +46,8 @@ export interface Order {
   notes?:      string | null
   createdAt?:  string
   customer?:   { id: string; email: string } | null
-  items?:      OrderItemDetail[] // ← only useful if backend actually returns this
+  items?:      OrderItemDetail[]
+  payment?:    { id: string; status: string; method: string } | null
 }
 
 interface GetOrdersParams {

@@ -20,7 +20,7 @@ export default function ProductDetailPage() {
   const allImages = product
     ? [
         ...(product.imageUrl ? [{ id: 'primary', url: product.imageUrl, position: -1 }] : []),
-        ...(product.images ?? []).slice().sort((a, b) => a.position - b.position),
+        ...(product.images ?? []).filter(img => img.url !== product.imageUrl).sort((a, b) => a.position - b.position),
       ]
     : []
 

@@ -9,7 +9,10 @@ import PaymentSuccessPage from '@/pages/customer/PaymentSuccessPage'
 import OrderTrackingPage from '@/pages/customer/OrderTrackingPage'
 import KitchenDisplayPage from '@/pages/kitchen/KitchenDisplayPage'
 import CashierPosPage from '@/pages/cashier/CashierPosPage'
-import WaiterPage from '@/pages/waiter/WaiterPage'
+import WaiterLayout from '@/pages/waiter/WaiterLayout'
+import WaiterIncomingOrdersPage from '@/pages/waiter/WaiterIncomingOrdersPage'
+import WaiterHistoryPage from '@/pages/waiter/WaiterHistoryPage'
+import WaiterNewOrderPage from '@/pages/waiter/WaiterNewOrderPage'
 import BaristaPage from '@/pages/barista/BaristaPage'
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage'
 import AnalyticsPage from '@/pages/admin/AnalyticsPage'
@@ -22,7 +25,7 @@ import StaffPage from '@/pages/admin/StaffPage'
 import ProductCreatePage from '@/pages/admin/ProductCreatePage'
 import OrdersPage from '@/pages/admin/OrdersPage'
 import BranchesPage from '@/pages/admin/BranchesPage'
-
+import ProductEditPage from '@/pages/admin/ProductEditPage'
 export default function AppRouter() {
   return (
    
@@ -46,8 +49,12 @@ export default function AppRouter() {
           <ProtectedRoute allowedRoles={['cashier', 'admin']}><CashierPosPage /></ProtectedRoute>
         } />
         <Route path="/waiter" element={
-          <ProtectedRoute allowedRoles={['waiter', 'admin']}><WaiterPage /></ProtectedRoute>
-        } />
+          <ProtectedRoute allowedRoles={['waiter', 'admin']}><WaiterLayout /></ProtectedRoute>
+        }>
+          <Route index element={<WaiterIncomingOrdersPage />} />
+          <Route path="history" element={<WaiterHistoryPage />} />
+          <Route path="new" element={<WaiterNewOrderPage />} />
+        </Route>
         <Route path="/barista" element={
           <ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaPage /></ProtectedRoute>
         } />
@@ -65,6 +72,7 @@ export default function AppRouter() {
           <Route path="branches" element={<BranchesPage />} />
           <Route path="staff" element={<StaffPage />} />
           <Route path="products/new" element={<ProductCreatePage />} />
+          <Route path="products/:id/edit" element={<ProductEditPage />} />
         </Route>
       </Routes>
    

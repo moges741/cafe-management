@@ -17,8 +17,9 @@ interface DraftItem {
   unitPrice:   number
 }
 
-export default function WaiterPage() {
+export default function WaiterNewOrderPage() {
   const [tableNumber, setTableNumber] = useState('')
+  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
   const [draftItems, setDraftItems] = useState<DraftItem[]>([])
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
@@ -63,7 +64,7 @@ export default function WaiterPage() {
   }
 
   const handleSubmitOrder = async () => {
-    if (!tableNumber.trim()) {
+    if (orderType === 'dine_in' && !tableNumber.trim()) {
       toast.error('Enter a table number first')
       return
     }
@@ -75,8 +76,8 @@ export default function WaiterPage() {
     try {
       const order = await createOrder({
         branchId:    BRANCH_ID,
-        type:        'dine_in',
-        tableNumber: Number(tableNumber),
+        type:        orderType,
+        tableNumber: orderType === 'dine_in' ? Number(tableNumber) : undefined,
         items: draftItems.map(i => ({ productId: i.productId, quantity: i.quantity })),
       }).unwrap()
 
@@ -138,15 +139,35 @@ export default function WaiterPage() {
 
       {/* ── Draft order panel ── */}
       <div className="w-80 border-l border-border flex flex-col shrink-0">
-        <div className="px-4 py-4 border-b border-border">
-          <label className="text-xs" style={{ color: '#B58B67' }}>Table number</label>
-          <Input
-            value={tableNumber}
-            onChange={(e) => setTableNumber(e.target.value)}
-            placeholder="e.g. 4"
-            type="number"
-            className="mt-1"
-          />
+        <div className="px-4 py-4 border-b border-border space-y-3">
+          <div className="flex gap-2">
+            {(['dine_in', 'takeaway'] as const).map((type) => (
+              <button
+                key={type}
+                onClick={() => setOrderType(type)}
+                className={`flex-1 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                  orderType === type
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-transparent text-foreground border-border'
+                }`}
+              >
+                {type === 'dine_in' ? 'Dine In' : 'Takeaway'}
+              </button>
+            ))}
+          </div>
+
+          {orderType === 'dine_in' && (
+            <div>
+              <label className="text-xs" style={{ color: '#B58B67' }}>Table number</label>
+              <Input
+                value={tableNumber}
+                onChange={(e) => setTableNumber(e.target.value)}
+                placeholder="e.g. 4"
+                type="number"
+                className="mt-1 h-8 text-sm"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">

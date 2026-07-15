@@ -14,7 +14,7 @@ const MAX_GALLERY = 3
 
 export default function ProductCreatePage() {
   const navigate = useNavigate()
-  const { data: categories = [] } = useGetCategoriesQuery({ includeInactive: true })
+  const { data: categories = [] } = useGetCategoriesQuery()
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation()
   const [uploadImages, { isLoading: isUploading }] = useUploadProductImagesMutation()
 
@@ -120,18 +120,31 @@ export default function ProductCreatePage() {
 
           <div className="space-y-1.5">
             <Label>Name</Label>
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="Pepperoni Nera" />
+            <Input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Pepperoni Nera"
+            />
           </div>
 
           <div className="space-y-1.5">
             <Label>Description</Label>
-            <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Charred crust, spicy pepperoni, hot honey" />
+            <Input
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Charred crust, spicy pepperoni, hot honey"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Price (ETB)</Label>
-              <Input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="45" />
+              <Input
+                type="number"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                placeholder="45"
+              />
             </div>
 
             <div className="space-y-1.5">
@@ -141,14 +154,19 @@ export default function ProductCreatePage() {
                 onChange={e => setCategoryId(e.target.value)}
                 className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
               >
-                <option value="">Select existing category</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                <option value="">Select active category</option>
+                {categories.filter(c => c.isActive).length > 0 ? (
+                  categories.filter(c => c.isActive).map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))
+                ) : (
+                  <p className="text-xs text-destructive mt-1">
+                    No active categories found — create one first from the Categories page.
+                  </p>
+                )}
               </select>
-              {categories.length === 0 && (
-                <p className="text-xs text-destructive mt-1">
-                  No categories exist yet — create one first from the Categories page.
-                </p>
-              )}
             </div>
           </div>
 
