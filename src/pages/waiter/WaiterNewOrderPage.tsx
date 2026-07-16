@@ -81,7 +81,7 @@ export default function WaiterNewOrderPage() {
         items: draftItems.map(i => ({ productId: i.productId, quantity: i.quantity })),
       }).unwrap()
 
-      toast.success(`Order ${order.orderNumber} sent to kitchen`)
+      toast.success(`Order ${order.orderNumber} created — collect payment first`)
       setDraftItems([])
       setTableNumber('')
     } catch (err: any) {
@@ -206,7 +206,7 @@ export default function WaiterNewOrderPage() {
           </div>
           <Button className="w-full" onClick={handleSubmitOrder} disabled={isSubmitting}>
             <Send size={14} className="mr-1.5" />
-            {isSubmitting ? 'Sending...' : 'Send to kitchen'}
+            {isSubmitting ? 'Sending...' : 'Create Order'}
           </Button>
         </div>
       </div>

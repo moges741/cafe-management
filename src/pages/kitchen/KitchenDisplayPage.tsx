@@ -10,15 +10,11 @@ import toast from 'react-hot-toast'
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 const COLUMNS = [
-  { status: 'pending',    title: 'New',       accent: 'border-l-primary' },
-  { status: 'confirmed',  title: 'Confirmed', accent: 'border-l-blue-500' },
-  { status: 'in_kitchen', title: 'Preparing', accent: 'border-l-amber-500' },
+  { status: 'in_kitchen', title: 'New',       accent: 'border-l-primary' },
   { status: 'ready',      title: 'Ready',     accent: 'border-l-green-500' },
 ]
 
 const NEXT_STATUS: Record<string, { label: string; next: string }> = {
-  pending:    { label: 'Confirm',   next: 'confirmed' },
-  confirmed:  { label: 'Start prep', next: 'in_kitchen' },
   in_kitchen: { label: 'Mark ready', next: 'ready' },
   ready:      { label: 'Complete',   next: 'completed' },
 }
@@ -75,7 +71,7 @@ export default function KitchenDisplayPage() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {COLUMNS.map((col) => {
           const ordersInColumn = liveOrders.filter(o => o.status === col.status)
 
