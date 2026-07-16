@@ -1,7 +1,6 @@
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from '@/features/orders/ordersApi'
-import { baseApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Clock, Send, ChefHat, AlertCircle, CheckCircle, CreditCard } from 'lucide-react'
+import { Clock, Send, ChefHat, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useMemo } from 'react'
 
@@ -13,14 +12,6 @@ export default function WaiterIncomingOrdersPage() {
     { pollingInterval: 5000 }
   )
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation()
-  const [confirmCash, { isLoading: isConfirming }] = baseApi.injectEndpoints({
-    endpoints: (builder) => ({
-      confirmCash: builder.mutation<any, { orderId: string }>({
-        query: (body) => ({ url: '/payments/cash-confirm', method: 'POST', body }),
-        invalidatesTags: ['Order'],
-      })
-    })
-  }).useConfirmCashMutation()
 
   const incomingOrders = useMemo(() => {
     return allOrders.filter(o => o.status === 'pending')
@@ -32,15 +23,6 @@ export default function WaiterIncomingOrdersPage() {
       toast.success('Order sent to kitchen!')
     } catch (err: any) {
       toast.error(err?.data?.message || err?.data?.error?.message || 'Failed to send')
-    }
-  }
-
-  const handleMarkAsPaid = async (order: any) => {
-    try {
-      await confirmCash({ orderId: order.id }).unwrap()
-      toast.success('Marked as paid')
-    } catch (err: any) {
-      toast.error(err?.data?.message || err?.data?.error?.message || 'Failed to confirm cash')
     }
   }
 
@@ -116,25 +98,13 @@ export default function WaiterIncomingOrdersPage() {
             </div>
 
             <div className="p-4 border-t border-border bg-muted/10 space-y-2">
-              {order.payment?.status !== 'completed' && (
-                <Button 
-                  variant="outline"
-                  className="w-full text-green-600 border-green-600/30 hover:bg-green-600/10" 
-                  onClick={() => handleMarkAsPaid(order)}
-                  disabled={isConfirming || isUpdating}
-                >
-                  <CheckCircle size={15} className="mr-2" />
-                  Mark as Paid (Cash)
-                </Button>
-              )}
-              
               <Button 
                 className="w-full" 
                 onClick={() => handleSendToKitchen(order.id)}
                 disabled={isUpdating || (order.payment?.status !== 'completed')}
               >
                 <Send size={15} className="mr-2" />
-                {order.payment?.status !== 'completed' ? 'Must be paid first' : 'Send to Kitchen'}
+                {order.payment?.status !== 'completed' ? 'Waiting for Cashier' : 'Send to Kitchen'}
               </Button>
             </div>
           </div>
