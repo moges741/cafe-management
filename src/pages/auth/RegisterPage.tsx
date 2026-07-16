@@ -23,10 +23,10 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await registerUser(data).unwrap()
-      toast.success('Account created — please log in')
+      toast.success('Registration successful! Please check your email for a verification link.', { duration: 6000 })
       navigate('/login')
     } catch (err: any) {
-      toast.error(err?.data?.error?.message ?? 'Registration failed')
+      toast.error(err?.data?.message || err?.data?.error?.message || 'Registration failed')
     }
   }
 
@@ -66,6 +66,31 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="firstName">First name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  {...register('firstName')}
+                />
+                {errors.firstName && (
+                  <p className="text-xs text-destructive">{errors.firstName.message}</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="lastName">Last name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  {...register('lastName')}
+                />
+                {errors.lastName && (
+                  <p className="text-xs text-destructive">{errors.lastName.message}</p>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input

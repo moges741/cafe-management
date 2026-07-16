@@ -8,6 +8,8 @@ import CheckoutPage from '@/pages/customer/CheckoutPage'
 import PaymentSuccessPage from '@/pages/customer/PaymentSuccessPage'
 import OrderTrackingPage from '@/pages/customer/OrderTrackingPage'
 import KitchenDisplayPage from '@/pages/kitchen/KitchenDisplayPage'
+import KitchenLayout from '@/pages/kitchen/KitchenLayout'
+import KitchenHistoryPage from '@/pages/kitchen/KitchenHistoryPage'
 import CashierPosPage from '@/pages/cashier/CashierPosPage'
 import WaiterLayout from '@/pages/waiter/WaiterLayout'
 import WaiterIncomingOrdersPage from '@/pages/waiter/WaiterIncomingOrdersPage'
@@ -26,12 +28,19 @@ import ProductCreatePage from '@/pages/admin/ProductCreatePage'
 import OrdersPage from '@/pages/admin/OrdersPage'
 import BranchesPage from '@/pages/admin/BranchesPage'
 import ProductEditPage from '@/pages/admin/ProductEditPage'
+import VerifyEmailPage from '@/pages/auth/VerifyEmailPage'
+import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
+
 export default function AppRouter() {
   return (
    
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route path="/" element={<MenuPage />} />
         <Route path="/menu" element={<MenuPage />} />
@@ -41,10 +50,14 @@ export default function AppRouter() {
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/order/:id/track" element={<OrderTrackingPage />} />
 
+
         {/* Single-page roles — no sidebar needed, full-screen operational views */}
         <Route path="/kitchen" element={
-          <ProtectedRoute allowedRoles={['kitchen', 'admin']}><KitchenDisplayPage /></ProtectedRoute>
-        } />
+          <ProtectedRoute allowedRoles={['kitchen', 'admin']}><KitchenLayout /></ProtectedRoute>
+        }>
+          <Route index element={<KitchenDisplayPage />} />
+          <Route path="history" element={<KitchenHistoryPage />} />
+        </Route>
         <Route path="/cashier" element={
           <ProtectedRoute allowedRoles={['cashier', 'admin']}><CashierPosPage /></ProtectedRoute>
         } />

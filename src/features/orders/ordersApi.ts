@@ -53,6 +53,7 @@ export interface Order {
 interface GetOrdersParams {
   branchId?: string
   status?: string
+  days?: number
 }
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

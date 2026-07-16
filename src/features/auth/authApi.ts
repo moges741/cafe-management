@@ -12,14 +12,14 @@ interface LoginRequest {
 }
 
 interface RegisterRequest {
-  email:    string
-  password: string
+  firstName: string
+  lastName:  string
+  email:     string
+  password:  string
 }
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Mutation = anything that changes server state (POST/PATCH/DELETE)
-    // Query = anything that reads data (GET)
     login: builder.mutation<{ message: string }, LoginRequest>({
       query: (body) => ({
         url:    '/auth/login',
@@ -28,9 +28,33 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    register: builder.mutation<User, RegisterRequest>({
+    register: builder.mutation<{ message: string }, RegisterRequest>({
       query: (body) => ({
         url:    '/auth/register',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    verifyEmail: builder.mutation<{ message: string }, { token: string }>({
+      query: (body) => ({
+        url:    '/auth/verify-email',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    forgotPassword: builder.mutation<{ message: string }, { email: string }>({
+      query: (body) => ({
+        url:    '/auth/forgot-password',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    resetPassword: builder.mutation<{ message: string }, any>({
+      query: (body) => ({
+        url:    '/auth/reset-password',
         method: 'POST',
         body,
       }),
@@ -43,19 +67,19 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // We don't have a dedicated "who am I" endpoint yet on the backend —
-    // this calls the users/me pattern. If your backend doesn't have this,
-    // flag it and we'll add a lightweight GET /auth/me endpoint
    getMe: builder.query<User, void>({
-  query: () => '/auth/me',
-  providesTags: ['User'],
-}),
+     query: () => '/auth/me',
+     providesTags: ['User'],
+   }),
   }),
 })
 
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useVerifyEmailMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useLogoutMutation,
   useGetMeQuery,
 } = authApi

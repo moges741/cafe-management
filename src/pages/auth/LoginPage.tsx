@@ -48,7 +48,7 @@ const onSubmit = async (data: LoginFormData) => {
       else navigate('/menu')
     }
   } catch (err: any) {
-    toast.error(err?.data?.error?.message ?? 'Login failed')
+    toast.error(err?.data?.message || err?.data?.error?.message || 'Login failed')
   }
 }
   return (
@@ -103,7 +103,12 @@ const onSubmit = async (data: LoginFormData) => {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
