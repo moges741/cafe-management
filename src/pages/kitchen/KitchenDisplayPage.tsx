@@ -10,11 +10,16 @@ import toast from 'react-hot-toast'
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 const COLUMNS = [
-  { status: 'in_kitchen', title: 'New',       accent: 'border-l-primary' },
+  { status: 'pending',    title: 'New',       accent: 'border-l-primary' },
+  { status: 'confirmed',  title: 'Confirm',   accent: 'border-l-blue-500' },
+  { status: 'in_kitchen', title: 'Preparing', accent: 'border-l-amber-500' },
   { status: 'ready',      title: 'Ready',     accent: 'border-l-green-500' },
+  { status: 'completed',  title: 'Completed', accent: 'border-l-gray-500' },
 ]
 
 const NEXT_STATUS: Record<string, { label: string; next: string }> = {
+  pending:    { label: 'Confirm',   next: 'confirmed' },
+  confirmed:  { label: 'Start prep', next: 'in_kitchen' },
   in_kitchen: { label: 'Mark ready', next: 'ready' },
   ready:      { label: 'Complete',   next: 'completed' },
 }
@@ -71,9 +76,17 @@ export default function KitchenDisplayPage() {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 overflow-x-auto">
         {COLUMNS.map((col) => {
-          const ordersInColumn = liveOrders.filter(o => o.status === col.status)
+          const ordersInColumn = liveOrders.filter(o => {
+            if (o.status !== col.status) return false
+            
+            // Hide unpaid digital orders from Kitchen's "New" tab so Waiter can process them first
+            if (col.status === 'pending' && (!o.payment || (o.payment.method === 'chapa' && o.payment.status !== 'completed'))) {
+              return false
+            }
+            return true
+          })
 
           return (
             <div key={col.status} className="space-y-3">
