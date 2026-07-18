@@ -4,30 +4,30 @@
 
 @layer base {
   :root {
-    --background: 175 43% 9%;        /* #112B29 */
-    --foreground: 60 100% 99%;        /* #FFFFF9 */
+    --background: 30 67% 1.2%;        /* #050301 — ultra-deep, warm brown */
+    --foreground: 30 15% 90%;         /* warm light cream */
 
-    --card: 172 40% 15%;              /* slightly lifted surface */
-    --card-foreground: 60 100% 99%;
+    --card: 30 6% 10%;                /* #1a1a1a — warm dark grey/brown */
+    --card-foreground: 30 15% 90%;
 
-    --primary: 28 35% 55%;            /* #B58B67 — used for buttons/accents */
-    --primary-foreground: 172 45% 12%;
+    --primary: 38 95% 50%;            /* amber-500 — golden roast */
+    --primary-foreground: 0 0% 0%;    /* black text for high contrast */
 
-    --secondary: 172 35% 18%;
-    --secondary-foreground: 60 100% 99%;
+    --secondary: 30 10% 12%;
+    --secondary-foreground: 30 15% 90%;
 
-    --muted: 172 30% 20%;
-    --muted-foreground: 28 25% 65%;
+    --muted: 30 10% 12%;
+    --muted-foreground: 30 10% 60%;
 
-    --accent: 28 35% 55%;
-    --accent-foreground: 172 45% 12%;
+    --accent: 38 95% 50%;
+    --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 60 100% 99%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 172 25% 22%;
-    --input: 172 25% 22%;
-    --ring: 28 35% 55%;
+    --border: 38 20% 15%;             /* subtle warm border */
+    --input: 38 20% 15%;
+    --ring: 38 95% 50%;
 
     --radius: 0.75rem;
   }

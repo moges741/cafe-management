@@ -34,7 +34,7 @@
 //               <Marker position={BRANCH_COORDS} />
 //             </Map>
 //           ) : (
-//             <div className="w-full h-full flex items-center justify-center text-xs text-center px-6" style={{ color: '#B58B67' }}>
+//             <div className="w-full h-full flex items-center justify-center text-xs text-center px-6 text-neutral-300">
 //               Add VITE_GOOGLE_MAPS_API_KEY to .env to show the live map
 //             </div>
 //           )}

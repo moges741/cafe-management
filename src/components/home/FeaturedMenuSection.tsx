@@ -1,46 +1,108 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useGetProductsQuery } from '@/features/products/productsApi'
 
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 export default function FeaturedMenuSection() {
-  const { data: products = [], isLoading } = useGetProductsQuery({ branchId: BRANCH_ID, isAvailable: true })
+  const { data: products = [], isLoading } = useGetProductsQuery({
+    branchId: BRANCH_ID,
+    isAvailable: true,
+  })
   const featured = products.slice(0, 4)
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  }
+
   return (
-    <section className="py-20 px-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="text-3xl font-bold text-foreground">Featured menu</h2>
-          <Link to="/menu" className="flex items-center gap-1 text-sm text-primary">
-            View full menu <ArrowRight size={14} />
+    <section className="py-24 px-6 bg-background relative overflow-hidden">
+      {/* Ambient Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-amber-950/10 blur-[150px] pointer-events-none" />
+
+      <div className="max-w-5xl mx-auto relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="flex items-center justify-between mb-12"
+        >
+          <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-500 to-orange-500">
+            Featured menu
+          </h2>
+          <Link to="/menu" className="flex items-center gap-2 text-primary group font-medium hover:text-amber-400 transition-colors">
+            View all
+            <motion.span whileHover={{ x: 4 }} transition={{ duration: 0.2 }}>
+              <ArrowRight size={16} />
+            </motion.span>
           </Link>
-        </div>
+        </motion.div>
 
         {isLoading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {Array.from({ length: 4 }).map((_, i) => <div key={i} className="aspect-square rounded-2xl bg-card animate-pulse" />)}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="aspect-square rounded-2xl bg-card animate-pulse border border-border" />
+            ))}
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, threshold: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-6"
+        >
           {featured.map((product) => (
-            <Link key={product.id} to={`/menu/${product.id}`} className="group rounded-2xl overflow-hidden border border-border bg-card block">
-              <div className="aspect-square bg-secondary">
-                {product.imageUrl ? (
-                  <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-primary/30">MC</div>
-                )}
-              </div>
-              <div className="p-3">
-                <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
-                <p className="text-xs text-primary mt-0.5">{Number(product.price).toFixed(0)} ETB</p>
-              </div>
-            </Link>
+            <motion.div key={product.id} variants={itemVariants}>
+              <Link to={`/menu/${product.id}`} className="group block">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm aspect-square mb-3 transition-all duration-300 group-hover:border-amber-500/30 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+                  <motion.div
+                    className="w-full h-full"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-primary/20">
+                        MC
+                      </div>
+                    )}
+                  </motion.div>
+
+                  {/* Overlay on hover */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4"
+                    whileHover={{ opacity: 1 }}
+                  >
+                    <span className="text-xs text-primary font-semibold tracking-wider">View details</span>
+                  </motion.div>
+                </div>
+
+                <p className="text-sm font-medium text-foreground truncate group-hover:text-amber-400 transition-colors">
+                  {product.name}
+                </p>
+                <p className="text-xs text-primary mt-1 font-semibold">{Number(product.price).toFixed(0)} ETB</p>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

@@ -31,7 +31,7 @@ import ProductEditPage from '@/pages/admin/ProductEditPage'
 import VerifyEmailPage from '@/pages/auth/VerifyEmailPage'
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
-
+import HomePage from '@/components/home/HomePage'
 export default function AppRouter() {
   return (
    
@@ -42,7 +42,7 @@ export default function AppRouter() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-        <Route path="/" element={<MenuPage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/menu/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
