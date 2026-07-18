@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
 import { useGetProductsQuery } from '@/features/products/productsApi'
 import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { MENU_TABS } from '@/features/categories/categoryFilters'
 import { cn } from '@/lib/utils'
 import CartBadge from '@/components/shared/CartBadge'
-
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ShoppingCart } from 'lucide-react';
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 type Product = {
@@ -116,41 +117,80 @@ export default function MenuPage() {
   )
 }
 
+
+
 function ProductCard({ product }: { product: Product }) {
   return (
-    <Link
-      to={`/menu/${product!.id}`}
-      className="group relative rounded-2xl overflow-hidden border border-border bg-card block"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="aspect-square w-full overflow-hidden bg-secondary">
-        {product!.imageUrl ? (
-          <img
-            src={product!.imageUrl}
-            alt={product!.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-primary/30">
-            MC
+      <Link
+        to={`/menu/${product.id}`}
+        className="group relative block w-full aspect-[4/5] rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900/50 backdrop-blur-md shadow-2xl transition-all duration-700 hover:border-amber-500/30"
+      >
+        {/* --- Image Layer --- */}
+        <div className="absolute inset-0 overflow-hidden">
+          <motion.div 
+            className="w-full h-full"
+            whileHover={{ scale: 1.1, rotate: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            {product.imageUrl ? (
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-full h-full object-cover brightness-90 group-hover:brightness-100 transition-all duration-700"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900 text-amber-500/20 text-6xl font-black">
+                MC
+              </div>
+            )}
+          </motion.div>
+          
+          {/* Subtle vignette for readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
+        </div>
+
+        {/* --- Content Overlay --- */}
+        <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col justify-end translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-500/80 mb-1">
+                {product.category?.name || "Signature"}
+              </p>
+              <h3 className="text-xl font-bold text-white leading-tight tracking-tight">
+                {product.name}
+              </h3>
+            </div>
+            
+            {/* Price Pill */}
+            <div className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white font-medium text-sm">
+              {Number(product.price).toFixed(0)} ETB
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Price pill floating over image */}
-      <div className="absolute top-3 right-3 bg-background/90 backdrop-blur px-2.5 py-1 rounded-full">
-        <span className="text-xs font-semibold text-primary">
-          {Number(product!.price).toFixed(0)} ETB
-        </span>
-      </div>
+          {/* Quick Add Indicator - Appears on Hover */}
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            whileHover={{ opacity: 1, height: "auto" }}
+            className="mt-4 flex items-center justify-between overflow-hidden"
+          >
+            <div className="flex items-center gap-2 text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> View Details
+            </div>
+            <div className="p-2 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <ShoppingCart size={16} />
+            </div>
+          </motion.div>
+        </div>
 
-      <div className="p-3">
-        <p className="text-sm font-medium text-foreground truncate">
-          {product!.name}
-        </p>
-        <p className="text-xs mt-0.5 truncate" style={{ color: '#B58B67' }}>
-          {product!.category?.name}
-        </p>
-      </div>
-    </Link>
-  )
+        {/* Premium Border Highlight Effect */}
+        <div className="absolute inset-0 rounded-[32px] border border-white/[0.05] pointer-events-none group-hover:border-amber-500/20 transition-colors duration-500" />
+      </Link>
+    </motion.div>
+  );
 }

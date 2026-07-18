@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 type FoodItem = {
   id: number;
@@ -98,7 +99,7 @@ export default function HeroSection() {
       {/* ================= ORBIT SYSTEM (CENTER) ================= */}
       <div 
         className="relative flex-1 w-full max-h-[800px] flex items-center justify-center z-20
-        [--radius:80px] md:[--radius:150px] lg:[--radius:170px] 
+        [--radius:100px] md:[--radius:150px] lg:[--radius:170px] 
         [--item-size:80px] md:[--item-size:110px] lg:[--item-size:140px]"
       >
         
@@ -198,7 +199,10 @@ export default function HeroSection() {
         </p>
         
         <button className="relative group px-10 py-4 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold text-lg overflow-hidden transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_35px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 duration-300">
-          <span className="relative z-10">Order now</span>
+          <span className="relative z-10">
+            <Link to="/menu">            Order now
+</Link>
+            </span>
           <div className="absolute top-0 -left-[100%] w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:left-[100%] transition-all duration-700 ease-in-out" />
         </button>
       </motion.div>

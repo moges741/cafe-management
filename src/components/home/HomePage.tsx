@@ -1,7 +1,7 @@
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import HeroSection from '@/components/home/HeroSection'
-import StatsSection from '@/components/home/StatsSection'
+// import StatsSection from '@/components/home/StatsSection'
 import AboutSection from '@/components/home/AboutSection'
 import WhyChooseUsSection from '@/components/home/WhyChooseUsSection'
 import FeaturedMenuSection from '@/components/home/FeaturedMenuSection'
@@ -21,7 +21,7 @@ export default function HomePage() {
     <div className="bg-background">
       <Navbar />
       <HeroSection />
-      <StatsSection />
+      {/* <StatsSection /> */}
       <AboutSection />
       <WhyChooseUsSection />
       <FeaturedMenuSection />
