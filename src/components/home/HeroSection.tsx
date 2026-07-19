@@ -47,7 +47,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative w-full h-screen overflow-hidden bg-[#050301] flex flex-col items-center justify-between py-12 md:py-20">
+    <section className="relative w-full h-screen overflow-hidden bg-[#050301] flex flex-col items-center justify-between py-20 md:py-20">
       
       {/* ================= BACKGROUND ================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
@@ -77,15 +77,7 @@ export default function HeroSection() {
 
       {/* ================= FOREGROUND TEXT (TOP) ================= */}
       <div className="relative z-30 text-center px-4 mt-8 flex flex-col items-center gap-4">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/5 backdrop-blur-md"
-        >
-          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          <span className="text-xs md:text-sm text-amber-200/80 uppercase tracking-widest font-semibold">AI-Powered Experience</span>
-        </motion.div>
+       
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

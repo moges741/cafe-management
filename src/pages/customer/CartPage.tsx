@@ -1,8 +1,25 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ShoppingBag, ArrowLeft, Trash2, Plus, Minus, Coffee } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { removeItem, updateQuantity } from '@/features/cart/cartSlice'
 import { selectCartItems, selectCartTotal } from '@/features/cart/cartSelectors'
 import { Button } from '@/components/ui/button'
+
+// Framer Motion Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  exit: { opacity: 0, x: 20, transition: { duration: 0.3 } }
+}
 
 export default function CartPage() {
   const dispatch = useAppDispatch()
@@ -10,77 +27,158 @@ export default function CartPage() {
   const items = useAppSelector(selectCartItems)
   const total = useAppSelector(selectCartTotal)
 
+  // ── Empty State ──
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
-        <p className="text-foreground text-lg font-medium mb-2">Your cart is empty</p>
-        <p className="text-sm mb-6" style={{ color: '#B58B67' }}>Add something delicious from the menu.</p>
-        <Link to="/menu">
-          <Button>Browse menu</Button>
-        </Link>
+      <div className="min-h-screen bg-[#050301] flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-amber-500/30">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-amber-900/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+        
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="relative z-10 flex flex-col items-center text-center max-w-sm"
+        >
+          <div className="w-24 h-24 rounded-full bg-white/[0.02] border border-white/10 flex items-center justify-center text-amber-500/50 mb-8 shadow-[0_0_30px_rgba(245,158,11,0.05)]">
+            <ShoppingBag size={40} strokeWidth={1.5} />
+          </div>
+          <h2 className="text-3xl font-black text-white tracking-tight mb-3">Your cart is empty</h2>
+          <p className="text-neutral-400 font-medium mb-10">
+            Looks like you haven't added anything yet. Discover our artisanal menu and find your next favorite brew.
+          </p>
+          <Button 
+            onClick={() => navigate('/menu')}
+            className="h-12 px-8 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all w-full sm:w-auto"
+          >
+            Browse the Menu
+          </Button>
+        </motion.div>
       </div>
     )
   }
 
+  // ── Filled State ──
   return (
-    <div className="min-h-screen bg-background">
-      <div className="px-6 py-4 border-b border-border">
-        <Link to="/menu" className="text-sm text-primary">← Continue shopping</Link>
+    <div className="min-h-screen bg-[#050301] selection:bg-amber-500/30 relative overflow-hidden pb-24">
+      {/* Ambient Background Glows */}
+      <div className="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-amber-900/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
+      <div className="fixed bottom-0 left-[-10%] w-[400px] h-[400px] bg-orange-950/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
+
+      {/* Top Navigation */}
+      <div className="sticky top-0 z-40 bg-[#050301]/80 backdrop-blur-xl border-b border-white/5">
+        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center">
+          <Link 
+            to="/menu" 
+            className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-400 hover:text-amber-500 transition-colors group"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            Continue shopping
+          </Link>
+        </div>
       </div>
 
-      <div className="max-w-xl mx-auto px-6 py-8">
-        <h1 className="text-2xl font-bold text-foreground mb-6">Your order</h1>
+      <div className="max-w-2xl mx-auto px-6 py-10 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8"
+        >
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+            Review your <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-600">order</span>
+          </h1>
+        </motion.div>
 
-        <div className="space-y-3">
-          {items.map((item) => (
-            <div
-              key={item.productId}
-              className="flex items-center gap-3 border border-border rounded-xl p-3 bg-card"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{item.productName}</p>
-                {item.notes && (
-                  <p className="text-xs mt-0.5" style={{ color: '#B58B67' }}>{item.notes}</p>
-                )}
-                <p className="text-xs mt-1 text-primary">{item.unitPrice} ETB each</p>
-              </div>
-
-              <div className="flex items-center border border-border rounded-full overflow-hidden shrink-0">
-                <button
-                  onClick={() => dispatch(updateQuantity({
-                    productId: item.productId,
-                    quantity: Math.max(1, item.quantity - 1),
-                  }))}
-                  className="w-7 h-7 flex items-center justify-center text-foreground hover:bg-secondary text-sm"
-                >−</button>
-                <span className="w-8 text-center text-sm text-foreground">{item.quantity}</span>
-                <button
-                  onClick={() => dispatch(updateQuantity({
-                    productId: item.productId,
-                    quantity: item.quantity + 1,
-                  }))}
-                  className="w-7 h-7 flex items-center justify-center text-foreground hover:bg-secondary text-sm"
-                >+</button>
-              </div>
-
-              <button
-                onClick={() => dispatch(removeItem(item.productId))}
-                className="text-xs text-destructive shrink-0"
+        {/* Cart Items List */}
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-4 mb-10"
+        >
+          <AnimatePresence>
+            {items.map((item) => (
+              <motion.div
+                key={item.productId}
+                variants={itemVariants}
+                exit="exit"
+                layout
+                className="group relative flex flex-col sm:flex-row sm:items-center gap-4 bg-white/[0.02] border border-white/10 rounded-[24px] p-4 backdrop-blur-xl hover:border-amber-500/30 transition-colors"
               >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
+                {/* Item Info */}
+                <div className="flex-1 min-w-0 flex items-start gap-4">
+                  <div className="w-12 h-12 shrink-0 rounded-2xl bg-black/50 border border-white/5 flex items-center justify-center text-amber-500/50">
+                    <Coffee size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white truncate leading-tight">{item.productName}</h3>
+                    <p className="text-sm text-amber-500 font-semibold mt-0.5">{item.unitPrice} ETB</p>
+                    {item.notes && (
+                      <p className="text-xs mt-1.5 text-neutral-400 bg-black/40 inline-block px-2 py-1 rounded-md border border-white/5">
+                        <span className="text-neutral-500">Note:</span> {item.notes}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
-        <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
-          <span className="text-foreground font-medium">Total</span>
-          <span className="text-xl font-bold text-primary">{total.toFixed(0)} ETB</span>
-        </div>
+                {/* Controls Area */}
+                <div className="flex items-center justify-between sm:justify-end gap-6 sm:pl-4 mt-2 sm:mt-0">
+                  
+                  {/* Quantity Controls */}
+                  <div className="flex items-center bg-black/60 border border-white/10 rounded-full p-1 shadow-inner">
+                    <button
+                      onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: Math.max(1, item.quantity - 1) }))}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="w-8 text-center text-sm font-bold text-white">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: item.quantity + 1 }))}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
 
-        <Button className="w-full mt-4" size="lg" onClick={() => navigate('/checkout')}>
-          Proceed to checkout
-        </Button>
+                  {/* Remove Button */}
+                  <button
+                    onClick={() => dispatch(removeItem(item.productId))}
+                    className="p-2.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+                    aria-label="Remove item"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Checkout Summary Footer */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-white/[0.03] border border-white/10 rounded-[32px] p-6 sm:p-8 backdrop-blur-2xl relative overflow-hidden"
+        >
+          {/* Subtle inside glow */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
+
+          <div className="flex items-center justify-between mb-6 relative z-10">
+            <span className="text-neutral-400 font-medium text-lg">Subtotal</span>
+            <span className="text-2xl font-black text-white">{total.toFixed(0)} ETB</span>
+          </div>
+
+          <Button 
+            className="w-full h-14 bg-amber-500 hover:bg-amber-400 text-black text-lg font-bold rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all relative z-10"
+            onClick={() => navigate('/checkout')}
+          >
+            Proceed to Checkout
+          </Button>
+        </motion.div>
       </div>
     </div>
   )

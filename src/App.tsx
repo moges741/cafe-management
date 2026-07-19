@@ -7,7 +7,7 @@ function App() {
   return (
     <SessionInitializer>
       <AiAssistantWidget />
-      <AppRouter />
+    <AppRouter />
       <Toaster position="top-center" />
     </SessionInitializer>
   )

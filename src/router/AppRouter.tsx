@@ -32,6 +32,8 @@ import VerifyEmailPage from '@/pages/auth/VerifyEmailPage'
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
 import HomePage from '@/components/home/HomePage'
+import AboutSection from '@/components/home/AboutSection'
+import GallerySection from '@/components/home/GallerySection'
 export default function AppRouter() {
   return (
    
@@ -43,6 +45,8 @@ export default function AppRouter() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutSection />} />
+        <Route path="/gallery" element={<GallerySection />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/menu/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<CartPage />} />

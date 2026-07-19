@@ -19,6 +19,7 @@ import FaqSection from '@/components/home/FaqSection'
 export default function HomePage() {
   return (
     <div className="bg-background">
+     
       <Navbar />
       <HeroSection />
       {/* <StatsSection /> */}

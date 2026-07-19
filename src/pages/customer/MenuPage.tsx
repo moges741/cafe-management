@@ -7,6 +7,7 @@ import CartBadge from '@/components/shared/CartBadge'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Coffee, Sparkles } from 'lucide-react'
+import Navbar from '@/components/layout/Navbar'
 
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
@@ -61,7 +62,7 @@ export default function MenuPage() {
       {/* Top Navigation / Cart */}
       <div className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-end pointer-events-none">
         <div className="pointer-events-auto">
-          <CartBadge />
+          <Navbar />
         </div>
       </div>
 
@@ -72,7 +73,7 @@ export default function MenuPage() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative px-6 pt-24 pb-12 max-w-7xl mx-auto z-10"
       >
-        <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 mb-6 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+        <div className="inline-flex mt-4 items-center justify-center gap-2 px-3 py-1.5 mb-6 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(245,158,11,0.1)]">
           <Coffee size={12} className="fill-amber-500" /> Artisan Menu
         </div>
         
