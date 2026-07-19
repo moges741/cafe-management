@@ -35,6 +35,9 @@ import HomePage from '@/components/home/HomePage'
 import AboutSection from '@/components/home/AboutSection'
 import GallerySection from '@/components/home/GallerySection'
 import NotFoundPage from '@/pages/error/NotFoundPage'
+import PremiumBurgerStory from '@/components/home/PremiumBurgerStory'
+import PremiumPizzaExperience from '@/components/home/PremiumPizzaExperience'
+import CulinaryGateway from '@/components/home/CulinaryGateway'
 
 export default function AppRouter() {
   return (
@@ -55,7 +58,9 @@ export default function AppRouter() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/order/:id/track" element={<OrderTrackingPage />} />
-
+        <Route path="preparing-burger" element={<PremiumBurgerStory />} />
+        <Route path="preparing-pizza" element={<PremiumPizzaExperience />} />
+        <Route path="experience-me" element={<CulinaryGateway />} />
 
         {/* Single-page roles — no sidebar needed, full-screen operational views */}
         <Route path="/kitchen" element={
