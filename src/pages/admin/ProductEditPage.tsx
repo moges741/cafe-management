@@ -37,17 +37,14 @@ export default function ProductEditPage() {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-  // Form fields — start empty, get populated once the product loads
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [categoryId, setCategoryId] = useState('')
 
-  // Cover image — either the existing Cloudinary URL, or a newly picked File pending upload
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
 
-  // Gallery — existing URLs (already saved) shown separately from new files (pending upload)
   const [existingGalleryUrls, setExistingGalleryUrls] = useState<string[]>([])
   const [newGalleryFiles, setNewGalleryFiles] = useState<File[]>([])
   const [newGalleryPreviews, setNewGalleryPreviews] = useState<string[]>([])
@@ -55,8 +52,6 @@ export default function ProductEditPage() {
   const coverInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
 
-  // Populate the form once the product data arrives — this only needs to run
-  // when `product` itself changes, not on every keystroke
   useEffect(() => {
     if (!product) return
     setName(product.name)
@@ -87,10 +82,6 @@ export default function ProductEditPage() {
     setNewGalleryPreviews(prev => prev.filter((_, i) => i !== index))
   }
 
-  // Note: removing an already-saved gallery image isn't possible yet —
-  // your backend's image upload is append-only, there's no delete endpoint.
-  // Only newly picked files (not yet uploaded) can be removed here.
-
   const handleSave = async () => {
     if (!name.trim() || !price || !categoryId) {
       toast.error('Fill in name, price, and category')
@@ -106,7 +97,6 @@ export default function ProductEditPage() {
         categoryId,
       }).unwrap()
 
-      // Only hit the image endpoint if something new was actually picked
       if (coverFile || newGalleryFiles.length > 0) {
         const formData = new FormData()
         if (coverFile) formData.append('coverImage', coverFile)
@@ -134,165 +124,217 @@ export default function ProductEditPage() {
   }
 
   if (isLoading) {
-    return <div className="p-6 text-foreground">Loading product...</div>
+    return (
+      <div className="min-h-screen bg-[#050301] flex items-center justify-center p-6">
+        <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+      </div>
+    )
   }
 
   if (!product) {
-    return <div className="p-6 text-foreground">Product not found.</div>
+    return (
+      <div className="min-h-screen bg-[#050301] flex items-center justify-center p-6 text-neutral-300">
+        Product not found.
+      </div>
+    )
   }
 
   return (
-    <div className="p-6 max-w-2xl">
-      <Link to="/admin/products" className="inline-flex items-center gap-1.5 text-sm text-primary mb-6">
-        <ArrowLeft size={14} />
-        Back to products
-      </Link>
+    <div className="min-h-screen bg-[#050301] relative overflow-hidden flex justify-center py-12 px-6">
+      {/* Ambient Glows */}
+      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-amber-900/20 blur-[120px] pointer-events-none rounded-full" />
+      <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-orange-950/40 blur-[120px] pointer-events-none rounded-full" />
+      
+      <div className="relative z-10 w-full max-w-2xl">
+        <Link 
+          to="/admin/products" 
+          className="inline-flex items-center gap-1.5 text-sm text-amber-500/80 hover:text-amber-400 hover:drop-shadow-[0_0_10px_rgba(245,158,11,0.5)] transition-all mb-6"
+        >
+          <ArrowLeft size={14} />
+          Back to products
+        </Link>
 
-      <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
-        <h1 className="text-xl font-bold text-foreground">Edit product</h1>
-
-        <div className="space-y-1.5">
-          <Label>Name</Label>
-          <Input value={name} onChange={e => setName(e.target.value)} placeholder="Pepperoni Nera" />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label>Description</Label>
-          <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Charred crust, spicy pepperoni, hot honey" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label>Price (ETB)</Label>
-            <Input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="45" />
+        {/* Main Glassmorphic Card */}
+        <div className="bg-[#1a1a1a]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-6 space-y-6 shadow-2xl hover:border-white/20 transition-all duration-500 group">
+          <div className="border-b border-gradient-to-r from-amber-500/10 via-amber-400/30 to-amber-500/10 pb-4">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-amber-500 to-orange-500 text-transparent bg-clip-text inline-block">
+              Edit Product
+            </h1>
           </div>
 
           <div className="space-y-1.5">
-            <Label>Category</Label>
-            <select
-              value={categoryId}
-              onChange={e => setCategoryId(e.target.value)}
-              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
-            >
-              <option value="">Select category</option>
-              {categories.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
+            <Label className="text-neutral-300">Name</Label>
+            <Input 
+              value={name} 
+              onChange={e => setName(e.target.value)} 
+              placeholder="Pepperoni Nera" 
+              className="bg-white/5 border-white/10 text-neutral-300 placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-amber-500 focus-visible:border-amber-500 transition-shadow"
+            />
           </div>
-        </div>
 
-        {/* Main image */}
-        <div>
-          <Label className="mb-2 block">Main image</Label>
+          <div className="space-y-1.5">
+            <Label className="text-neutral-300">Description</Label>
+            <Input 
+              value={description} 
+              onChange={e => setDescription(e.target.value)} 
+              placeholder="Charred crust, spicy pepperoni, hot honey" 
+              className="bg-white/5 border-white/10 text-neutral-300 placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-amber-500 focus-visible:border-amber-500 transition-shadow"
+            />
+          </div>
 
-          {coverPreview ? (
-            <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border">
-              <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
-              <button
-                onClick={() => coverInputRef.current?.click()}
-                className="absolute inset-0 bg-background/0 hover:bg-background/60 flex items-center justify-center text-transparent hover:text-foreground text-sm transition-colors"
-              >
-                Click to replace
-              </button>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-neutral-300">Price (ETB)</Label>
+              <Input 
+                type="number" 
+                value={price} 
+                onChange={e => setPrice(e.target.value)} 
+                placeholder="45" 
+                className="bg-white/5 border-white/10 text-neutral-300 placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-amber-500 focus-visible:border-amber-500 transition-shadow"
+              />
             </div>
-          ) : (
-            <button
-              onClick={() => coverInputRef.current?.click()}
-              className="w-full aspect-video rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 transition-colors"
-            >
-              <ImagePlus size={26} />
-              <span className="text-sm">Click to upload main image</span>
-            </button>
-          )}
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => e.target.files?.[0] && handleCoverSelect(e.target.files[0])}
-          />
-        </div>
 
-        {/* Gallery */}
-        <div>
-          <Label className="mb-2 block">Detail photos ({totalGalleryCount}/{MAX_GALLERY})</Label>
+            <div className="space-y-1.5">
+              <Label className="text-neutral-300">Category</Label>
+              <select
+                value={categoryId}
+                onChange={e => setCategoryId(e.target.value)}
+                className="w-full h-10 rounded-md border border-white/10 bg-[#1a1a1a] px-3 text-sm text-neutral-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all appearance-none"
+              >
+                <option value="">Select category</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            {/* Already-saved images — read only, no remove button since backend has no delete endpoint yet */}
-            {existingGalleryUrls.map((url, i) => (
-              <div key={`existing-${i}`} className="aspect-square rounded-lg overflow-hidden border border-border">
-                <img src={url} alt={`Saved detail ${i + 1}`} className="w-full h-full object-cover" />
-              </div>
-            ))}
+          {/* Main image */}
+          <div>
+            <Label className="mb-2 block text-neutral-300">Main image</Label>
 
-            {/* Newly picked, not-yet-uploaded images — removable */}
-            {newGalleryPreviews.map((src, i) => (
-              <div key={`new-${i}`} className="relative aspect-square rounded-lg overflow-hidden border border-primary/50">
-                <img src={src} alt={`New detail ${i + 1}`} className="w-full h-full object-cover" />
+            {coverPreview ? (
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 group/img hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-300">
+                <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
                 <button
-                  onClick={() => removeNewGalleryImage(i)}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-background/90 flex items-center justify-center"
-                  aria-label="Remove image"
+                  onClick={() => coverInputRef.current?.click()}
+                  className="absolute inset-0 bg-[#050301]/70 backdrop-blur-sm opacity-0 group-hover/img:opacity-100 flex flex-col items-center justify-center text-amber-400 text-sm font-medium transition-all duration-300"
                 >
-                  <X size={11} className="text-foreground" />
+                  <ImagePlus size={24} className="mb-2" />
+                  Click to replace
                 </button>
               </div>
-            ))}
-
-            {gallerySlotsLeft > 0 && (
+            ) : (
               <button
-                onClick={() => galleryInputRef.current?.click()}
-                className="aspect-square rounded-lg border-2 border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-primary/50 transition-colors"
+                onClick={() => coverInputRef.current?.click()}
+                className="w-full aspect-video rounded-xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center gap-2 text-white/60 hover:text-amber-400 hover:border-amber-500 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all duration-300"
               >
-                <ImagePlus size={18} />
+                <ImagePlus size={26} />
+                <span className="text-sm">Click to upload main image</span>
               </button>
             )}
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleCoverSelect(e.target.files[0])}
+            />
           </div>
 
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => e.target.files && handleGallerySelect(e.target.files)}
-          />
-        </div>
+          {/* Gallery */}
+          <div>
+            <Label className="mb-3 block text-neutral-300">
+              Detail photos <span className="text-amber-500/80">({totalGalleryCount}/{MAX_GALLERY})</span>
+            </Label>
 
-        <div className="flex gap-3 pt-2">
-          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <DialogTrigger asChild>
-              <Button type="button" variant="destructive" disabled={isDeleting} className="w-1/3">
-                {isDeleting ? <Loader2 size={15} className="mr-1.5 animate-spin" /> : <Trash size={15} className="mr-1.5" />}
-                Delete
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Delete Product</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to delete this product? This action cannot be undone.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline" disabled={isDeleting}>Cancel</Button>
-                </DialogClose>
-                <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-                  {isDeleting ? <Loader2 size={15} className="mr-1.5 animate-spin" /> : <Trash size={15} className="mr-1.5" />}
-                  Yes, Delete
+            <div className="grid grid-cols-3 gap-4">
+              {/* Already-saved images */}
+              {existingGalleryUrls.map((url, i) => (
+                <div key={`existing-${i}`} className="aspect-square rounded-lg overflow-hidden border border-white/10 relative group/gallery hover:border-amber-500/50 transition-all duration-300">
+                  <img src={url} alt={`Saved detail ${i + 1}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#050301]/80 to-transparent opacity-0 group-hover/gallery:opacity-100 transition-opacity pointer-events-none" />
+                </div>
+              ))}
+
+              {/* Newly picked images */}
+              {newGalleryPreviews.map((src, i) => (
+                <div key={`new-${i}`} className="relative aspect-square rounded-lg overflow-hidden border border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)] group/new">
+                  <img src={src} alt={`New detail ${i + 1}`} className="w-full h-full object-cover opacity-90 group-hover/new:opacity-100 transition-opacity" />
+                  <button
+                    onClick={() => removeNewGalleryImage(i)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#050301]/90 backdrop-blur-md flex items-center justify-center border border-white/10 hover:border-amber-500 hover:text-amber-400 transition-all"
+                    aria-label="Remove image"
+                  >
+                    <X size={12} className="text-white/80 hover:text-amber-400" />
+                  </button>
+                </div>
+              ))}
+
+              {gallerySlotsLeft > 0 && (
+                <button
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="aspect-square rounded-lg border-2 border-dashed border-white/20 bg-white/5 flex items-center justify-center text-white/50 hover:border-amber-500 hover:text-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.2)] transition-all duration-300"
+                >
+                  <ImagePlus size={22} />
+                </button>
+              )}
+            </div>
+
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => e.target.files && handleGallerySelect(e.target.files)}
+            />
+          </div>
+
+          <div className="flex gap-4 pt-4 border-t border-white/5">
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  type="button" 
+                  disabled={isDeleting} 
+                  className="w-1/3 bg-transparent border border-red-900/50 text-red-500 hover:bg-red-950/40 hover:text-red-400 hover:border-red-900 transition-all duration-300"
+                >
+                  {isDeleting ? <Loader2 size={15} className="mr-2 animate-spin" /> : <Trash size={15} className="mr-2" />}
+                  Delete
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Button onClick={handleSave} disabled={isUpdating || isUploading || isDeleting} className="w-2/3">
-            {isUpdating || isUploading ? (
-              <><Loader2 size={15} className="mr-1.5 animate-spin" /> Saving...</>
-            ) : (
-              <><Check size={15} className="mr-1.5" /> Save changes</>
-            )}
-          </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-[#1a1a1a] border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+                <DialogHeader>
+                  <DialogTitle className="text-amber-400 font-bold">Delete Product</DialogTitle>
+                  <DialogDescription className="text-white/60">
+                    Are you sure you want to delete this product? This action cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                  <DialogClose asChild>
+                    <Button disabled={isDeleting} className="bg-white/5 border border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white transition-colors">
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                  <Button onClick={handleDelete} disabled={isDeleting} className="bg-red-950/80 text-red-400 border border-red-900/50 hover:bg-red-900 hover:text-red-300 transition-colors">
+                    {isDeleting ? <Loader2 size={15} className="mr-1.5 animate-spin" /> : <Trash size={15} className="mr-1.5" />}
+                    Yes, Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Button 
+              onClick={handleSave} 
+              disabled={isUpdating || isUploading || isDeleting} 
+              className="w-2/3 bg-gradient-to-r from-amber-500 to-orange-500 text-black font-semibold border-0 hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] hover:brightness-110 transition-all duration-300 disabled:opacity-50 disabled:grayscale"
+            >
+              {isUpdating || isUploading ? (
+                <><Loader2 size={16} className="mr-2 animate-spin text-black/70" /> Saving...</>
+              ) : (
+                <><Check size={16} className="mr-2" /> Save Changes</>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
