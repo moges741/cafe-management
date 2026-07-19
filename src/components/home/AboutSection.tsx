@@ -5,17 +5,17 @@ import { useRef } from "react";
 
 export default function AboutSection() {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, threshold: 0.4 });
+  const isInView = useInView(ref, { once: true, amount: 0.4 });
 
   // Upgraded variants with a subtle upward glide
-  const textVariants: any = {
+  const textVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
       transition: {
         delay: i * 0.05,
-        ease: [0.2, 0.65, 0.3, 0.9],
+        ease: [0.2, 0.65, 0.3, 0.9] as const,
       },
     }),
   };

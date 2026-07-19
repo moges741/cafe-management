@@ -18,7 +18,7 @@ import {
 import { useNavigate, Link } from 'react-router-dom'
 import { useAppSelector, useAppDispatch } from '@/app/hooks'
 import { clearUser, type UserRole } from '@/features/auth/authSlice'
-import Spinner from '@/components/ui/Spinner'
+
 
 type NavItem = { name: string; href: string }
 
@@ -102,7 +102,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ================= DESKTOP & TABLET NAVBAR ================= */}
+
       <motion.nav
         initial={{ y: -50, opacity: 0, scale: 0.95 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}

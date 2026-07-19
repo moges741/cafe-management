@@ -15,18 +15,18 @@ import { cn } from '@/lib/utils'
 import Spinner from '@/components/ui/Spinner'
 
 // Framer Motion Variants
-const fadeUpVariants: any = {
+const fadeUpVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-}
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
+} as const
 
-const staggerContainer: any = {
+const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: { staggerChildren: 0.1 }
   }
-}
+} as const
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -49,7 +49,7 @@ export default function LoginPage() {
       const result = await dispatch(authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true }))
 
       if ('data' in result && result.data) {
-        const role = result.data.role.name
+        const role = result.data.role
 
         toast.success('Logged in successfully', {
           icon: '☕',

@@ -18,7 +18,7 @@ export default function DashboardLayout() {
   const navigate = useNavigate()
   const [logout] = useLogoutMutation()
 
-  const navItems = user ? NAV_BY_ROLE[user.role.name] ?? [] : []
+  const navItems = user ? NAV_BY_ROLE[user.role] ?? [] : []
 
   // Close sidebar on route change (for mobile)
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function DashboardLayout() {
           <div>
             <p className="font-bold text-white tracking-wide text-lg">Mr. Cafe</p>
             <p className="text-xs font-semibold uppercase tracking-widest text-amber-500 mt-0.5">
-              {user?.role.name} Panel
+              {user?.role} Panel
             </p>
           </div>
         </div>
