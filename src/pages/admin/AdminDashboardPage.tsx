@@ -5,11 +5,12 @@ import { ArrowRight, Package, ReceiptText, Tags, TriangleAlert, Sparkles, Trendi
 import { useGetDashboardQuery } from '@/features/analytics/analyticsApi'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { SkeletonMetricCard } from '@/components/ui/Skeleton'
 
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 // Animation variants for staggered entrance
-const containerVariants = {
+const containerVariants: any = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -17,7 +18,7 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
+const itemVariants: any = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -78,7 +79,7 @@ export default function AdminDashboardPage() {
         {isLoading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-36 rounded-3xl bg-white/5 border border-white/10 animate-pulse backdrop-blur-md" />
+              <SkeletonMetricCard key={i} />
             ))}
           </div>
         ) : data ? (

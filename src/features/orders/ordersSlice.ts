@@ -6,6 +6,7 @@ interface TrackedOrder {
   status:      string
   branchId:    string
   createdAt?:  string
+  payment?:    { id: string; status: string; method: string } | null
 }
 
 interface OrdersState {

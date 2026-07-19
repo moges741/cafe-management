@@ -8,7 +8,7 @@ export default function AboutSection() {
   const isInView = useInView(ref, { once: true, threshold: 0.4 });
 
   // Upgraded variants with a subtle upward glide
-  const textVariants = {
+  const textVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
       opacity: 1,

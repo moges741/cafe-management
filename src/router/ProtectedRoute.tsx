@@ -17,7 +17,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     return <Navigate to="/login" replace />
   }
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role.name)) {
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
     // Logged in but wrong role — send them to their own area instead of blank 403
     return <Navigate to="/" replace />
   }

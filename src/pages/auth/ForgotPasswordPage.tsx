@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useForgotPasswordMutation } from '@/features/auth/authApi'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Mail, Coffee } from 'lucide-react'
+import { motion } from 'framer-motion'
+import Spinner from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 
 export default function ForgotPasswordPage() {
@@ -25,58 +27,97 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
-      <div className="w-full max-w-sm space-y-6 bg-card border border-border p-8 rounded-xl shadow-sm">
-        
-        {!isSubmitted ? (
-          <>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">Reset Password</h2>
-              <p className="text-sm mt-1 text-muted-foreground">
-                Enter your email address and we'll send you a link to reset your password.
-              </p>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#050301] p-6 relative overflow-hidden selection:bg-amber-500/30">
+      {/* Ambient glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-amber-900/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] bg-orange-950/15 rounded-full blur-[150px] pointer-events-none" />
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-sm"
+      >
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <Link to="/">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+              <Coffee size={24} />
+            </div>
+          </Link>
+        </div>
+
+        <div className="bg-white/[0.02] border border-white/10 backdrop-blur-xl rounded-[32px] p-8 shadow-2xl">
+          {!isSubmitted ? (
+            <>
+              <div className="mb-6">
+                <h2 className="text-2xl font-extrabold text-white tracking-tight">Reset Password</h2>
+                <p className="text-sm mt-2 text-neutral-400">
+                  Enter your email and we'll send you a reset link.
+                </p>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Sending link...' : 'Send reset link'}
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">Email Address</label>
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-amber-500 transition-colors" size={18} />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="pl-11 h-12 bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl transition-all"
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-12 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all"
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Spinner size="sm" />
+                      Sending link…
+                    </span>
+                  ) : (
+                    'Send reset link'
+                  )}
+                </Button>
+              </form>
+
+              <div className="text-center text-sm mt-6">
+                <Link to="/login" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">
+                  ← Back to Login
+                </Link>
+              </div>
+            </>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center space-y-4 py-4"
+            >
+              <div className="flex justify-center">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                  <CheckCircle className="text-emerald-400" size={32} />
+                </div>
+              </div>
+              <h2 className="text-xl font-bold text-white">Check your email</h2>
+              <p className="text-neutral-400 text-sm">
+                If an account exists for <span className="text-amber-400 font-semibold">{email}</span>, a reset link has been sent.
+              </p>
+              <Button asChild className="w-full mt-4 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl">
+                <Link to="/login">Return to Login</Link>
               </Button>
-            </form>
-
-            <div className="text-center text-sm">
-              <Link to="/login" className="text-primary hover:underline">
-                Back to Login
-              </Link>
-            </div>
-          </>
-        ) : (
-          <div className="text-center space-y-4">
-            <div className="flex justify-center">
-              <CheckCircle className="text-green-500" size={48} />
-            </div>
-            <h2 className="text-xl font-bold text-foreground">Check your email</h2>
-            <p className="text-muted-foreground text-sm">
-              If an account exists with <strong>{email}</strong>, we have sent a password reset link.
-            </p>
-            <Button asChild variant="outline" className="w-full mt-4">
-              <Link to="/login">Return to Login</Link>
-            </Button>
-          </div>
-        )}
-
-      </div>
+            </motion.div>
+          )}
+        </div>
+      </motion.div>
     </div>
   )
 }

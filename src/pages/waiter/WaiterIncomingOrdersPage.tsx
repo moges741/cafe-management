@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Clock, Send, ChefHat, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useMemo } from 'react'
+import { SkeletonOrderRow } from '@/components/ui/Skeleton'
 
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
@@ -26,23 +27,20 @@ export default function WaiterIncomingOrdersPage() {
     }
   }
 
-  if (isLoading) {
-    return <div className="p-6 text-foreground">Loading orders...</div>
-  }
-
-  if (incomingOrders.length === 0) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-        <ChefHat size={48} className="mb-4 opacity-20" />
-        <p>No incoming orders</p>
-      </div>
-    )
-  }
-
   return (
     <div className="p-6 h-full overflow-y-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {incomingOrders.map((order) => (
+      {isLoading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonOrderRow key={i} />)}
+        </div>
+      ) : incomingOrders.length === 0 ? (
+        <div className="h-full flex flex-col items-center justify-center text-neutral-500 pt-20">
+          <ChefHat size={48} className="mb-4 opacity-20" />
+          <p>No incoming orders</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {incomingOrders.map((order) => (
           <div key={order.id} className={`bg-card border ${order.type === 'takeaway' ? 'border-orange-500/50' : 'border-border'} rounded-xl flex flex-col overflow-hidden`}>
             <div className={`p-4 border-b border-border ${order.type === 'takeaway' ? 'bg-orange-500/10' : 'bg-muted/20'}`}>
               <div className="flex justify-between items-start mb-2">
@@ -109,7 +107,8 @@ export default function WaiterIncomingOrdersPage() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

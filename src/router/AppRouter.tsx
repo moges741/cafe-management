@@ -34,9 +34,11 @@ import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
 import HomePage from '@/components/home/HomePage'
 import AboutSection from '@/components/home/AboutSection'
 import GallerySection from '@/components/home/GallerySection'
+import NotFoundPage from '@/pages/error/NotFoundPage'
+
 export default function AppRouter() {
   return (
-   
+    
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -91,6 +93,9 @@ export default function AppRouter() {
           <Route path="products/new" element={<ProductCreatePage />} />
           <Route path="products/:id/edit" element={<ProductEditPage />} />
         </Route>
+
+        {/* Wildcard 404 Fallback */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
    
   )

@@ -12,14 +12,15 @@ import { loginSchema, type LoginFormData } from './schemas'
 import { authApi } from '@/features/auth/authApi'
 import { useAppDispatch } from '@/app/hooks'
 import { cn } from '@/lib/utils'
+import Spinner from '@/components/ui/Spinner'
 
 // Framer Motion Variants
-const fadeUpVariants = {
+const fadeUpVariants: any = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
 }
 
-const staggerContainer = {
+const staggerContainer: any = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -233,8 +234,8 @@ export default function LoginPage() {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+                  <span className="flex items-center gap-2 justify-center">
+                    <Spinner size="sm" />
                     Authenticating...
                   </span>
                 ) : (

@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import toast from 'react-hot-toast'
+import { SkeletonOrderRow } from '@/components/ui/Skeleton'
 
 // Premium Status configurations
 const STATUS_CONFIG: Record<string, { label: string, color: string, icon: any }> = {
@@ -137,12 +138,10 @@ export default function OrdersPage() {
         <motion.div layout className="space-y-4">
           <AnimatePresence mode="popLayout">
             {isLoading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <motion.div 
-                  key={`skeleton-${i}`}
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="h-28 bg-white/5 backdrop-blur-md rounded-[24px] animate-pulse border border-white/10" 
-                />
+              Array.from({ length: 5 }).map((_, i) => (
+                <motion.div key={`skeleton-${i}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <SkeletonOrderRow />
+                </motion.div>
               ))
             ) : sortedOrders.length === 0 ? (
               <motion.div 

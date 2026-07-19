@@ -53,7 +53,12 @@ export default function KitchenDisplayPage() {
   useEffect(() => {
     if (initialOrders) {
       initialOrders.forEach(o => dispatch(upsertOrder({
-        id: o.id, orderNumber: o.orderNumber, status: o.status, branchId: o.branchId,
+        id: o.id,
+        orderNumber: o.orderNumber,
+        status: o.status,
+        branchId: o.branchId,
+        createdAt: o.createdAt,
+        payment: o.payment,
       })))
     }
     dispatch(socketActions.joinKitchen(BRANCH_ID))

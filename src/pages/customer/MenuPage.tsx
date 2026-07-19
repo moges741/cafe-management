@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Coffee, Sparkles } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
+import { SkeletonMenuCard } from '@/components/ui/Skeleton'
 
 const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
@@ -118,12 +119,7 @@ export default function MenuPage() {
         {isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div 
-                key={i} 
-                className="aspect-[4/5] rounded-[32px] bg-white/[0.02] border border-white/5 animate-pulse relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-white/[0.05]" />
-              </div>
+              <SkeletonMenuCard key={i} />
             ))}
           </div>
         )}
@@ -149,7 +145,7 @@ export default function MenuPage() {
             variants={{
               hidden: { opacity: 0 },
               visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-            }}
+            } as any}
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
           >
             {visibleProducts.map((product) => (
@@ -168,7 +164,7 @@ function ProductCard({ product }: { product: Product }) {
       variants={{
         hidden: { opacity: 0, y: 30 },
         visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
-      }}
+      } as any}
       viewport={{ once: true }}
     >
       <Link

@@ -15,9 +15,10 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAppSelector, useAppDispatch } from '@/app/hooks'
 import { clearUser, type UserRole } from '@/features/auth/authSlice'
+import Spinner from '@/components/ui/Spinner'
 
 type NavItem = { name: string; href: string }
 
@@ -161,7 +162,6 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
             ))}
           </div>
 
-          {/* ----- DESKTOP ACTIONS ----- */}
           <div className="hidden lg:flex items-center gap-4 relative z-10">
             {/* Cart Button */}
             <motion.button
