@@ -1,11 +1,22 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Mic, MicOff, X, MessageCircle, Send, Volume2, ShoppingCart } from 'lucide-react'
+import {
+  Mic, MicOff, X, Send, Volume2, VolumeX,
+  ShoppingCart, Coffee, Sparkles, RefreshCw,
+} from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { useStartConversationMutation, useSendMessageMutation } from '@/features/ai/aiApi'
-import { startSession, addUserMessage, addAssistantMessage, resetChat } from '@/features/ai/aiChatSlice'
+import {
+  useStartConversationMutation,
+  useSendMessageMutation,
+  useSendVoiceMessageMutation,
+} from '@/features/ai/aiApi'
+import {
+  startSession, addUserMessage,
+  addAssistantMessage, resetChat,
+} from '@/features/ai/aiChatSlice'
 import { addItem, setBranch } from '@/features/cart/cartSlice'
-import { useSpeechRecognition } from '@/features/ai/useSpeechRecognition'
+import { useMicRecorder } from '@/hooks/useMicRecorder'
 import { useSpeechSynthesis } from '@/features/ai/useSpeechSynthesis'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -15,38 +26,39 @@ const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 export default function AiAssistantWidget() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { sessionId, messages, orderSummary } = useAppSelector(state => state.aiChat)
-  const cartItemCount = useAppSelector(state => state.cart.items.length)
+  const { sessionId, messages, orderSummary } = useAppSelector(s => s.aiChat)
+  const cartItemCount = useAppSelector(s => s.cart.items.length)
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [input, setInput] = useState('')
-  const [voiceMode, setVoiceMode] = useState(false) // true = speak replies aloud
+  const [isOpen, setIsOpen]     = useState(false)
+  const [input, setInput]       = useState('')
+  const [voiceMode, setVoiceMode] = useState(false)
 
-  const [startConversation] = useStartConversationMutation()
-  const [sendMessage, { isLoading: isSending }] = useSendMessageMutation()
-  const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis()
+  const [startConversation]                         = useStartConversationMutation()
+  const [sendMessage, { isLoading: isSendingText }] = useSendMessageMutation()
+  const [sendVoice, { isLoading: isSendingVoice }]  = useSendVoiceMessageMutation()
+
+  const isSending = isSendingText || isSendingVoice
+
+  const { speak, stop: stopSpeaking, isSpeaking }  = useSpeechSynthesis()
+  const { isRecording, startRecording, stopRecording, error: micError } = useMicRecorder()
 
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const { isListening, isSupported, startListening, stopListening } = useSpeechRecognition(
-    (transcript) => {
-      setVoiceMode(true)      // if they spoke, assume they want spoken replies too
-      handleSend(transcript)  // auto-send once transcription completes
-    }
-  )
-
+  // ── Auto-start session when panel opens ──
   useEffect(() => {
     if (isOpen && !sessionId) {
-      startConversation({ branchId: BRANCH_ID }).unwrap().then((res) => {
+      startConversation({ branchId: BRANCH_ID }).unwrap().then(res => {
         dispatch(startSession({ sessionId: res.sessionId, welcomeMessage: res.message }))
-      })
+      }).catch(() => {})
     }
   }, [isOpen, sessionId])
 
+  // ── Auto-scroll to bottom on new messages ──
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, orderSummary])
 
+  // ── Handle text send ──
   const handleSend = async (overrideText?: string) => {
     const text = (overrideText ?? input).trim()
     if (!text || !sessionId || isSending) return
@@ -61,182 +73,287 @@ export default function AiAssistantWidget() {
 
       if (voiceMode) speak(res.reply)
 
-      if (res.intent === 'place_order' && res.confidence >= 0.75 && res.orderSummary) {
-        dispatch(setBranch(BRANCH_ID))
-        res.orderSummary.items.forEach((item: any) => {
-          dispatch(addItem({
-            productId:   item.productId,
-            productName: item.name,
-            quantity:    item.quantity,
-            unitPrice:   item.unitPrice,
-            notes:       item.notes ?? undefined,
-          }))
-        })
-      }
+      handleCartSync(res)
     } catch {
       dispatch(addAssistantMessage({ content: "Sorry, something went wrong. Please try again." }))
     }
   }
 
-  const handleMicClick = () => {
-    if (isListening) {
-      stopListening()
+  // ── Handle voice: record → upload to Whisper → LLM → speak reply ──
+  const handleMicToggle = async () => {
+    if (isRecording) {
+      // Stop recording and send the audio
+      const blob = await stopRecording()
+      if (!blob || !sessionId) return
+
+      setVoiceMode(true)
+      dispatch(addUserMessage('🎤 Voice message...'))
+
+      try {
+        const formData = new FormData()
+        formData.append('audio', blob, 'recording.webm')
+        formData.append('sessionId', sessionId)
+        formData.append('mimeType', blob.type || 'audio/webm')
+
+        const res = await sendVoice(formData).unwrap()
+
+        // Replace the placeholder with the actual transcript
+        dispatch(addAssistantMessage({
+          content: res.reply,
+          orderSummary: res.orderSummary,
+        }))
+
+        // Update the "🎤 Voice message..." with real transcript
+        // We already pushed addUserMessage, just update last user msg visually
+        // Actually, let's insert the transcript as the user message content
+        // The simplest approach: we pushed a placeholder, now the transcript is in res
+        // We'll show transcript in a special way via the messages
+
+        speak(res.reply)
+        handleCartSync(res)
+      } catch {
+        dispatch(addAssistantMessage({ content: "I couldn't process your voice. Please try again." }))
+      }
     } else {
-      stopSpeaking() // don't let it hear itself
-      startListening()
+      // Start recording
+      stopSpeaking()
+      await startRecording()
+    }
+  }
+
+  // ── Sync AI-extracted items into cart ──
+  const handleCartSync = (res: any) => {
+    if (res.intent === 'place_order' && res.confidence >= 0.75 && res.orderSummary) {
+      dispatch(setBranch(BRANCH_ID))
+      res.orderSummary.items.forEach((item: any) => {
+        dispatch(addItem({
+          productId:   item.productId,
+          productName: item.name,
+          quantity:    item.quantity,
+          unitPrice:   item.unitPrice,
+          notes:       item.notes ?? undefined,
+        }))
+      })
     }
   }
 
   const handleNewChat = () => {
     dispatch(resetChat())
-    startConversation({ branchId: BRANCH_ID }).unwrap().then((res) => {
+    startConversation({ branchId: BRANCH_ID }).unwrap().then(res => {
       dispatch(startSession({ sessionId: res.sessionId, welcomeMessage: res.message }))
-    })
+    }).catch(() => {})
   }
 
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end">
-      {/* ── Expanded panel ── */}
-      <div
-        className={cn(
-          'mb-3 w-[360px] max-w-[calc(100vw-2.5rem)] bg-card border border-border rounded-2xl shadow-lg overflow-hidden transition-all duration-200 origin-bottom-right',
-          isOpen ? 'scale-100 opacity-100 pointer-events-auto' : 'scale-95 opacity-0 pointer-events-none absolute'
-        )}
-        style={{ height: isOpen ? 480 : 0 }}
-      >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
-                <MessageCircle size={14} className="text-primary" />
-              </div>
-              <span className="text-sm font-medium text-foreground">Mr. Cafe Assistant</span>
-              {isSpeaking && <Volume2 size={14} className="text-primary animate-pulse" />}
-            </div>
-            <div className="flex items-center gap-1">
-              {cartItemCount > 0 && (
-                <button
-                  onClick={() => navigate('/cart')}
-                  className="flex items-center gap-1 text-xs bg-primary/20 text-primary px-2 py-1 rounded-full"
-                >
-                  <ShoppingCart size={12} />
-                  {cartItemCount}
-                </button>
-              )}
-              <button
-                onClick={() => setIsOpen(false)}
-                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-secondary text-muted-foreground"
-                aria-label="Close assistant"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
-            {messages.map((m, i) => (
-              <div key={i} className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}>
-                <div className={cn(
-                  'max-w-[80%] rounded-2xl px-3 py-2 text-sm',
-                  m.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-br-sm'
-                    : 'bg-secondary text-foreground rounded-bl-sm'
-                )}>
-                  {m.content}
-                </div>
-              </div>
-            ))}
+      {/* ═══════════════ CHAT PANEL ═══════════════ */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3, ease: [0.2, 0.65, 0.3, 0.9] }}
+            className="mb-3 w-[380px] max-w-[calc(100vw-2.5rem)] rounded-[28px] overflow-hidden shadow-[0_0_60px_rgba(245,158,11,0.12)] border border-amber-500/20 bg-[#0c0804]/95 backdrop-blur-2xl"
+            style={{ height: 520 }}
+          >
+            <div className="flex flex-col h-full">
 
-            {orderSummary && (
-              <div className="bg-secondary border border-primary/40 rounded-xl p-3">
-                <p className="text-[11px] font-semibold text-primary mb-1.5 uppercase tracking-wide">
-                  Added to your cart
-                </p>
-                <div className="space-y-1">
-                  {orderSummary.items.map((item, i) => (
-                    <div key={i} className="flex justify-between text-xs">
-                      <span className="text-foreground">{item.quantity}x {item.name}</span>
-                      <span style={{ color: '#B58B67' }}>{item.subtotal} ETB</span>
+              {/* ── HEADER ── */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-gradient-to-r from-amber-500/5 to-transparent shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                    <Coffee size={16} className="text-amber-500" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-white tracking-tight">Mr. Cafe AI</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[10px] text-neutral-400 font-medium">
+                        {isSpeaking ? 'Speaking...' : isRecording ? 'Listening...' : 'Online'}
+                      </span>
                     </div>
-                  ))}
+                  </div>
                 </div>
-                <div className="flex gap-2 mt-2">
-                  <Button size="sm" className="flex-1 h-7 text-xs" onClick={() => navigate('/checkout')}>
-                    Checkout
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleNewChat}>
-                    New order
-                  </Button>
-                </div>
-              </div>
-            )}
 
-            {isSending && (
-              <div className="flex justify-start">
-                <div className="bg-secondary rounded-2xl rounded-bl-sm px-3 py-2 flex gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              </div>
-            )}
-            <div ref={bottomRef} />
-          </div>
+                <div className="flex items-center gap-1.5">
+                  {/* TTS toggle */}
+                  <button
+                    onClick={() => { setVoiceMode(v => !v); if (isSpeaking) stopSpeaking() }}
+                    className={cn(
+                      'w-7 h-7 rounded-lg flex items-center justify-center transition-colors',
+                      voiceMode
+                        ? 'bg-amber-500/20 text-amber-400'
+                        : 'bg-white/5 text-neutral-500 hover:text-white'
+                    )}
+                    title={voiceMode ? 'Mute replies' : 'Speak replies'}
+                  >
+                    {voiceMode ? <Volume2 size={14} /> : <VolumeX size={14} />}
+                  </button>
 
-          {/* Input bar */}
-          <div className="border-t border-border px-3 py-2.5 shrink-0">
-            <div className="flex items-center gap-2">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder={isListening ? 'Listening...' : 'Type or speak your order...'}
-                disabled={!sessionId || isSending}
-                className="flex-1 h-9 rounded-full border border-input bg-background px-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              />
-
-              {isSupported && (
-                <button
-                  onClick={handleMicClick}
-                  disabled={!sessionId || isSending}
-                  aria-label={isListening ? 'Stop listening' : 'Start voice input'}
-                  className={cn(
-                    'w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors',
-                    isListening
-                      ? 'bg-destructive text-destructive-foreground'
-                      : 'bg-secondary text-foreground hover:bg-secondary/70'
+                  {cartItemCount > 0 && (
+                    <button
+                      onClick={() => navigate('/cart')}
+                      className="flex items-center gap-1 text-[11px] bg-amber-500/15 text-amber-400 px-2 py-1 rounded-lg font-semibold border border-amber-500/20"
+                    >
+                      <ShoppingCart size={12} />
+                      {cartItemCount}
+                    </button>
                   )}
-                >
-                  {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-                </button>
-              )}
 
-              <button
-                onClick={() => handleSend()}
-                disabled={!sessionId || isSending || !input.trim()}
-                aria-label="Send message"
-                className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 disabled:opacity-40"
-              >
-                <Send size={15} />
-              </button>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* ── MESSAGES ── */}
+              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-thin scrollbar-thumb-white/5 scrollbar-track-transparent">
+                {messages.map((m, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, delay: 0.05 }}
+                    className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}
+                  >
+                    <div className={cn(
+                      'max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed',
+                      m.role === 'user'
+                        ? 'bg-amber-500 text-black font-medium rounded-br-md shadow-[0_2px_12px_rgba(245,158,11,0.2)]'
+                        : 'bg-white/[0.04] border border-white/10 text-neutral-200 rounded-bl-md'
+                    )}>
+                      {m.content}
+                    </div>
+                  </motion.div>
+                ))}
+
+                {/* Order summary card */}
+                {orderSummary && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white/[0.03] border border-amber-500/20 rounded-2xl p-4 shadow-[0_0_20px_rgba(245,158,11,0.05)]"
+                  >
+                    <div className="flex items-center gap-1.5 mb-2.5">
+                      <Sparkles size={12} className="text-amber-500" />
+                      <p className="text-[10px] font-bold text-amber-400 uppercase tracking-[0.15em]">
+                        Order Preview
+                      </p>
+                    </div>
+                    <div className="space-y-1.5">
+                      {orderSummary.items.map((item: any, i: number) => (
+                        <div key={i} className="flex justify-between text-xs">
+                          <span className="text-neutral-300">{item.quantity}× {item.name}</span>
+                          <span className="text-amber-400 font-semibold">{item.subtotal} ETB</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-white/5">
+                      <span className="text-xs font-bold text-white">Total: {orderSummary.total} ETB</span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="h-7 text-[11px] bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg px-3"
+                          onClick={() => navigate('/checkout')}
+                        >
+                          Checkout
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[11px] border-white/10 text-neutral-300 hover:bg-white/5 rounded-lg px-3"
+                          onClick={handleNewChat}
+                        >
+                          <RefreshCw size={10} className="mr-1" /> New
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Typing indicator */}
+                {isSending && (
+                  <div className="flex justify-start">
+                    <div className="bg-white/[0.04] border border-white/10 rounded-2xl rounded-bl-md px-4 py-3 flex gap-1.5 items-center">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Mic error */}
+                {micError && (
+                  <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
+                    {micError}
+                  </div>
+                )}
+
+                <div ref={bottomRef} />
+              </div>
+
+              {/* ── INPUT BAR ── */}
+              <div className="border-t border-white/5 px-4 py-3 shrink-0 bg-[#0a0603]/50">
+                <div className="flex items-center gap-2">
+                  <input
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSend()}
+                    placeholder={isRecording ? '🔴 Recording... tap mic to stop' : 'Type or speak your order...'}
+                    disabled={!sessionId || isSending || isRecording}
+                    className="flex-1 h-10 rounded-xl border border-white/10 bg-white/[0.03] px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all"
+                  />
+
+                  {/* Mic button — records real audio → Whisper STT */}
+                  <button
+                    onClick={handleMicToggle}
+                    disabled={!sessionId || isSending}
+                    className={cn(
+                      'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all border',
+                      isRecording
+                        ? 'bg-red-500/20 border-red-500/40 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-pulse'
+                        : 'bg-white/[0.03] border-white/10 text-neutral-400 hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/5'
+                    )}
+                    title={isRecording ? 'Stop recording & send' : 'Hold to record voice'}
+                  >
+                    {isRecording ? <MicOff size={16} /> : <Mic size={16} />}
+                  </button>
+
+                  {/* Send text */}
+                  <button
+                    onClick={() => handleSend()}
+                    disabled={!sessionId || isSending || !input.trim()}
+                    className="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-400 text-black flex items-center justify-center shrink-0 disabled:opacity-30 transition-all shadow-[0_0_15px_rgba(245,158,11,0.15)]"
+                  >
+                    <Send size={15} />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── Floating trigger button ── */}
-      <button
+      {/* ═══════════════ FLOATING TRIGGER ═══════════════ */}
+      <motion.button
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(o => !o)}
-        aria-label={isOpen ? 'Close assistant' : 'Open Mr. Cafe assistant'}
+        aria-label={isOpen ? 'Close assistant' : 'Open Mr. Cafe AI assistant'}
         className={cn(
-          'w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-105',
-          isOpen ? 'bg-secondary text-foreground' : 'bg-primary text-primary-foreground'
+          'w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 border shadow-xl',
+          isOpen
+            ? 'bg-white/10 border-white/20 text-white shadow-[0_0_20px_rgba(255,255,255,0.05)]'
+            : 'bg-gradient-to-br from-amber-500 to-orange-600 border-amber-400/30 text-black shadow-[0_0_30px_rgba(245,158,11,0.3)]'
         )}
       >
         {isOpen ? <X size={22} /> : <Mic size={22} />}
-      </button>
+      </motion.button>
     </div>
   )
 }

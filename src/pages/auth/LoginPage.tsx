@@ -58,8 +58,9 @@ export default function LoginPage() {
 
         if (role === 'admin' || role === 'manager') navigate('/admin')
         else if (role === 'kitchen') navigate('/kitchen')
-        else if (role === 'cashier') navigate('/cashier')
-        else navigate('/menu')
+        else if (role === 'cashier') navigate('/cashier') 
+        else if (role === 'waiter') navigate('/waiter')
+        else navigate('/')
       }
     } catch (err: any) {
       toast.error(err?.data?.message || err?.data?.error?.message || 'Login failed')
