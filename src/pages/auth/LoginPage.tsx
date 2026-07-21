@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { useLoginMutation } from '@/features/auth/authApi'
 import { loginSchema, type LoginFormData } from './schemas'
 import { authApi } from '@/features/auth/authApi'
+import { useSyncCartMutation } from '@/features/cart/cartApi'
 import { useAppDispatch } from '@/app/hooks'
 import { cn } from '@/lib/utils'
 import Spinner from '@/components/ui/Spinner'
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const location = useLocation()
 
   const [login, { isLoading }] = useLoginMutation()
+  const [syncCart] = useSyncCartMutation()
 
   const {
     register,
@@ -46,6 +48,17 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data).unwrap()
+
+      // Sync guest cart to user account
+      const localCartStr = localStorage.getItem('mr_cafe_cart')
+      if (localCartStr) {
+        try {
+          const localCart = JSON.parse(localCartStr)
+          if (localCart.items?.length > 0) {
+            await syncCart(localCart.items).unwrap()
+          }
+        } catch(e) {}
+      }
 
       const result = await dispatch(authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true }))
 

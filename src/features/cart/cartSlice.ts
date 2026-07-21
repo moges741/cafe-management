@@ -1,7 +1,8 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type {PayloadAction} from '@reduxjs/toolkit'
+import { createSlice, } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
+import { cartApi } from './cartApi'
 
-interface CartItem {
+export interface CartItem {
   productId:   string
   productName: string
   quantity:    number
@@ -14,40 +15,55 @@ interface CartState {
   items:    CartItem[]
 }
 
-const initialState: CartState = {
-  branchId: null,
-  items:    [],
+const loadState = (): CartState => {
+  try {
+    const serializedState = localStorage.getItem('mr_cafe_cart')
+    if (serializedState === null) {
+      return { branchId: null, items: [] }
+    }
+    return JSON.parse(serializedState)
+  } catch (err) {
+    return { branchId: null, items: [] }
+  }
 }
+
+const saveState = (state: CartState) => {
+  try {
+    const serializedState = JSON.stringify(state)
+    localStorage.setItem('mr_cafe_cart', serializedState)
+  } catch {
+    // ignore write errors
+  }
+}
+
+const initialState: CartState = loadState()
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    // Adding an item — but check if it already exists first
-    // This is normal JS logic inside the reducer, RTK doesn't restrict that
+    setCart: (state, action: PayloadAction<CartItem[]>) => {
+      state.items = action.payload
+      saveState(state)
+    },
     addItem: (state, action: PayloadAction<CartItem>) => {
       const existing = state.items.find(
         item => item.productId === action.payload.productId
       )
-
       if (existing) {
-        // Item already in cart — just bump the quantity
         existing.quantity += action.payload.quantity
+        if (action.payload.notes) existing.notes = action.payload.notes
       } else {
-        // New item — push it into the array
-        // Again — this LOOKS like a mutation, Immer makes it safe
         state.items.push(action.payload)
       }
+      saveState(state)
     },
-
     removeItem: (state, action: PayloadAction<string>) => {
-      // action.payload here is just the productId (a string)
-      // filter returns a new array without the matching item
       state.items = state.items.filter(
         item => item.productId !== action.payload
       )
+      saveState(state)
     },
-
     updateQuantity: (
       state,
       action: PayloadAction<{ productId: string; quantity: number }>
@@ -58,24 +74,40 @@ const cartSlice = createSlice({
       if (item) {
         item.quantity = action.payload.quantity
       }
+      saveState(state)
     },
-
     setBranch: (state, action: PayloadAction<string>) => {
-      // If switching branches, clear the cart —
-      // a Macchiato from Branch A might not exist at Branch B
       if (state.branchId !== action.payload) {
         state.items = []
       }
       state.branchId = action.payload
+      saveState(state)
     },
-
     clearCart: (state) => {
       state.items = []
+      saveState(state)
     },
   },
+  extraReducers: (builder) => {
+    // When backend returns cart, we update our local state to match
+    builder.addMatcher(
+      cartApi.endpoints.getCart.matchFulfilled,
+      (state, { payload }) => {
+        state.items = payload.items.map(item => ({
+          productId: item.productId,
+          productName: item.productName || 'Unknown Product',
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          notes: item.notes
+        }))
+        saveState(state)
+      }
+    )
+  }
 })
 
 export const {
+  setCart,
   addItem,
   removeItem,
   updateQuantity,

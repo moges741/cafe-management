@@ -5,7 +5,9 @@ import ordersReducer from '../features/orders/ordersSlice'
 import socketReducer from '../features/socket/socketSlice'
 import { baseApi } from '../lib/api'
 import { socketMiddleware } from '../features/socket/socketMiddleware'
+import { cartSyncMiddleware } from '../features/cart/cartMiddleware'
 import aiChatReducer from '../features/ai/aiChatSlice'
+
 export const store = configureStore({
   reducer: {
     auth:                   authReducer,
@@ -16,7 +18,7 @@ export const store = configureStore({
     [baseApi.reducerPath]:   baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(baseApi.middleware, socketMiddleware),
+    getDefaultMiddleware().concat(baseApi.middleware, socketMiddleware, cartSyncMiddleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

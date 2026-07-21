@@ -11,6 +11,6 @@ export const baseApi = createApi({
   }),
   // tagTypes lets different endpoints invalidate each other's cache
   // e.g. after creating an order, the "Orders" list refetches automatically
-  tagTypes: ['User', 'Product', 'Category', 'Order', 'Payment', 'Inventory', 'Branch'],
+  tagTypes: ['User', 'Product', 'Category', 'Order', 'Payment', 'Inventory', 'Branch', 'Cart'],
   endpoints: () => ({}),
 })
