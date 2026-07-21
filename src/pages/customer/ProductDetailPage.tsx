@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Minus, Plus, ShoppingBag, Coffee, Sparkles } from 'lucide-react'
 import { useGetProductByIdQuery } from '@/features/products/productsApi'
-import { useAppDispatch } from '@/app/hooks'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { addItem, setBranch } from '@/features/cart/cartSlice'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -29,6 +29,7 @@ export default function ProductDetailPage() {
   const { data: product, isLoading } = useGetProductByIdQuery(id!)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
 
   const [activeImage, setActiveImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -42,6 +43,15 @@ export default function ProductDetailPage() {
     : []
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to place an order', {
+        icon: '🔒',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(245, 158, 11, 0.2)' }
+      })
+      navigate('/login')
+      return
+    }
+
     dispatch(setBranch(product!.branchId))
     dispatch(addItem({
       productId: product!.id,
@@ -99,7 +109,7 @@ export default function ProductDetailPage() {
       {/* Top Navigation */}
       <div className="sticky top-0 z-40 bg-[#050301]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center">
-         <Navbar/>
+
         </div>
       </div>
 

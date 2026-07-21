@@ -63,7 +63,7 @@ export default function MenuPage() {
       {/* Top Navigation / Cart */}
       <div className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-end pointer-events-none">
         <div className="pointer-events-auto">
-          <Navbar />
+
         </div>
       </div>
 

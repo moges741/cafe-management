@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { removeItem, updateQuantity } from '@/features/cart/cartSlice'
 import { selectCartItems, selectCartTotal } from '@/features/cart/cartSelectors'
 import { Button } from '@/components/ui/button'
+import Navbar from '@/components/layout/Navbar'
 
 // Framer Motion Variants
 const containerVariants: any = {
@@ -66,18 +67,19 @@ export default function CartPage() {
 
       {/* Top Navigation */}
       <div className="sticky top-0 z-40 bg-[#050301]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center">
-          <Link 
+        {/* <div className="max-w-2xl mx-auto px-6 py-4 flex items-center"> */}
+          {/* <Link 
             to="/menu" 
             className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-400 hover:text-amber-500 transition-colors group"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             Continue shopping
-          </Link>
-        </div>
+          </Link> */}
+
+        {/* </div> */}
       </div>
 
-      <div className="max-w-2xl mx-auto px-6 py-10 relative z-10">
+      <div className="ax-w-2xl mx-auto px-6 py-10 relative z-10 mt-20">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

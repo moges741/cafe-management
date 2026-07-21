@@ -9,7 +9,7 @@ import { useInitializePaymentMutation } from '@/features/payments/paymentsApi'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-
+import Navbar from '@/components/layout/Navbar' 
 export default function CheckoutPage() {
   const items    = useAppSelector(selectCartItems)
   const total    = useAppSelector(selectCartTotal)
@@ -72,11 +72,12 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="px-6 py-4 border-b border-border">
+      {/* <div className="px-6 py-4 border-b border-border">
         <Link to="/cart" className="text-sm text-primary">← Back to cart</Link>
-      </div>
+      </div> */}
 
-      <div className="max-w-xl mx-auto px-6 py-8 space-y-6">
+
+      <div className="mt-20 max-w-xl mx-auto px-6 py-8 space-y-6">
         <h1 className="text-2xl font-bold text-foreground">Checkout</h1>
 
         {/* Order type */}

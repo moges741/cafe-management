@@ -1,15 +1,16 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CheckCircle2, ArrowRight, FileText, Clock, Coffee } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useGetOrderByIdQuery } from '@/features/orders/ordersApi'
 
 export default function PaymentSuccessPage() {
-  // Mock details for the success page (you can pass these via state/props or fetch them)
-  const orderDetails = {
-    orderNumber: "#MC-8924",
-    time: "10-15 mins",
-    status: "Sent to Kitchen"
-  }
+  const [searchParams] = useSearchParams()
+  const orderId = searchParams.get('orderId')
+
+  const { data: order, isLoading } = useGetOrderByIdQuery(orderId!, {
+    skip: !orderId,
+  })
 
   return (
     <div className="min-h-screen bg-[#050301] flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-amber-500/30">
@@ -60,38 +61,44 @@ export default function PaymentSuccessPage() {
           </motion.div>
 
           {/* Order Details Box */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-            className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 mb-8 text-left space-y-4"
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-white/5">
-              <div className="flex items-center gap-3 text-neutral-300">
-                <FileText size={16} className="text-amber-500" />
-                <span className="text-sm font-medium">Order Number</span>
+          {isLoading ? (
+             <div className="w-full py-8 flex justify-center">
+               <div className="w-8 h-8 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+             </div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+              className="w-full bg-black/40 border border-white/5 rounded-2xl p-5 mb-8 text-left space-y-4"
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                <div className="flex items-center gap-3 text-neutral-300">
+                  <FileText size={16} className="text-amber-500" />
+                  <span className="text-sm font-medium">Order Number</span>
+                </div>
+                <span className="font-bold text-white">{order?.orderNumber || "Pending"}</span>
               </div>
-              <span className="font-bold text-white">{orderDetails.orderNumber}</span>
-            </div>
-            
-            <div className="flex items-center justify-between pb-4 border-b border-white/5">
-              <div className="flex items-center gap-3 text-neutral-300">
-                <Clock size={16} className="text-amber-500" />
-                <span className="text-sm font-medium">Est. Prep Time</span>
+              
+              <div className="flex items-center justify-between pb-4 border-b border-white/5">
+                <div className="flex items-center gap-3 text-neutral-300">
+                  <Clock size={16} className="text-amber-500" />
+                  <span className="text-sm font-medium">Est. Prep Time</span>
+                </div>
+                <span className="font-bold text-white">10-15 mins</span>
               </div>
-              <span className="font-bold text-white">{orderDetails.time}</span>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-neutral-300">
-                <Coffee size={16} className="text-amber-500" />
-                <span className="text-sm font-medium">Status</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-neutral-300">
+                  <Coffee size={16} className="text-amber-500" />
+                  <span className="text-sm font-medium">Status</span>
+                </div>
+                <span className="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
+                  {order?.status === 'pending' ? 'Order Received' : order?.status || 'Processing'}
+                </span>
               </div>
-              <span className="text-sm font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
-                {orderDetails.status}
-              </span>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
 
           {/* Action Buttons */}
           <motion.div 
@@ -100,12 +107,20 @@ export default function PaymentSuccessPage() {
             transition={{ delay: 0.5 }}
             className="w-full space-y-3"
           >
-            <Button 
-              className="w-full h-14 bg-amber-500 hover:bg-amber-400 text-black text-base font-bold rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-2 group"
-            >
-              Track Order Live
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </Button>
+            {orderId ? (
+              <Link to={`/order/${orderId}/track`} className="block w-full">
+                <Button 
+                  className="w-full h-14 bg-amber-500 hover:bg-amber-400 text-black text-base font-bold rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-2 group"
+                >
+                  Track Order Live
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+            ) : (
+              <Button disabled className="w-full h-14 bg-amber-500/50 text-black text-base font-bold rounded-xl">
+                Track Order Live
+              </Button>
+            )}
             <Link to="/menu" className="block w-full">
               <Button 
                 variant="outline" 

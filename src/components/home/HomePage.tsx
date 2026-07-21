@@ -20,7 +20,7 @@ export default function HomePage() {
   return (
     <div className="bg-background">
      
-      <Navbar />
+
       <HeroSection />
       {/* <StatsSection /> */}
       <AboutSection />

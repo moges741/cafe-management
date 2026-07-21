@@ -91,7 +91,7 @@ export default function DashboardLayout() {
   return (
     <section className="bg-[#050301] min-h-screen selection:bg-amber-500/30 flex flex-col">
       {/* Assuming Navbar is global/fixed at top */}
-      <Navbar />
+
 
       <div className="flex-1 flex overflow-hidden mt-20 relative">
         

@@ -104,7 +104,7 @@ interface LoginResponse {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<LoginResponse, LoginDto>({
+    login: builder.mutation<{ message: string }, LoginDto>({
       query: (body) => ({
         url: '/auth/login',
         method: 'POST',
@@ -114,7 +114,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
    verifyEmail: builder.mutation<{ message: string }, { token: string }>({
       query: (body) => ({
-      url:    '/auth/verify-em ',    
+      url:    '/auth/verify-email',    
       method: 'POST',
        body,
      }),
@@ -135,7 +135,7 @@ export const authApi = baseApi.injectEndpoints({
         body,
       }),
     }),
-    register: builder.mutation<LoginResponse, RegisterDto>({
+    register: builder.mutation<{ message: string }, RegisterDto>({
       query: (body) => ({
         url: '/auth/register',
         method: 'POST',
@@ -146,6 +146,10 @@ export const authApi = baseApi.injectEndpoints({
 
     getMe: builder.query<User, void>({
       query: () => '/auth/me',
+      transformResponse: (response: any) => ({
+        ...response,
+        role: response.role?.name || response.role
+      }),
       providesTags: ['Auth'],
     }),
 

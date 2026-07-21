@@ -28,6 +28,7 @@ export default function AiAssistantWidget() {
   const navigate = useNavigate()
   const { sessionId, messages, orderSummary } = useAppSelector(s => s.aiChat)
   const cartItemCount = useAppSelector(s => s.cart.items.length)
+  const isAuthenticated = useAppSelector(s => s.auth.isAuthenticated)
 
   const [isOpen, setIsOpen]     = useState(false)
   const [input, setInput]       = useState('')
@@ -69,6 +70,15 @@ export default function AiAssistantWidget() {
     try {
       const res = await sendMessage({ sessionId, message: text }).unwrap()
 
+      if (!isAuthenticated && res.intent === 'place_order') {
+        dispatch(addAssistantMessage({ content: "Please sign in to add items to your order." }))
+        setTimeout(() => {
+          setIsOpen(false)
+          navigate('/login')
+        }, 2000)
+        return
+      }
+
       dispatch(addAssistantMessage({ content: res.reply, orderSummary: res.orderSummary }))
 
       if (voiceMode) speak(res.reply)
@@ -96,6 +106,16 @@ export default function AiAssistantWidget() {
         formData.append('mimeType', blob.type || 'audio/webm')
 
         const res = await sendVoice(formData).unwrap()
+
+        if (!isAuthenticated && res.intent === 'place_order') {
+          dispatch(addAssistantMessage({ content: "Please sign in to add items to your order." }))
+          speak("Please sign in to add items to your order.")
+          setTimeout(() => {
+            setIsOpen(false)
+            navigate('/login')
+          }, 2000)
+          return
+        }
 
         // Replace the placeholder with the actual transcript
         dispatch(addAssistantMessage({
