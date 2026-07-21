@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import MenuPage from '@/pages/customer/MenuPage';
@@ -39,12 +39,18 @@ import PremiumBurgerStory from '@/components/home/PremiumBurgerStory';
 import PremiumPizzaExperience from '@/components/home/PremiumPizzaExperience';
 import CulinaryGateway from '@/components/home/CulinaryGateway';
 import Navbar from '@/components/layout/Navbar';
+import HomePage from '@/components/home/HomePage';
 
-// RootRedirect: send authenticated staff to their dashboard, guests to Login
+// RootRedirect: send authenticated staff to their dashboard, guests/customers to HomePage
 const RootRedirect = () => {
   const { user, isAuthenticated, isInitializing } = useAppSelector((state) => state.auth);
+  
   if (isInitializing) return null;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  if (!isAuthenticated || user?.role === 'customer') {
+    return <HomePage />;
+  }
+
   switch (user?.role) {
     case 'admin':
     case 'manager':
@@ -58,58 +64,64 @@ const RootRedirect = () => {
     case 'barista':
       return <Navigate to="/barista" replace />;
     default:
-      return <Navigate to="/menu" replace />;
+      return <HomePage />;
   }
 };
 
 export default function AppRouter() {
+  const location = useLocation();
+  const hideNavbarRoutes = ['/login', '/register'];
+  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+
   return (
     <>
-      <Navbar />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/about" element={<AboutSection />} />
-        <Route path="/gallery" element={<GallerySection />} />
-        <Route path="/menu" element={<MenuPage />} />
-        <Route path="/menu/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
-        <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-        <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
-        <Route path="/order/:id/track" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
-        <Route path="preparing-burger" element={<PremiumBurgerStory />} />
-        <Route path="preparing-pizza" element={<PremiumPizzaExperience />} />
-        <Route path="experience-me" element={<CulinaryGateway />} />
-        {/* Operational role routes */}
-        <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['kitchen', 'admin']}><KitchenLayout /></ProtectedRoute>}>
-          <Route index element={<KitchenDisplayPage />} />
-          <Route path="history" element={<KitchenHistoryPage />} />
-        </Route>
-        <Route path="/cashier" element={<ProtectedRoute allowedRoles={['cashier', 'admin']}><CashierPosPage /></ProtectedRoute>} />
-        <Route path="/waiter" element={<ProtectedRoute allowedRoles={['waiter', 'admin']}><WaiterLayout /></ProtectedRoute>}>
-          <Route index element={<WaiterIncomingOrdersPage />} />
-          <Route path="history" element={<WaiterHistoryPage />} />
-          <Route path="new" element={<WaiterNewOrderPage />} />
-        </Route>
-        <Route path="/barista" element={<ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaPage /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><DashboardLayout /></ProtectedRoute>}>
-          <Route index element={<AdminDashboardPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="inventory" element={<InventoryPage />} />
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="branches" element={<BranchesPage />} />
-          <Route path="staff" element={<StaffPage />} />
-          <Route path="products/new" element={<ProductCreatePage />} />
-          <Route path="products/:id/edit" element={<ProductEditPage />} />
-        </Route>
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      {!shouldHideNavbar && <Navbar />}
+      <main className={!shouldHideNavbar ? "pt-20 min-h-screen flex flex-col w-full" : "min-h-screen flex flex-col w-full"}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/about" element={<AboutSection />} />
+          <Route path="/gallery" element={<GallerySection />} />
+          <Route path="/menu" element={<MenuPage />} />
+          <Route path="/menu/:id" element={<ProductDetailPage />} />
+          <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />
+          <Route path="/order/:id/track" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
+          <Route path="preparing-burger" element={<PremiumBurgerStory />} />
+          <Route path="preparing-pizza" element={<PremiumPizzaExperience />} />
+          <Route path="experience-me" element={<CulinaryGateway />} />
+          {/* Operational role routes */}
+          <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['kitchen', 'admin']}><KitchenLayout /></ProtectedRoute>}>
+            <Route index element={<KitchenDisplayPage />} />
+            <Route path="history" element={<KitchenHistoryPage />} />
+          </Route>
+          <Route path="/cashier" element={<ProtectedRoute allowedRoles={['cashier', 'admin']}><CashierPosPage /></ProtectedRoute>} />
+          <Route path="/waiter" element={<ProtectedRoute allowedRoles={['waiter', 'admin']}><WaiterLayout /></ProtectedRoute>}>
+            <Route index element={<WaiterIncomingOrdersPage />} />
+            <Route path="history" element={<WaiterHistoryPage />} />
+            <Route path="new" element={<WaiterNewOrderPage />} />
+          </Route>
+          <Route path="/barista" element={<ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><DashboardLayout /></ProtectedRoute>}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="inventory" element={<InventoryPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="orders" element={<OrdersPage />} />
+            <Route path="branches" element={<BranchesPage />} />
+            <Route path="staff" element={<StaffPage />} />
+            <Route path="products/new" element={<ProductCreatePage />} />
+            <Route path="products/:id/edit" element={<ProductEditPage />} />
+          </Route>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
     </>
   );
 }

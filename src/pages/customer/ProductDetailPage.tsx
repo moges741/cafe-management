@@ -113,7 +113,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mt-20 mx-auto px-6 py-8 md:py-12 relative z-10">
+      <div className="max-w-6xl mx-auto px-6 py-8 md:py-12 relative z-10">
         <div className="grid lg:grid-cols-2 gap-10 md:gap-16 items-start">
           
           {/* ── LEFT COLUMN: IMAGE GALLERY ── */}

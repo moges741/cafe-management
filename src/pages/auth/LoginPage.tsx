@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
 import { Mail, Lock, Coffee, ArrowRight } from 'lucide-react'
@@ -31,6 +31,7 @@ const staggerContainer = {
 export default function LoginPage() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const location = useLocation()
 
   const [login, { isLoading }] = useLoginMutation()
 
@@ -56,11 +57,16 @@ export default function LoginPage() {
           style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(245, 158, 11, 0.2)' }
         })
 
-        if (role === 'admin' || role === 'manager') navigate('/admin')
-        else if (role === 'kitchen') navigate('/kitchen')
-        else if (role === 'cashier') navigate('/cashier') 
-        else if (role === 'waiter') navigate('/waiter')
-        else navigate('/')
+        const from = location.state?.from?.pathname || null
+        if (from) {
+          navigate(from, { replace: true })
+        } else {
+          if (role === 'admin' || role === 'manager') navigate('/admin')
+          else if (role === 'kitchen') navigate('/kitchen')
+          else if (role === 'cashier') navigate('/cashier') 
+          else if (role === 'waiter') navigate('/waiter')
+          else navigate('/')
+        }
       }
     } catch (err: any) {
       toast.error(err?.data?.message || err?.data?.error?.message || 'Login failed')

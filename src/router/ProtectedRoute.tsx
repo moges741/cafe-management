@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAppSelector } from '@/app/hooks'
 import type { RootState } from '@/app/store'
 
@@ -9,12 +9,13 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, isAuthenticated, isInitializing } = useAppSelector((state: RootState) => state.auth)
+  const location = useLocation()
 
   // Still checking session — don't decide anything yet
   if (isInitializing) return null
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {

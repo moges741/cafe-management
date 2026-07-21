@@ -77,7 +77,7 @@ export default function CheckoutPage() {
       </div> */}
 
 
-      <div className="mt-20 max-w-xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-xl mx-auto px-6 py-8 space-y-6">
         <h1 className="text-2xl font-bold text-foreground">Checkout</h1>
 
         {/* Order type */}

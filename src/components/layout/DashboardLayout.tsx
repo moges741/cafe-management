@@ -93,7 +93,7 @@ export default function DashboardLayout() {
       {/* Assuming Navbar is global/fixed at top */}
 
 
-      <div className="flex-1 flex overflow-hidden mt-20 relative">
+      <div className="flex-1 flex overflow-hidden relative">
         
         {/* Ambient Background Glows */}
         <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-amber-900/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />

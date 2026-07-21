@@ -79,7 +79,7 @@ export default function CartPage() {
         {/* </div> */}
       </div>
 
-      <div className="ax-w-2xl mx-auto px-6 py-10 relative z-10 mt-20">
+      <div className="ax-w-2xl mx-auto px-6 py-10 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
