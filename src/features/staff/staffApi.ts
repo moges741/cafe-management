@@ -22,8 +22,11 @@ interface CreateStaffDto {
 
 export const staffApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getStaff: builder.query<StaffUser[], void>({
-      query: () => '/auth/staff',
+    getStaff: builder.query<StaffUser[], { branchId?: string }>({
+      query: (params) => ({
+        url: '/auth/staff',
+        params: params?.branchId ? { branchId: params.branchId } : undefined,
+      }),
       providesTags: ['Staff'],
     }),
 

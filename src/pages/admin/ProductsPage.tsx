@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom'
 import { Plus, ImageOff } from 'lucide-react'
 import { useGetProductsQuery, useToggleProductAvailabilityMutation } from '@/features/products/productsApi'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
-
 export default function ProductsPage() {
-  const { data: products = [], isLoading } = useGetProductsQuery({ branchId: BRANCH_ID })
+  const { branchId } = useCurrentBranch()
+  const { data: products = [], isLoading } = useGetProductsQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const [toggleAvailability] = useToggleProductAvailabilityMutation()
 
   return (

@@ -23,13 +23,13 @@ import {
   useDeleteStaffMutation,
   useToggleStaffStatusMutation,
 } from '@/features/staff/staffApi'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 const ROLES = ['manager', 'cashier', 'waiter', 'barista', 'kitchen']
 
 // Premium Role Configurations
@@ -53,8 +53,10 @@ const itemVariants = {
 } as const
 
 export default function StaffPage() {
+  const { branchId } = useCurrentBranch()
+  
   // Fetch staff
-  const { data: staffList = [], isLoading: isLoadingStaff } = useGetStaffQuery()
+  const { data: staffList = [], isLoading: isLoadingStaff } = useGetStaffQuery({ branchId: branchId || undefined }, { skip: !branchId })
 
   // Mutations
   const [createStaff, { isLoading: isCreating }] = useCreateStaffMutation()
@@ -91,9 +93,13 @@ export default function StaffPage() {
       toast.error('Fill in all fields')
       return
     }
+    if (!branchId) {
+      toast.error('No branch selected')
+      return
+    }
 
     try {
-      await createStaff({ email, password, role, branchId: BRANCH_ID }).unwrap()
+      await createStaff({ email, password, role, branchId }).unwrap()
       toast.success(`${role} account created`)
       setEmail('')
       setPassword('')

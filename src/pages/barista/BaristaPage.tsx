@@ -6,12 +6,10 @@ import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { upsertOrder } from '@/features/orders/ordersSlice'
 import { selectActiveOrders } from '@/features/orders/ordersSelectors'
 import { socketActions } from '@/features/socket/socketMiddleware'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
-
 
 const COLUMNS = [
   { status: 'confirmed',  title: 'Confirmed', action: { label: 'Start prep',   next: 'in_kitchen' } },
@@ -20,10 +18,11 @@ const COLUMNS = [
 ]
 
 export default function BaristaPage() {
+  const { branchId } = useCurrentBranch()
   const dispatch = useAppDispatch()
   const connected = useAppSelector(state => state.socket.connected)
-  const { data: initialOrders } = useGetOrdersQuery()
-  const { data: categories = [] } = useGetCategoriesQuery()
+  const { data: initialOrders } = useGetOrdersQuery({ branchId: branchId || undefined }, { skip: !branchId })
+  const { data: categories = [] } = useGetCategoriesQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const liveOrders = useAppSelector(selectActiveOrders)
   const [updateStatus] = useUpdateOrderStatusMutation()
 
@@ -40,8 +39,8 @@ export default function BaristaPage() {
   }, [initialOrders, dispatch])
 
   useEffect(() => {
-    if (connected) dispatch(socketActions.joinKitchen(BRANCH_ID))
-  }, [connected, dispatch])
+    if (connected && branchId) dispatch(socketActions.joinKitchen(branchId))
+  }, [connected, dispatch, branchId])
 
   // If the order has `items` with category info, filter to drink orders only.
   // If items aren't present on the order object yet, fall back to showing everything

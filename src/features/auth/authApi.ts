@@ -110,6 +110,14 @@ export const authApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      transformResponse: (response: any) => ({
+        ...response,
+        user: {
+          ...response.user,
+          role: response.user?.role?.name || response.user?.role,
+          branchId: response.user?.employee?.branchId,
+        }
+      }),
       invalidatesTags: ['Auth'],
     }),
    verifyEmail: builder.mutation<{ message: string }, { token: string }>({
@@ -148,7 +156,8 @@ export const authApi = baseApi.injectEndpoints({
       query: () => '/auth/me',
       transformResponse: (response: any) => ({
         ...response,
-        role: response.role?.name || response.role
+        role: response.role?.name || response.role,
+        branchId: response.employee?.branchId,
       }),
       providesTags: ['Auth'],
     }),

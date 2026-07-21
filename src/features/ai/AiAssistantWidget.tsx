@@ -20,10 +20,10 @@ import { useMicRecorder } from '@/hooks/useMicRecorder'
 import { useSpeechSynthesis } from '@/features/ai/useSpeechSynthesis'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 export default function AiAssistantWidget() {
+  const { branchId } = useCurrentBranch()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { sessionId, messages, orderSummary } = useAppSelector(s => s.aiChat)
@@ -47,12 +47,12 @@ export default function AiAssistantWidget() {
 
   // ── Auto-start session when panel opens ──
   useEffect(() => {
-    if (isOpen && !sessionId) {
-      startConversation({ branchId: BRANCH_ID }).unwrap().then(res => {
+    if (isOpen && !sessionId && branchId) {
+      startConversation({ branchId }).unwrap().then(res => {
         dispatch(startSession({ sessionId: res.sessionId, welcomeMessage: res.message }))
       }).catch(() => {})
     }
-  }, [isOpen, sessionId])
+  }, [isOpen, sessionId, branchId])
 
   // ── Auto-scroll to bottom on new messages ──
   useEffect(() => {
@@ -143,8 +143,8 @@ export default function AiAssistantWidget() {
 
   // ── Sync AI-extracted items into cart ──
   const handleCartSync = (res: any) => {
-    if (res.intent === 'place_order' && res.confidence >= 0.75 && res.orderSummary) {
-      dispatch(setBranch(BRANCH_ID))
+    if (res.intent === 'place_order' && res.confidence >= 0.75 && res.orderSummary && branchId) {
+      dispatch(setBranch(branchId))
       res.orderSummary.items.forEach((item: any) => {
         dispatch(addItem({
           productId:   item.productId,
@@ -159,7 +159,8 @@ export default function AiAssistantWidget() {
 
   const handleNewChat = () => {
     dispatch(resetChat())
-    startConversation({ branchId: BRANCH_ID }).unwrap().then(res => {
+    if (!branchId) return
+    startConversation({ branchId }).unwrap().then(res => {
       dispatch(startSession({ sessionId: res.sessionId, welcomeMessage: res.message }))
     }).catch(() => {})
   }

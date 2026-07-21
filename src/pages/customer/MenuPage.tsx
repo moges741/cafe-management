@@ -8,9 +8,8 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Coffee, Sparkles } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { SkeletonMenuCard } from '@/components/ui/Skeleton'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 type Product = {
   id: string
@@ -24,13 +23,14 @@ type Product = {
 }
 
 export default function MenuPage() {
+  const { branchId } = useCurrentBranch()
   const [activeTab, setActiveTab] = useState('all')
 
-  const { data: categories = [] } = useGetCategoriesQuery()
+  const { data: categories = [] } = useGetCategoriesQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const { data: products = [], isLoading } = useGetProductsQuery({
-    branchId: BRANCH_ID,
+    branchId: branchId || undefined,
     isAvailable: true,
-  }) as { data?: Product[]; isLoading: boolean }
+  }, { skip: !branchId }) as { data?: Product[]; isLoading: boolean }
 
   // Resolve the active tab into a set of real category IDs
   const activeCategoryIds = useMemo(() => {

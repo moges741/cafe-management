@@ -2,15 +2,15 @@ import { useGetOrdersQuery } from '@/features/orders/ordersApi'
 import { baseApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Clock, CheckCircle, CreditCard, History, ChefHat, AlertCircle } from 'lucide-react'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import toast from 'react-hot-toast'
 import { useMemo } from 'react'
 
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
-
 export default function CashierPosPage() {
+  const { branchId } = useCurrentBranch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
-    { branchId: BRANCH_ID },
-    { pollingInterval: 5000 }
+    { branchId: branchId || undefined },
+    { pollingInterval: 5000, skip: !branchId }
   )
 
   const [confirmCash, { isLoading: isConfirming }] = baseApi.injectEndpoints({

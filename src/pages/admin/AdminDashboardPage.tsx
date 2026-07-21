@@ -3,11 +3,10 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Package, ReceiptText, Tags, TriangleAlert, Sparkles, TrendingUp, Users, Activity } from 'lucide-react'
 import { useGetDashboardQuery } from '@/features/analytics/analyticsApi'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { SkeletonMetricCard } from '@/components/ui/Skeleton'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 // Animation variants for staggered entrance
 const containerVariants: any = {
@@ -28,7 +27,8 @@ const itemVariants: any = {
 }
 
 export default function AdminDashboardPage() {
-  const { data, isLoading } = useGetDashboardQuery({ period: 'this_week', branchId: BRANCH_ID })
+  const { branchId } = useCurrentBranch()
+  const { data, isLoading } = useGetDashboardQuery({ period: 'this_week', branchId: branchId || undefined }, { skip: !branchId })
 
   return (
     <div className="min-h-screen bg-[#050301] relative overflow-hidden pb-20">

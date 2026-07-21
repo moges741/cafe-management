@@ -61,9 +61,12 @@ const CustomTooltip = ({ active, payload, label, formatter }: any) => {
   return null
 }
 
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
+
 export default function AnalyticsPage() {
+  const { branchId } = useCurrentBranch()
   const [period, setPeriod] = useState('this_week')
-  const { data, isLoading } = useGetDashboardQuery({ period })
+  const { data, isLoading } = useGetDashboardQuery({ period, branchId: branchId || undefined }, { skip: !branchId })
 
   const statusData = data
     ? Object.entries(data.salesSummary.ordersByStatus).map(([status, count]) => ({

@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { useGetProductsQuery } from '@/features/products/productsApi'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 export default function FeaturedMenuSection() {
+  const { branchId } = useCurrentBranch()
   const { data: products = [], isLoading } = useGetProductsQuery({
-    branchId: BRANCH_ID,
+    branchId: branchId || undefined,
     isAvailable: true,
-  })
+  }, { skip: !branchId })
   const featured = products.slice(0, 4)
 
   const containerVariants = {

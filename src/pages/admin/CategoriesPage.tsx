@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 type CategoryFormState = {
   name: string
@@ -37,7 +38,8 @@ const itemVariants: any = {
 }
 
 export default function CategoriesPage() {
-  const { data: categories = [], isLoading } = useGetCategoriesQuery({ includeInactive: true })
+  const { branchId } = useCurrentBranch()
+  const { data: categories = [], isLoading } = useGetCategoriesQuery({ includeInactive: true, branchId: branchId || undefined }, { skip: !branchId })
   const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation()
   const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation()
   const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation()
@@ -73,11 +75,16 @@ export default function CategoriesPage() {
       toast.error('Category name is required')
       return
     }
+    if (!branchId) {
+      toast.error('No branch selected')
+      return
+    }
 
     try {
       const created = await createCategory({
         name: createForm.name.trim(),
         description: createForm.description.trim() || undefined,
+        branchId,
       }).unwrap()
 
       setCreateForm({ name: '', description: '' })

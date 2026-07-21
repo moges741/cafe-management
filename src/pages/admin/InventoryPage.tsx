@@ -7,8 +7,11 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import toast from 'react-hot-toast'
 
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
+
 export default function InventoryPage() {
-  const { data: items = [], isLoading } = useGetInventoryQuery()
+  const { branchId } = useCurrentBranch()
+  const { data: items = [], isLoading } = useGetInventoryQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const [adjust] = useAdjustInventoryMutation()
   const [adjustingId, setAdjustingId] = useState<string | null>(null)
   

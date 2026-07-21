@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight
 } from 'lucide-react'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -40,7 +41,8 @@ const itemVariants = {
 }
 
 export default function OrdersPage() {
-  const { data: orders = [], isLoading } = useGetOrdersQuery()
+  const { branchId } = useCurrentBranch()
+  const { data: orders = [], isLoading } = useGetOrdersQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const [updateStatus] = useUpdateOrderStatusMutation()
   
   const [searchTerm, setSearchTerm] = useState('')

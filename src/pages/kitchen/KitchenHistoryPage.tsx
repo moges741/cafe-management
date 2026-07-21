@@ -3,13 +3,13 @@ import { Clock, ChefHat } from 'lucide-react'
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { SkeletonTableRow } from '@/components/ui/Skeleton'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 export default function KitchenHistoryPage() {
+  const { branchId } = useCurrentBranch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
-    { branchId: BRANCH_ID, days: 10 },
-    { pollingInterval: 10000 }
+    { branchId: branchId || undefined, days: 10 },
+    { pollingInterval: 10000, skip: !branchId }
   )
 
   const historyOrders = useMemo(() => {

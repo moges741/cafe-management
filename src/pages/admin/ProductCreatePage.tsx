@@ -3,18 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import { ImagePlus, X, Check, Loader2 } from 'lucide-react'
 import { useCreateProductMutation, useUploadProductImagesMutation } from '@/features/products/productsApi'
 import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 const MAX_GALLERY = 3
 
 export default function ProductCreatePage() {
   const navigate = useNavigate()
-  const { data: categories = [] } = useGetCategoriesQuery()
+  const { branchId } = useCurrentBranch()
+  const { data: categories = [] } = useGetCategoriesQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation()
   const [uploadImages, { isLoading: isUploading }] = useUploadProductImagesMutation()
 
@@ -38,28 +38,53 @@ export default function ProductCreatePage() {
   const coverInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
 
-  const handleCreateDetails = async () => {
-    if (!name || !price || !categoryId) {
-      toast.error('Fill in name, price, and category')
+const handleCreateDetails = async () => {
+  if (!name || !price || !categoryId) {
+    toast.error('Fill in name, price, and category')
+    return
+  }
+  if (!branchId) {
+    toast.error('No branch selected')
+    return
+  }
+
+  try {
+    // Ensure price is a number
+    const priceNumber = parseFloat(price)
+    if (isNaN(priceNumber) || priceNumber <= 0) {
+      toast.error('Price must be a valid positive number')
       return
     }
-    try {
-      const product = await createProduct({
-        name,
-        description: description || undefined,
-        price: Number(price),
-        categoryId,
-        branchId: BRANCH_ID,
-      }).unwrap()
 
-      setCreatedProductId(product.id)
-      setCreatedProductName(product.name)
-      setStep(2)
-      toast.success('Product created — now add photos')
-    } catch (err: any) {
-      toast.error(err?.data?.error?.message ?? 'Could not create product')
+    const payload = {
+      name: name.trim(),
+      description: description?.trim() || '',
+      price: priceNumber,
+      categoryId: categoryId.trim(),
+      branchId: branchId.trim(),
     }
+
+    console.log('Creating product with payload:', payload) // Debug log
+
+    const product = await createProduct(payload).unwrap()
+
+    setCreatedProductId(product.id)
+    setCreatedProductName(product.name)
+    setStep(2)
+    toast.success('Product created — now add photos')
+  } catch (err: any) {
+    console.error('Create product error:', err) // Debug log
+    
+    const errorMessage =
+      err?.data?.message ??
+      err?.data?.error?.message ??
+      err?.data?.error ??
+      err?.message ??
+      'Could not create product'
+
+    toast.error(errorMessage)
   }
+}
 
   const handleCoverSelect = (file: File) => {
     setCoverFile(file)

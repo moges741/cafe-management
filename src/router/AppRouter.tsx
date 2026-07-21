@@ -71,7 +71,7 @@ const RootRedirect = () => {
 export default function AppRouter() {
   const location = useLocation();
   const hideNavbarRoutes = ['/login', '/register'];
-  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const shouldHideNavbar = hideNavbarRoutes.some(route => location.pathname.startsWith(route));
 
   return (
     <>

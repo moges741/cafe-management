@@ -11,21 +11,27 @@ export interface Category {
 
 interface GetCategoriesParams {
   includeInactive?: boolean
+  branchId?: string
 }
 
 export const categoriesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query<Category[], GetCategoriesParams | void>({
-      query: (params) => ({
-        url: '/categories',
-        params: params?.includeInactive ? { includeInactive: 'true' } : undefined,
-      }),
+      query: (params) => {
+        const queryParams: Record<string, string> = {}
+        if (params?.includeInactive) queryParams.includeInactive = 'true'
+        if (params?.branchId) queryParams.branchId = params.branchId
+        return {
+          url: '/categories',
+          params: queryParams,
+        }
+      },
       providesTags: ['Category'],
     }),
-    createCategory: builder.mutation<Category, { name: string; description?: string }>({
-  query: (body) => ({ url: '/categories', method: 'POST', body }),
-  invalidatesTags: ['Category'],
-}),
+    createCategory: builder.mutation<Category, { name: string; description?: string; branchId: string }>({
+      query: (body) => ({ url: '/categories', method: 'POST', body }),
+      invalidatesTags: ['Category'],
+    }),
 
 updateCategory: builder.mutation<Category, { id: string; data: { name: string; description?: string } }>({
   query: ({ id, data }) => ({ url: `/categories/${id}`, method: 'PATCH', body: data }),

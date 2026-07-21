@@ -1,16 +1,16 @@
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from '@/features/orders/ordersApi'
 import { Button } from '@/components/ui/button'
 import { Clock, Send, ChefHat, AlertCircle } from 'lucide-react'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import toast from 'react-hot-toast'
 import { useMemo } from 'react'
 import { SkeletonOrderRow } from '@/components/ui/Skeleton'
 
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
-
 export default function WaiterIncomingOrdersPage() {
+  const { branchId } = useCurrentBranch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
-    { branchId: BRANCH_ID },
-    { pollingInterval: 5000 }
+    { branchId: branchId || undefined },
+    { pollingInterval: 5000, skip: !branchId }
   )
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation()
 

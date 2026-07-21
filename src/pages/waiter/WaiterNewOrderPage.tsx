@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 interface DraftItem {
   productId:   string
@@ -18,13 +17,14 @@ interface DraftItem {
 }
 
 export default function WaiterNewOrderPage() {
+  const { branchId } = useCurrentBranch()
   const [tableNumber, setTableNumber] = useState('')
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
   const [draftItems, setDraftItems] = useState<DraftItem[]>([])
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
 
-  const { data: categories = [] } = useGetCategoriesQuery()
-  const { data: products = [] } = useGetProductsQuery({ branchId: BRANCH_ID, isAvailable: true })
+  const { data: categories = [] } = useGetCategoriesQuery({ branchId: branchId || undefined }, { skip: !branchId })
+  const { data: products = [] } = useGetProductsQuery({ branchId: branchId || undefined, isAvailable: true }, { skip: !branchId })
   const [createOrder, { isLoading: isSubmitting }] = useCreateOrderMutation()
 
   const visibleProducts = activeCategory
@@ -72,10 +72,14 @@ export default function WaiterNewOrderPage() {
       toast.error('Add at least one item')
       return
     }
+    if (!branchId) {
+      toast.error('No branch selected')
+      return
+    }
 
     try {
       const order = await createOrder({
-        branchId:    BRANCH_ID,
+        branchId,
         type:        orderType,
         tableNumber: orderType === 'dine_in' ? Number(tableNumber) : undefined,
         items: draftItems.map(i => ({ productId: i.productId, quantity: i.quantity })),

@@ -9,15 +9,15 @@ import { useInitializePaymentMutation } from '@/features/payments/paymentsApi'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import Navbar from '@/components/layout/Navbar' 
+
 export default function CheckoutPage() {
-  const items    = useAppSelector(selectCartItems)
-  const total    = useAppSelector(selectCartTotal)
+  const items = useAppSelector(selectCartItems)
+  const total = useAppSelector(selectCartTotal)
   const branchId = useAppSelector(selectCartBranchId)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const [orderType, setOrderType]     = useState<'dine_in' | 'takeaway'>('dine_in')
+  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
   const [tableNumber, setTableNumber] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
 
@@ -27,56 +27,101 @@ export default function CheckoutPage() {
   const isSubmitting = isCreatingOrder || isInitializingPayment
 
   const handlePayWithChapa = async () => {
+    // Validation
+    if (!items || items.length === 0) {
+      toast.error('Your cart is empty')
+      return
+    }
+
     if (!branchId) {
       toast.error('Your cart has no branch selected')
       return
     }
 
+    if (orderType === 'dine_in' && !tableNumber) {
+      toast.error('Please enter a table number for dine-in')
+      return
+    }
+
+    if (!phoneNumber) {
+      toast.error('Phone number is required for payment')
+      return
+    }
+
     try {
-      // Step 1 — create the real order in the backend
-      const order = await createOrder({
-        branchId,
+      // Build order payload
+      const orderPayload = {
+        branchId: branchId.trim(),
         type: orderType,
-        tableNumber: orderType === 'dine_in' && tableNumber ? Number(tableNumber) : undefined,
-        items: items.map(i => ({
-          productId: i.productId,
-          quantity:  i.quantity,
-          notes:     i.notes,
+        tableNumber: orderType === 'dine_in' ? parseInt(tableNumber, 10) : undefined,
+        items: items.map((i) => ({
+          productId: i.productId.trim(),
+          quantity: parseInt(String(i.quantity), 10),
+          notes: i.notes?.trim() || '',
         })),
-      }).unwrap()
+      }
+
+      console.log('Creating order with payload:', orderPayload)
+
+      // Step 1 — create the real order in the backend
+      const order = await createOrder(orderPayload).unwrap()
+      console.log('Order created:', order)
 
       // Step 2 — initialize Chapa payment for that order
-      const payment = await initializePayment({
-        orderId:     order.id,
-        phoneNumber: phoneNumber || undefined,
-      }).unwrap()
+      const paymentPayload = {
+        orderId: order.id.trim(),
+        phoneNumber: phoneNumber.trim(),
+      }
+
+      console.log('Initializing payment with payload:', paymentPayload)
+
+      const payment = await initializePayment(paymentPayload).unwrap()
+      console.log('Payment initialized:', payment)
 
       // Step 3 — clear the cart now that the order is safely created
       dispatch(clearCart())
 
       // Step 4 — redirect the browser to Chapa's hosted checkout
-      window.location.href = payment.checkoutUrl
-
+      if (payment.checkoutUrl) {
+        window.location.href = payment.checkoutUrl
+      } else {
+        toast.error('No checkout URL received from payment provider')
+      }
     } catch (err: any) {
-      toast.error(err?.data?.error?.message ?? 'Checkout failed')
+      console.error('Checkout error:', err)
+
+      // Better error message extraction
+      let errorMessage = 'Checkout failed'
+
+      if (err?.data?.error?.message) {
+        errorMessage = err.data.error.message
+      } else if (err?.data?.message) {
+        errorMessage = err.data.message
+      } else if (err?.data?.error) {
+        errorMessage = typeof err.data.error === 'string' ? err.data.error : JSON.stringify(err.data.error)
+      } else if (err?.message) {
+        errorMessage = err.message
+      }
+
+      toast.error(errorMessage)
     }
   }
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-foreground">Your cart is empty.</p>
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-foreground mb-4">Your cart is empty.</p>
+          <Link to="/menu">
+            <Button>Back to menu</Button>
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* <div className="px-6 py-4 border-b border-border">
-        <Link to="/cart" className="text-sm text-primary">← Back to cart</Link>
-      </div> */}
-
-
       <div className="max-w-xl mx-auto px-6 py-8 space-y-6">
         <h1 className="text-2xl font-bold text-foreground">Checkout</h1>
 
@@ -100,6 +145,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
+        {/* Table number for dine-in */}
         {orderType === 'dine_in' && (
           <div className="space-y-1.5">
             <Label htmlFor="table">Table number</Label>
@@ -109,12 +155,14 @@ export default function CheckoutPage() {
               placeholder="e.g. 4"
               value={tableNumber}
               onChange={(e) => setTableNumber(e.target.value)}
+              min="1"
             />
           </div>
         )}
 
+        {/* Phone number */}
         <div className="space-y-1.5">
-          <Label htmlFor="phone">Phone number (for Telebirr/CBE Birr)</Label>
+          <Label htmlFor="phone">Phone number (for payment)</Label>
           <Input
             id="phone"
             type="tel"
@@ -128,8 +176,13 @@ export default function CheckoutPage() {
         <div className="border border-border rounded-xl p-4 bg-card space-y-2">
           {items.map((item) => (
             <div key={item.productId} className="flex justify-between text-sm">
-              <span className="text-foreground">{item.quantity}x {item.productName}</span>
-              <span style={{ color: '#B58B67' }}>{(item.unitPrice * item.quantity).toFixed(0)} ETB</span>
+              <div className="flex-1">
+                <span className="text-foreground">{item.quantity}x {item.productName}</span>
+                {item.notes && <p className="text-xs text-muted-foreground mt-1">{item.notes}</p>}
+              </div>
+              <span style={{ color: '#B58B67' }} className="ml-4 shrink-0">
+                {(item.unitPrice * item.quantity).toFixed(0)} ETB
+              </span>
             </div>
           ))}
           <div className="pt-2 border-t border-border flex justify-between font-medium">
@@ -146,6 +199,12 @@ export default function CheckoutPage() {
         >
           {isSubmitting ? 'Processing...' : `Pay ${total.toFixed(0)} ETB with Chapa`}
         </Button>
+
+        <Link to="/cart">
+          <button className="w-full py-2 text-sm text-primary hover:text-primary/80 transition-colors">
+            ← Back to cart
+          </button>
+        </Link>
       </div>
     </div>
   )

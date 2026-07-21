@@ -4,10 +4,9 @@ import { useGetOrdersQuery, useUpdateOrderStatusMutation } from '@/features/orde
 import { upsertOrder } from '@/features/orders/ordersSlice'
 import { selectActiveOrders } from '@/features/orders/ordersSelectors'
 import { socketActions } from '@/features/socket/socketMiddleware'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
 
 const COLUMNS = [
   { status: 'pending',    title: 'New',       accent: 'border-l-primary' },
@@ -45,8 +44,9 @@ function formatElapsed(seconds: number) {
 }
 
 export default function KitchenDisplayPage() {
+  const { branchId } = useCurrentBranch()
   const dispatch = useAppDispatch()
-  const { data: initialOrders } = useGetOrdersQuery()
+  const { data: initialOrders } = useGetOrdersQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const liveOrders = useAppSelector(selectActiveOrders)
   const [updateStatus, { isLoading }] = useUpdateOrderStatusMutation()
 
@@ -61,8 +61,10 @@ export default function KitchenDisplayPage() {
         payment: o.payment,
       })))
     }
-    dispatch(socketActions.joinKitchen(BRANCH_ID))
-  }, [initialOrders, dispatch])
+    if (branchId) {
+      dispatch(socketActions.joinKitchen(branchId))
+    }
+  }, [initialOrders, dispatch, branchId])
 
   const handleAdvance = async (orderId: string, nextStatus: string) => {
     try {

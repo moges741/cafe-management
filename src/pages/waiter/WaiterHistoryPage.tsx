@@ -1,13 +1,13 @@
 import { useGetOrdersQuery } from '@/features/orders/ordersApi'
 import { Clock } from 'lucide-react'
 import { useMemo } from 'react'
-
-const BRANCH_ID = '845d738e-f5ba-4b88-8eae-e9b829b45dba'
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 export default function WaiterHistoryPage() {
+  const { branchId } = useCurrentBranch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
-    { branchId: BRANCH_ID },
-    { pollingInterval: 10000 }
+    { branchId: branchId || undefined },
+    { pollingInterval: 10000, skip: !branchId }
   )
 
   const historyOrders = useMemo(() => {
