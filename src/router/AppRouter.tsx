@@ -41,31 +41,12 @@ import CulinaryGateway from '@/components/home/CulinaryGateway';
 import Navbar from '@/components/layout/Navbar';
 import HomePage from '@/components/home/HomePage';
 
-// RootRedirect: send authenticated staff to their dashboard, guests/customers to HomePage
+// RootRedirect: Now lets everyone access HomePage (/) freely. 
+// Use specific dashboard links (e.g. /admin, /cashier) when they need their operational view.
 const RootRedirect = () => {
-  const { user, isAuthenticated, isInitializing } = useAppSelector((state) => state.auth);
-  
+  const { isInitializing } = useAppSelector((state) => state.auth);
   if (isInitializing) return null;
-  
-  if (!isAuthenticated || user?.role === 'customer') {
-    return <HomePage />;
-  }
-
-  switch (user?.role) {
-    case 'admin':
-    case 'manager':
-      return <Navigate to="/admin" replace />;
-    case 'kitchen':
-      return <Navigate to="/kitchen" replace />;
-    case 'cashier':
-      return <Navigate to="/cashier" replace />;
-    case 'waiter':
-      return <Navigate to="/waiter" replace />;
-    case 'barista':
-      return <Navigate to="/barista" replace />;
-    default:
-      return <HomePage />;
-  }
+  return <HomePage />;
 };
 
 export default function AppRouter() {
@@ -95,6 +76,7 @@ export default function AppRouter() {
           <Route path="preparing-burger" element={<PremiumBurgerStory />} />
           <Route path="preparing-pizza" element={<PremiumPizzaExperience />} />
           <Route path="experience-me" element={<CulinaryGateway />} />
+          
           {/* Operational role routes */}
           <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['kitchen', 'admin']}><KitchenLayout /></ProtectedRoute>}>
             <Route index element={<KitchenDisplayPage />} />

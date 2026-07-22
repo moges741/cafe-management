@@ -1,5 +1,5 @@
 import { useGetOrdersQuery } from '@/features/orders/ordersApi'
-import { Clock, ChefHat } from 'lucide-react'
+import { Clock, ChefHat, SearchX, ArrowRight } from 'lucide-react'
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { SkeletonTableRow } from '@/components/ui/Skeleton'
@@ -17,20 +17,37 @@ export default function KitchenHistoryPage() {
   }, [allOrders])
 
   return (
-    <div className="p-6 h-full overflow-y-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white">Completed Orders</h2>
-        <p className="text-sm text-neutral-400 mt-1">Showing history for the last 10 days.</p>
+    <div className="min-h-screen bg-[#050505] p-6 h-full overflow-y-auto font-sans">
+      
+      {/* Header section */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-black text-white tracking-tight uppercase">Service Archive</h2>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="w-8 h-[2px] bg-amber-500 rounded-full" />
+            <p className="text-xs font-bold tracking-widest text-neutral-500 uppercase">
+              Completed metrics • Last 10 Days
+            </p>
+          </div>
+        </div>
+        
+        <div className="text-right">
+          <span className="text-4xl font-black text-white">{historyOrders.length}</span>
+          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-widest ml-2 block">
+            Total Fulfilled
+          </span>
+        </div>
       </div>
 
-      <div className="overflow-x-auto border border-white/10 rounded-2xl bg-white/[0.02] backdrop-blur-md">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs uppercase bg-white/[0.04] text-neutral-400 border-b border-white/10">
+      {/* Main Data Table */}
+      <div className="overflow-x-auto rounded-3xl border border-white/10 bg-[#0a0a0a] shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+        <table className="w-full text-sm text-left whitespace-nowrap">
+          <thead className="text-xs uppercase tracking-widest bg-white/[0.02] text-neutral-400 border-b border-white/10">
             <tr>
-              <th className="px-6 py-4 font-semibold tracking-wider">Order</th>
-              <th className="px-6 py-4 font-semibold tracking-wider">Type</th>
-              <th className="px-6 py-4 font-semibold tracking-wider">Time Completed</th>
-              <th className="px-6 py-4 font-semibold tracking-wider">Items</th>
+              <th className="px-8 py-5 font-bold">Order Ref</th>
+              <th className="px-8 py-5 font-bold">Fulfillment Type</th>
+              <th className="px-8 py-5 font-bold">Time Completed</th>
+              <th className="px-8 py-5 font-bold">Component Summary</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -38,10 +55,18 @@ export default function KitchenHistoryPage() {
               Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} cols={4} />)
             ) : historyOrders.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-20 text-center">
-                  <div className="flex flex-col items-center justify-center gap-3 text-neutral-500">
-                    <ChefHat size={40} className="opacity-20" />
-                    <p className="font-medium">No completed orders in the last 10 days</p>
+                <td colSpan={4} className="px-6 py-32 text-center relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                    <div className="w-[40vw] h-[40vw] bg-amber-500 rounded-full blur-[100px]" />
+                  </div>
+                  <div className="flex flex-col items-center justify-center gap-4 relative z-10">
+                    <div className="w-20 h-20 bg-white/[0.02] border border-white/10 rounded-full flex items-center justify-center shadow-inner">
+                      <SearchX size={32} className="text-neutral-500" />
+                    </div>
+                    <p className="text-lg font-bold text-white tracking-wide">No Historical Data</p>
+                    <p className="text-xs font-medium text-neutral-500 tracking-widest uppercase">
+                      Awaiting completed tickets for this period.
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -49,35 +74,45 @@ export default function KitchenHistoryPage() {
               historyOrders.map((order, idx) => (
                 <motion.tr
                   key={order.id}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.04 }}
-                  className="hover:bg-white/[0.04] transition-colors"
+                  transition={{ duration: 0.4, delay: idx * 0.05, ease: "easeOut" }}
+                  className="hover:bg-white/[0.04] transition-colors group"
                 >
-                  <td className="px-6 py-4">
-                    <div className="font-semibold text-white">{order.orderNumber}</div>
+                  <td className="px-8 py-5">
+                    <div className="inline-flex items-center gap-3">
+                      <span className="w-2 h-2 rounded-full bg-neutral-600 group-hover:bg-amber-500 transition-colors" />
+                      <span className="font-black text-white text-base">#{order.orderNumber}</span>
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-neutral-300">
-                    {order.type === 'dine_in' ? `Table ${order.tableNumber}` : 'Takeaway'}
+                  <td className="px-8 py-5">
+                    <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-md border border-white/10 bg-white/5 text-neutral-300">
+                      {order.type === 'dine_in' ? `Table ${order.tableNumber}` : 'Takeaway'}
+                    </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1.5 text-neutral-300">
-                      <Clock size={14} className="text-amber-500" />
-                      {new Date(order.createdAt!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      <span className="text-xs text-neutral-500 ml-2">
-                        ({new Date(order.createdAt!).toLocaleDateString()})
+                  <td className="px-8 py-5">
+                    <div className="flex items-center gap-2 text-neutral-400 font-medium">
+                      <Clock size={16} className="text-amber-500" />
+                      <span>{new Date(order.createdAt!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-neutral-600 ml-1 font-mono text-xs">
+                        {new Date(order.createdAt!).toLocaleDateString()}
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <ul className="text-xs space-y-1 text-neutral-300">
-                      {order.items?.map((item: any, i: number) => (
-                        <li key={i}>
-                          <span className="font-bold text-amber-400 mr-1">{item.quantity}x</span>
-                          {item.product?.name || item.productName || 'Item'}
-                        </li>
+                  <td className="px-8 py-5">
+                    <div className="flex flex-wrap gap-2">
+                      {order.items?.slice(0, 2).map((item: any, i: number) => (
+                        <div key={i} className="flex items-center gap-1.5 text-xs bg-black/40 border border-white/5 px-2.5 py-1 rounded-full">
+                          <span className="font-black text-amber-500">{item.quantity}x</span>
+                          <span className="text-neutral-300">{item.product?.name || item.productName || 'Item'}</span>
+                        </div>
                       ))}
-                    </ul>
+                      {order.items && order.items.length > 2 && (
+                        <div className="flex items-center justify-center w-8 h-6 bg-white/[0.03] border border-white/10 rounded-full text-[10px] text-neutral-400 font-bold">
+                          +{order.items.length - 2}
+                        </div>
+                      )}
+                    </div>
                   </td>
                 </motion.tr>
               ))
