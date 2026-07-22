@@ -11,7 +11,7 @@ import { useRegisterMutation } from '@/features/auth/authApi'
 import { registerSchema, type RegisterFormData } from './schemas'
 import { cn } from '@/lib/utils'
 import Spinner from '@/components/ui/Spinner'
-
+import Logo from '/logo.svg'
 // Framer Motion Variants
 const fadeUpVariants: any = {
   hidden: { opacity: 0, y: 20 },
@@ -80,13 +80,16 @@ export default function RegisterPage() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="relative z-10 flex items-center gap-3"
         >
-          <Link to="/">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-            <Coffee size={20} />
-          </div>
-           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Mr. Cafe</h1>
-         
+        <Link to="/" className="flex items-center gap-3">
+  <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20">
+    <img
+      src={Logo}
+      alt="Mr. Cafe Logo"
+      className="w-full h-full object-contain transition-all duration-500 ease-out hover:scale-150 drop-shadow-[0_0_20px_rgba(245,158,11,0.35)]"
+      draggable={false}
+    />
+  </div>
+</Link>
         </motion.div>
 
         <motion.div 
@@ -133,11 +136,16 @@ export default function RegisterPage() {
         >
           {/* Mobile Logo */}
           <motion.div variants={fadeUpVariants} className="lg:hidden flex justify-center mb-8">
-            <Link to="/">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
-              <Coffee size={28} />
-            </div>
-            </Link>
+         <Link to="/" className="flex items-center gap-3">
+  <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20">
+    <img
+      src={Logo}
+      alt="Mr. Cafe Logo"
+      className="w-full h-full object-contain transition-all duration-500 ease-out hover:scale-150 drop-shadow-[0_0_20px_rgba(245,158,11,0.35)]"
+      draggable={false}
+    />
+  </div>
+</Link>
           </motion.div>
 
           <motion.div variants={fadeUpVariants} className="text-center lg:text-left mb-8">
@@ -166,7 +174,7 @@ export default function RegisterPage() {
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-amber-500 transition-colors" size={18} />
                     <Input
                       id="firstName"
-                      placeholder="John"
+                      placeholder="Moges"
                       {...register('firstName')}
                       className={cn(
                         "pl-11 h-12 bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl transition-all",
@@ -190,7 +198,7 @@ export default function RegisterPage() {
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-amber-500 transition-colors" size={18} />
                     <Input
                       id="lastName"
-                      placeholder="Doe"
+                      placeholder="Sisay"
                       {...register('lastName')}
                       className={cn(
                         "pl-11 h-12 bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl transition-all",
@@ -216,7 +224,7 @@ export default function RegisterPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="moges@example.com"
                     {...register('email')}
                     className={cn(
                       "pl-11 h-12 bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl transition-all",

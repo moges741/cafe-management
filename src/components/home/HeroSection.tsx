@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-
+import Logo from '/logo.svg'
 type FoodItem = {
   id: number;
   name: string;
@@ -167,7 +167,7 @@ export default function HeroSection() {
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Link to="/experience-me">
+            {/* <Link to="/experience-me">
             <div className="relative w-32 h-32 md:w-44 md:h-44 rounded-full bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/20 shadow-[0_0_50px_rgba(245,158,11,0.15)] flex items-center justify-center pointer-events-auto cursor-pointer group">
               <div className="absolute inset-2 rounded-full border border-amber-500/30 group-hover:border-amber-500/60 transition-colors duration-500 shadow-inner" />
               <h2 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-br from-amber-100 via-amber-300 to-orange-500 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-500">
@@ -175,7 +175,25 @@ export default function HeroSection() {
                 Mr. Cafe
               </h2>
             </div>
-            </Link>
+            </Link> */}
+            <Link to="/experience-me">
+  <div className="relative w-32 h-32 md:w-44 md:h-44 rounded-full bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/20 shadow-[0_0_50px_rgba(245,158,11,0.15)] flex items-center justify-center pointer-events-auto cursor-pointer group overflow-hidden">
+    
+    {/* Inner Ring */}
+    <div className="absolute inset-2 rounded-full border border-amber-500/30 group-hover:border-amber-500/60 transition-all duration-500 shadow-inner" />
+
+    {/* Glow */}
+    <div className="absolute inset-0 rounded-full bg-amber-500/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+    {/* Logo */}
+    <img
+      src={Logo} // <-- Replace with your SVG path
+      alt="Mr. Cafe Logo"
+      className="relative z-10 w-20 h-20 md:w-28 md:h-28 object-contain transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 drop-shadow-[0_0_20px_rgba(251,191,36,0.35)]"
+      draggable={false}
+    />
+  </div>
+</Link>
 
           </motion.div>
         </div>

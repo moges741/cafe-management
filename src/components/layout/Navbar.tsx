@@ -18,7 +18,7 @@ import {
 import { useNavigate, Link } from 'react-router-dom'
 import { useAppSelector, useAppDispatch } from '@/app/hooks'
 import { clearUser, type UserRole } from '@/features/auth/authSlice'
-
+import Logo from '/logo.svg'
 
 type NavItem = { name: string; href: string }
 
@@ -131,17 +131,16 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
           <div className="absolute inset-0 rounded-full pointer-events-none shadow-[inset_0_0_20px_rgba(255,255,255,0.02)]" />
 
           {/* ----- LOGO ----- */}
-          <button
-            onClick={() => navigate('/')}
-            className="relative z-10 flex items-center gap-2 group cursor-pointer"
-          >
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.4)] group-hover:shadow-[0_0_25px_rgba(245,158,11,0.6)] transition-all duration-300">
-              <Coffee className="w-5 h-5 text-black" strokeWidth={2.5} />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-400 group-hover:from-amber-200 group-hover:to-amber-500 transition-colors duration-300">
-              Mr. Cafe
-            </span>
-          </button>
+       <Link to="/" className="flex items-center gap-3">
+  <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20">
+    <img
+      src={Logo}
+      alt="Mr. Cafe Logo"
+      className="w-full h-full object-contain transition-all duration-500 ease-out hover:scale-150 drop-shadow-[0_0_20px_rgba(245,158,11,0.35)]"
+      draggable={false}
+    />
+  </div>
+</Link>
 
           {/* ----- DESKTOP LINKS ----- */}
           <div className="hidden lg:flex items-center gap-1 relative z-10">

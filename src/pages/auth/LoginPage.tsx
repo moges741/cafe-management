@@ -14,7 +14,7 @@ import { useSyncCartMutation } from '@/features/cart/cartApi'
 import { useAppDispatch } from '@/app/hooks'
 import { cn } from '@/lib/utils'
 import Spinner from '@/components/ui/Spinner'
-
+import Logo from '/logo.svg'
 // Framer Motion Variants
 const fadeUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -113,12 +113,23 @@ export default function LoginPage() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="relative z-10 flex items-center gap-3"
         >
-          <Link to="/">
+          {/* <Link to="/">
           <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
             <Coffee size={20} />
           </div>
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Mr. Cafe</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Mr. Cafe</h1> */}
+
+<Link to="/" className="flex items-center gap-3">
+  <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20">
+    <img
+      src={Logo}
+      alt="Mr. Cafe Logo"
+      className="w-full h-full object-contain transition-all duration-500 ease-out hover:scale-150 drop-shadow-[0_0_20px_rgba(245,158,11,0.35)]"
+      draggable={false}
+    />
+  </div>
+</Link>
         </motion.div>
 
         <motion.div 
@@ -169,11 +180,16 @@ export default function LoginPage() {
         >
           {/* Mobile Logo */}
           <motion.div variants={fadeUpVariants} className="lg:hidden flex justify-center mb-8">
-            <Link to="/">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
-              <Coffee size={28} />
-            </div>
-            </Link>
+          <Link to="/" className="flex items-center gap-3">
+  <div className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20">
+    <img
+      src={Logo}
+      alt="Mr. Cafe Logo"
+      className="w-full h-full object-contain transition-all duration-500 ease-out hover:scale-150 drop-shadow-[0_0_20px_rgba(245,158,11,0.35)]"
+      draggable={false}
+    />
+  </div>
+</Link>
           </motion.div>
 
           <motion.div variants={fadeUpVariants} className="text-center lg:text-left mb-8">
