@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import MenuPage from '@/pages/customer/MenuPage';
@@ -40,6 +40,7 @@ import PremiumPizzaExperience from '@/components/home/PremiumPizzaExperience';
 import CulinaryGateway from '@/components/home/CulinaryGateway';
 import Navbar from '@/components/layout/Navbar';
 import HomePage from '@/components/home/HomePage';
+import ContactPage from '@/components/home/ContactPage';
 
 // RootRedirect: Now lets everyone access HomePage (/) freely. 
 // Use specific dashboard links (e.g. /admin, /cashier) when they need their operational view.
@@ -60,6 +61,7 @@ export default function AppRouter() {
       <main className={!shouldHideNavbar ? "pt-20 min-h-screen flex flex-col w-full" : "min-h-screen flex flex-col w-full"}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
