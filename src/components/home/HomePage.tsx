@@ -8,10 +8,11 @@ import AiFeaturesSection from '@/components/home/AiFeaturesSection'
 import CustomerFavoritesSection from '@/components/home/CustomerFavoritesSection'
 import GallerySection from '@/components/home/GallerySection'
 import TestimonialsSection from '@/components/home/TestimonialsSection'
-import ReservationSection from '@/components/home/ReservationSection'
-import EventsSection from '@/components/home/EventsSection'
-import TeamSection from '@/components/home/TeamSection'
-import NewsletterSection from '@/components/home/NewsletterSection'
+// import ReservationSection from '@/components/home/ReservationSection'
+// import EventsSection from '@/components/home/EventsSection'
+// import TeamSection from '@/components/home/TeamSection'
+import TeamAndEventsSection from '@/components/home/TeamAndEventSection'
+// import NewsletterSection from '@/components/home/NewsletterSection'
 // import LocationSection from '@/components/home/LocationSection'
 import FaqSection from '@/components/home/FaqSection'
 
@@ -29,10 +30,9 @@ export default function HomePage() {
       <CustomerFavoritesSection />
       <GallerySection />
       <TestimonialsSection />
-      <ReservationSection />
-      <EventsSection />
-      <TeamSection />
-      <NewsletterSection />
+      {/* <ReservationSection /> */}
+      <TeamAndEventsSection />
+      {/* <NewsletterSection /> */}
       {/* <LocationSection /> */}
       <FaqSection />
       <Footer />
