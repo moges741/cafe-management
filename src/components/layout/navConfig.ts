@@ -1,6 +1,7 @@
 import {
   LayoutDashboard, Package, ChefHat, Users, BarChart3,
-  UtensilsCrossed, Coffee, ClipboardList, Boxes, Store, Tags
+  UtensilsCrossed, Coffee, ClipboardList, Boxes, Store, Tags,
+  Database, Scroll
 } from 'lucide-react'
 
 export interface NavItem {
@@ -15,7 +16,11 @@ export const NAV_BY_ROLE: Record<string, NavItem[]> = {
   admin: [
     { label: 'Dashboard',  path: '/admin',            icon: LayoutDashboard },
     { label: 'Analytics',  path: '/admin/analytics',  icon: BarChart3 },
-    { label: 'Inventory',  path: '/admin/inventory',  icon: Boxes },
+    { label: 'Raw Catalog', path: '/admin/raw-materials', icon: Tags },
+    { label: 'Main Store',  path: '/admin/main-store', icon: Database },
+    { label: 'Recipes',     path: '/admin/recipes',    icon: ChefHat },
+    { label: 'Transfer Requests', path: '/admin/requests', icon: Scroll },
+    { label: 'Legacy Stock', path: '/admin/inventory',  icon: Boxes },
     { label: 'Categories', path: '/admin/categories', icon: Tags },
     { label: 'Products',   path: '/admin/products',   icon: Package },
     { label: 'Orders',     path: '/admin/orders',     icon: ClipboardList },
@@ -25,7 +30,11 @@ export const NAV_BY_ROLE: Record<string, NavItem[]> = {
   manager: [
     { label: 'Dashboard',  path: '/admin',            icon: LayoutDashboard },
     { label: 'Analytics',  path: '/admin/analytics',  icon: BarChart3 },
-    { label: 'Inventory',  path: '/admin/inventory',  icon: Boxes },
+    { label: 'Raw Catalog', path: '/admin/raw-materials', icon: Tags },
+    { label: 'Main Store',  path: '/admin/main-store', icon: Database },
+    { label: 'Recipes',     path: '/admin/recipes',    icon: ChefHat },
+    { label: 'Transfer Requests', path: '/admin/requests', icon: Scroll },
+    { label: 'Legacy Stock', path: '/admin/inventory',  icon: Boxes },
     { label: 'Categories', path: '/admin/categories', icon: Tags },
     { label: 'Orders',     path: '/admin/orders',     icon: ClipboardList },
   ],
@@ -39,6 +48,7 @@ export const NAV_BY_ROLE: Record<string, NavItem[]> = {
     { label: 'Drinks',     path: '/barista',          icon: Coffee },
   ],
   kitchen: [
-    { label: 'Kitchen',    path: '/kitchen',          icon: ChefHat },
+    { label: 'Kitchen Screen', path: '/kitchen',          icon: ChefHat },
+    { label: 'Kitchen Stock',  path: '/kitchen/inventory', icon: Boxes },
   ],
 }

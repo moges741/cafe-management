@@ -18,6 +18,7 @@ import {
 import { useNavigate, Link } from 'react-router-dom'
 import { useAppSelector, useAppDispatch } from '@/app/hooks'
 import { clearUser, type UserRole } from '@/features/auth/authSlice'
+import BranchSelector from '@/components/shared/BranchSelector'
 import Logo from '/logo.svg'
 
 type NavItem = { name: string; href: string }
@@ -162,6 +163,9 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
           </div>
 
           <div className="hidden lg:flex items-center gap-4 relative z-10">
+            {/* Branch Selector */}
+            <BranchSelector variant="compact" />
+
             {/* Cart Button */}
             <motion.button
               onClick={handleCartClick}

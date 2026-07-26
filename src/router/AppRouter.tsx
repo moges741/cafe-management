@@ -42,6 +42,12 @@ import Navbar from '@/components/layout/Navbar';
 import HomePage from '@/components/home/HomePage';
 import ContactPage from '@/components/home/ContactPage';
 
+import RawMaterialsPage from '@/pages/admin/RawMaterialsPage';
+import MainStorePage from '@/pages/admin/MainStorePage';
+import RecipeBuilderPage from '@/pages/admin/RecipeBuilderPage';
+import MaterialRequestsPage from '@/pages/admin/MaterialRequestsPage';
+import KitchenInventoryPage from '@/pages/kitchen/KitchenInventoryPage';
+
 // RootRedirect: Now lets everyone access HomePage (/) freely. 
 // Use specific dashboard links (e.g. /admin, /cashier) when they need their operational view.
 const RootRedirect = () => {
@@ -83,6 +89,7 @@ export default function AppRouter() {
           <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['kitchen', 'admin']}><KitchenLayout /></ProtectedRoute>}>
             <Route index element={<KitchenDisplayPage />} />
             <Route path="history" element={<KitchenHistoryPage />} />
+            <Route path="inventory" element={<KitchenInventoryPage />} />
           </Route>
           <Route path="/cashier" element={<ProtectedRoute allowedRoles={['cashier', 'admin']}><CashierPosPage /></ProtectedRoute>} />
           <Route path="/waiter" element={<ProtectedRoute allowedRoles={['waiter', 'admin']}><WaiterLayout /></ProtectedRoute>}>
@@ -95,6 +102,10 @@ export default function AppRouter() {
             <Route index element={<AdminDashboardPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="inventory" element={<InventoryPage />} />
+            <Route path="raw-materials" element={<RawMaterialsPage />} />
+            <Route path="main-store" element={<MainStorePage />} />
+            <Route path="recipes" element={<RecipeBuilderPage />} />
+            <Route path="requests" element={<MaterialRequestsPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="orders" element={<OrdersPage />} />

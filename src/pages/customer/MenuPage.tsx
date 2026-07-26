@@ -3,11 +3,10 @@ import { useGetProductsQuery } from '@/features/products/productsApi'
 import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { MENU_TABS } from '@/features/categories/categoryFilters'
 import { cn } from '@/lib/utils'
-import CartBadge from '@/components/shared/CartBadge'
+import BranchSelector from '@/components/shared/BranchSelector'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Coffee, Sparkles } from 'lucide-react'
-import Navbar from '@/components/layout/Navbar'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { SkeletonMenuCard } from '@/components/ui/Skeleton'
 
@@ -23,8 +22,12 @@ type Product = {
 }
 
 export default function MenuPage() {
-  const { branchId } = useCurrentBranch()
+  const { branchId, branches } = useCurrentBranch()
   const [activeTab, setActiveTab] = useState('all')
+
+  const selectedBranch = useMemo(() => {
+    return branches?.find(b => b.id === branchId)
+  }, [branches, branchId])
 
   const { data: categories = [] } = useGetCategoriesQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const { data: products = [], isLoading } = useGetProductsQuery({
@@ -74,8 +77,12 @@ export default function MenuPage() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="relative px-6 pt-24 pb-12 max-w-7xl mx-auto z-10"
       >
-        <div className="inline-flex mt-4 items-center justify-center gap-2 px-3 py-1.5 mb-6 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(245,158,11,0.1)]">
-          <Coffee size={12} className="fill-amber-500" /> Artisan Menu
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6 mt-4">
+          <div className="inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+            <Coffee size={12} className="fill-amber-500" /> Artisan Menu
+          </div>
+
+          <BranchSelector />
         </div>
         
         <h1 className="text-4xl md:text-6xl font-black text-white max-w-2xl leading-[1.1] tracking-tight">
@@ -85,7 +92,7 @@ export default function MenuPage() {
           </span>
         </h1>
         <p className="mt-4 text-lg text-neutral-400 max-w-md font-medium">
-          Fresh from our kitchen to your table. Order online or chat with our AI assistant.
+          Fresh from our kitchen to your table. {selectedBranch ? `Showing menu for ${selectedBranch.name}.` : 'Order online or chat with our AI assistant.'}
         </p>
       </motion.div>
 
