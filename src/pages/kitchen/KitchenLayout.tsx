@@ -9,6 +9,9 @@ export default function KitchenLayout() {
   const tabs = [
     { name: 'Live Display', path: '/kitchen', end: true, icon: Utensils },
     { name: 'Archive', path: '/kitchen/history', end: false, icon: History },
+    { name: 'Inventory', path: '/kitchen/inventory', end: false, icon: History },
+
+
   ]
 
   return (
