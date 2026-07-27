@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit2, Check, Search, Tag, Settings, Info } from 'lucide-react';
+import { Plus, Edit2, Search, Tag } from 'lucide-react';
 import {
   useGetRawMaterialsQuery,
   useCreateRawMaterialMutation,

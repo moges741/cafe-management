@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChefHat, Plus, Trash2, Search, ArrowRight, Save, Info, BookOpen } from 'lucide-react';
+import { ChefHat, Trash2, Search, ArrowRight, Save, Info, BookOpen } from 'lucide-react';
 import { useGetProductsQuery } from '@/features/products/productsApi';
 import {
   useGetRawMaterialsQuery,

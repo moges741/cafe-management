@@ -130,7 +130,20 @@ export const inventoryWorkflowApi = baseApi.injectEndpoints({
         params: { branchId },
         body,
       }),
-      invalidatesTags: ['MainStore'],
+      invalidatesTags: ['MainStore', 'InventoryTransaction'],
+    }),
+
+    takeFromMainStore: builder.mutation<
+      KitchenItem,
+      { branchId: string; materialId: string; quantity: number; notes?: string }
+    >({
+      query: ({ branchId, ...body }) => ({
+        url: '/inventory/take-from-store',
+        method: 'POST',
+        params: { branchId },
+        body,
+      }),
+      invalidatesTags: ['MainStore', 'KitchenStock', 'InventoryTransaction'],
     }),
 
     getKitchenStock: builder.query<KitchenItem[], { branchId: string }>({
@@ -151,7 +164,7 @@ export const inventoryWorkflowApi = baseApi.injectEndpoints({
         params: { branchId },
         body,
       }),
-      invalidatesTags: ['KitchenStock'],
+      invalidatesTags: ['KitchenStock', 'InventoryTransaction'],
     }),
 
     createMaterialRequest: builder.mutation<
@@ -195,7 +208,7 @@ export const inventoryWorkflowApi = baseApi.injectEndpoints({
         method: 'PATCH',
         body,
       }),
-      invalidatesTags: ['MaterialRequest', 'MainStore', 'KitchenStock'],
+      invalidatesTags: ['MaterialRequest', 'MainStore', 'KitchenStock', 'InventoryTransaction'],
     }),
 
     createOrUpdateRecipe: builder.mutation<Recipe, { productId: string; ingredients: { materialId: string; quantity: number }[] }>({
@@ -217,6 +230,7 @@ export const inventoryWorkflowApi = baseApi.injectEndpoints({
         url: '/inventory/transactions',
         params: params || undefined,
       }),
+      providesTags: ['InventoryTransaction'],
     }),
   }),
 });
@@ -227,6 +241,7 @@ export const {
   useUpdateRawMaterialMutation,
   useGetMainStoreStockQuery,
   useAdjustMainStoreMutation,
+  useTakeFromMainStoreMutation,
   useGetKitchenStockQuery,
   useAdjustKitchenMutation,
   useCreateMaterialRequestMutation,
