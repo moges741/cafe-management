@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { Utensils, History, Terminal } from 'lucide-react'
+import { Utensils, History, Terminal, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
@@ -10,8 +10,7 @@ export default function KitchenLayout() {
     { name: 'Live Display', path: '/kitchen', end: true, icon: Utensils },
     { name: 'Archive', path: '/kitchen/history', end: false, icon: History },
     { name: 'Inventory', path: '/kitchen/inventory', end: false, icon: History },
-
-
+    { name: 'Menu Status', path: '/kitchen/menu-status', end: false, icon: Eye },
   ]
 
   return (

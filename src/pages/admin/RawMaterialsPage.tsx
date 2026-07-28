@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit2, Search, Tag } from 'lucide-react';
+import { Plus, Edit2, Search, Tag, X } from 'lucide-react';
 import {
   useGetRawMaterialsQuery,
   useCreateRawMaterialMutation,
@@ -101,12 +101,12 @@ export default function RawMaterialsPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-5 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Raw Materials Catalog</h1>
-          <p className="text-sm mt-1" style={{ color: '#B58B67' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Raw Materials Catalog</h1>
+          <p className="text-xs sm:text-sm mt-1" style={{ color: '#B58B67' }}>
             Maintain the organization-wide master list of materials, ingredients, and packaging.
           </p>
         </div>
@@ -115,7 +115,7 @@ export default function RawMaterialsPage() {
             resetForm();
             setIsModalOpen(true);
           }}
-          className="rounded-xl flex items-center gap-2 bg-[#c29570] hover:bg-[#b08460] text-white"
+          className="w-full sm:w-auto rounded-xl flex items-center justify-center gap-2 bg-[#c29570] hover:bg-[#b08460] text-white py-2.5 sm:py-2"
         >
           <Plus size={18} />
           Add Raw Material
@@ -123,7 +123,7 @@ export default function RawMaterialsPage() {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center bg-card p-4 rounded-2xl border border-border shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 items-center bg-card p-3 sm:p-4 rounded-2xl border border-border shadow-sm">
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <input
@@ -131,7 +131,7 @@ export default function RawMaterialsPage() {
             placeholder="Search raw materials by name or SKU..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#c29570] transition-all"
+            className="w-full pl-10 pr-4 py-2.5 sm:py-2 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#c29570] transition-all"
           />
         </div>
       </div>
@@ -139,53 +139,53 @@ export default function RawMaterialsPage() {
       {/* Table/List */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         {isLoading ? (
-          <div className="p-12 text-center text-muted-foreground">Loading catalog...</div>
+          <div className="p-8 sm:p-12 text-center text-xs sm:text-sm text-muted-foreground">Loading catalog...</div>
         ) : filteredMaterials.length === 0 ? (
-          <div className="p-16 text-center text-muted-foreground flex flex-col items-center">
-            <Tag size={40} className="mb-3 text-[#c29570] opacity-40" />
-            <p className="text-lg font-medium text-foreground">No raw materials found</p>
-            <p className="text-sm mt-1">Add materials to start tracking your inventory.</p>
+          <div className="p-12 sm:p-16 text-center text-muted-foreground flex flex-col items-center px-4">
+            <Tag size={36} className="mb-3 text-[#c29570] opacity-40" />
+            <p className="text-base sm:text-lg font-medium text-foreground">No raw materials found</p>
+            <p className="text-xs sm:text-sm mt-1">Add materials to start tracking your inventory.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full border-collapse text-left text-xs sm:text-sm min-w-[600px]">
               <thead>
-                <tr className="bg-muted/50 border-b border-border text-muted-foreground text-xs font-semibold uppercase tracking-wider">
-                  <th className="p-4">Material Name</th>
-                  <th className="p-4">Category</th>
-                  <th className="p-4">SKU</th>
-                  <th className="p-4 text-center">Unit</th>
-                  <th className="p-4 text-right">Min Stock Limit</th>
-                  <th className="p-4 text-right">Actions</th>
+                <tr className="bg-muted/50 border-b border-border text-muted-foreground text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+                  <th className="p-3 sm:p-4">Material Name</th>
+                  <th className="p-3 sm:p-4">Category</th>
+                  <th className="p-3 sm:p-4">SKU</th>
+                  <th className="p-3 sm:p-4 text-center">Unit</th>
+                  <th className="p-3 sm:p-4 text-right">Min Stock Limit</th>
+                  <th className="p-3 sm:p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border text-sm">
+              <tbody className="divide-y divide-border">
                 {filteredMaterials.map((material) => (
                   <tr key={material.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="p-4">
+                    <td className="p-3 sm:p-4">
                       <div>
                         <div className="font-bold text-foreground">{material.name}</div>
                         {material.description && (
-                          <div className="text-xs text-muted-foreground mt-0.5">{material.description}</div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5">{material.description}</div>
                         )}
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="p-3 sm:p-4 whitespace-nowrap">
                       <span className="px-2.5 py-0.5 bg-[#c29570]/10 text-[#a3724c] rounded-full text-xs font-medium">
                         {material.category}
                       </span>
                     </td>
-                    <td className="p-4 text-muted-foreground font-mono text-xs">{material.sku ?? '—'}</td>
-                    <td className="p-4 text-center font-semibold">{material.unit}</td>
-                    <td className="p-4 text-right font-semibold text-amber-600">
+                    <td className="p-3 sm:p-4 text-muted-foreground font-mono text-xs whitespace-nowrap">{material.sku ?? '—'}</td>
+                    <td className="p-3 sm:p-4 text-center font-semibold whitespace-nowrap">{material.unit}</td>
+                    <td className="p-3 sm:p-4 text-right font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap">
                       {material.minStockLevel} {material.unit}
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="p-3 sm:p-4 text-right whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleEditClick(material)}
-                        className="rounded-xl border-[#c29570] text-[#c29570] hover:bg-[#c29570]/5"
+                        className="rounded-xl border-[#c29570] text-[#c29570] hover:bg-[#c29570]/5 text-xs py-1.5"
                       >
                         <Edit2 size={14} className="mr-1" />
                         Edit
@@ -199,18 +199,21 @@ export default function RawMaterialsPage() {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal (Mobile Responsive Scrollable) */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-card border border-border rounded-2xl max-w-lg w-full overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-6 border-b border-border flex items-center justify-between">
-              <h2 className="text-xl font-bold">{editingId ? 'Edit Raw Material' : 'Add Raw Material'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="text-muted-foreground hover:text-foreground">
-                ✕
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+          <div className="bg-card border border-border rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-150 my-auto">
+            <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between sticky top-0 bg-card z-10">
+              <h2 className="text-lg sm:text-xl font-bold">{editingId ? 'Edit Raw Material' : 'Add Raw Material'}</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
                   Material Name *
@@ -225,7 +228,7 @@ export default function RawMaterialsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
                     Category *
@@ -261,7 +264,7 @@ export default function RawMaterialsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
                     SKU Code (Optional)
@@ -304,11 +307,16 @@ export default function RawMaterialsPage() {
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="rounded-xl">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 border-t border-border">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsModalOpen(false)}
+                  className="rounded-xl w-full sm:w-auto"
+                >
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-[#c29570] hover:bg-[#b08460] text-white rounded-xl">
+                <Button type="submit" className="bg-[#c29570] hover:bg-[#b08460] text-white rounded-xl w-full sm:w-auto">
                   {editingId ? 'Save Changes' : 'Add Material'}
                 </Button>
               </div>

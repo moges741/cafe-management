@@ -18,7 +18,7 @@ import {
 import { useNavigate, Link } from 'react-router-dom'
 import { useAppSelector, useAppDispatch } from '@/app/hooks'
 import { clearUser, type UserRole } from '@/features/auth/authSlice'
-import BranchSelector from '@/components/shared/BranchSelector'
+// import BranchSelector from '@/components/shared/BranchSelector'
 import Logo from '/logo.svg'
 
 type NavItem = { name: string; href: string }
@@ -40,12 +40,15 @@ const ROLE_ROUTES: Record<UserRole, string> = {
   customer: '/menu',
 }
 
+import { useCurrentBranch } from '@/hooks/useCurrentBranch'
+
 export default function Navbar() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
   const { user, isAuthenticated } = useAppSelector(state => state.auth)
   const cartItems = useAppSelector(state => state.cart.items)
+  const { isOwnBranch } = useCurrentBranch()
 
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -163,9 +166,6 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
           </div>
 
           <div className="hidden lg:flex items-center gap-4 relative z-10">
-            {/* Branch Selector */}
-            <BranchSelector variant="compact" />
-
             {/* Cart Button */}
             <motion.button
               onClick={handleCartClick}
@@ -206,7 +206,7 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
                       transition={{ duration: 0.2 }}
                       className="absolute right-0 mt-4 w-48 rounded-2xl bg-[#120804]/90 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden py-2"
                     >
-                      {user.role !== 'customer' && (
+                      {user.role !== 'customer' && isOwnBranch && (
                         <button
                           onClick={handleDashboardNavigate}
                           className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-amber-500/10 hover:text-amber-400 transition-colors text-left"
@@ -214,7 +214,7 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
                           <Settings className="w-4 h-4" /> Dashboard
                         </button>
                       )}
-                      {user.role === 'customer' && (
+                      {(user.role === 'customer' || (user.role !== 'customer' && !isOwnBranch)) && (
                         <button
                           onClick={() => {
                             navigate('/menu')

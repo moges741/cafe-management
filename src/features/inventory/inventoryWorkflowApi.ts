@@ -112,10 +112,10 @@ export const inventoryWorkflowApi = baseApi.injectEndpoints({
       invalidatesTags: ['RawMaterial', 'MainStore', 'KitchenStock'],
     }),
 
-    getMainStoreStock: builder.query<MainStoreItem[], { branchId: string }>({
-      query: ({ branchId }) => ({
+    getMainStoreStock: builder.query<MainStoreItem[], { branchId?: string } | void>({
+      query: (params) => ({
         url: '/inventory/main-store',
-        params: { branchId },
+        params: params || undefined,
       }),
       providesTags: ['MainStore'],
     }),
@@ -146,10 +146,10 @@ export const inventoryWorkflowApi = baseApi.injectEndpoints({
       invalidatesTags: ['MainStore', 'KitchenStock', 'InventoryTransaction'],
     }),
 
-    getKitchenStock: builder.query<KitchenItem[], { branchId: string }>({
-      query: ({ branchId }) => ({
+    getKitchenStock: builder.query<KitchenItem[], { branchId?: string } | void>({
+      query: (params) => ({
         url: '/inventory/kitchen',
-        params: { branchId },
+        params: params || undefined,
       }),
       providesTags: ['KitchenStock'],
     }),

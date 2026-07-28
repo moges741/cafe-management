@@ -8,7 +8,7 @@ import { clearUser } from '@/features/auth/authSlice'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { NAV_BY_ROLE } from './navConfig'
 import { cn } from '@/lib/utils'
-
+import BranchSelector from '@/components/shared/BranchSelector'
 export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
@@ -61,28 +61,11 @@ export default function DashboardLayout() {
 
         {/* Branch Selector */}
         <div className="mt-5">
-          {isAdmin && branches && branches.length > 1 ? (
-            <div className="relative group">
-              <select
-                value={branchId || ''}
-                onChange={(e) => setBranch(e.target.value)}
-                className="w-full h-10 rounded-xl border border-white/10 bg-white/[0.03] px-3 pr-8 text-sm text-white font-medium focus:outline-none focus:ring-1 focus:ring-amber-500/40 appearance-none cursor-pointer hover:border-amber-500/30 hover:bg-white/[0.06] transition-all"
-              >
-                {branches.filter(b => b.isActive).map(b => (
-                  <option key={b.id} value={b.id} className="bg-neutral-900">
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none group-hover:text-amber-500 transition-colors" />
-            </div>
-          ) : currentBranch ? (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10">
-              <Building2 size={14} className="text-amber-500 shrink-0" />
-              <span className="text-sm text-neutral-300 font-medium truncate">{currentBranch.name}</span>
-            </div>
-          ) : null}
+    <BranchSelector variant="compact" />
+
+        
         </div>
+
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-none">

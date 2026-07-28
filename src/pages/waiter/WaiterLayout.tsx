@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { ClipboardList, History, PlusSquare, ConciergeBell } from 'lucide-react'
+import { ClipboardList, History, PlusSquare, ConciergeBell, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
@@ -10,6 +10,7 @@ export default function WaiterLayout() {
     { name: 'Incoming Orders', path: '/waiter', end: true, icon: ClipboardList },
     { name: 'Archive', path: '/waiter/history', end: false, icon: History },
     { name: 'New Ticket', path: '/waiter/new', end: false, icon: PlusSquare },
+    { name: 'Menu Status', path: '/waiter/menu-status', end: false, icon: Eye },
   ]
 
   return (

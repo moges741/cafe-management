@@ -32,6 +32,7 @@ import ProductEditPage from '@/pages/admin/ProductEditPage';
 import VerifyEmailPage from '@/pages/auth/VerifyEmailPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
+import GoogleCallbackPage from '@/pages/auth/GoogleCallbackPage';
 import AboutSection from '@/components/home/AboutSection';
 import GallerySection from '@/components/home/GallerySection';
 import NotFoundPage from '@/pages/error/NotFoundPage';
@@ -45,8 +46,9 @@ import ContactPage from '@/components/home/ContactPage';
 import RawMaterialsPage from '@/pages/admin/RawMaterialsPage';
 import MainStorePage from '@/pages/admin/MainStorePage';
 import RecipeBuilderPage from '@/pages/admin/RecipeBuilderPage';
-import MaterialRequestsPage from '@/pages/admin/MaterialRequestsPage';
 import KitchenInventoryPage from '@/pages/kitchen/KitchenInventoryPage';
+import KitchenMenuStatusPage from '@/pages/kitchen/KitchenMenuStatusPage';
+import WaiterMenuStatusPage from '@/pages/waiter/WaiterMenuStatusPage';
 
 // RootRedirect: Now lets everyone access HomePage (/) freely. 
 // Use specific dashboard links (e.g. /admin, /cashier) when they need their operational view.
@@ -72,6 +74,7 @@ export default function AppRouter() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/" element={<RootRedirect />} />
           <Route path="/about" element={<AboutSection />} />
           <Route path="/gallery" element={<GallerySection />} />
@@ -90,12 +93,14 @@ export default function AppRouter() {
             <Route index element={<KitchenDisplayPage />} />
             <Route path="history" element={<KitchenHistoryPage />} />
             <Route path="inventory" element={<KitchenInventoryPage />} />
+            <Route path="menu-status" element={<KitchenMenuStatusPage />} />
           </Route>
           <Route path="/cashier" element={<ProtectedRoute allowedRoles={['cashier', 'admin']}><CashierPosPage /></ProtectedRoute>} />
           <Route path="/waiter" element={<ProtectedRoute allowedRoles={['waiter', 'admin']}><WaiterLayout /></ProtectedRoute>}>
             <Route index element={<WaiterIncomingOrdersPage />} />
             <Route path="history" element={<WaiterHistoryPage />} />
             <Route path="new" element={<WaiterNewOrderPage />} />
+            <Route path="menu-status" element={<WaiterMenuStatusPage />} />
           </Route>
           <Route path="/barista" element={<ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><DashboardLayout /></ProtectedRoute>}>
@@ -105,7 +110,6 @@ export default function AppRouter() {
             <Route path="raw-materials" element={<RawMaterialsPage />} />
             <Route path="main-store" element={<MainStorePage />} />
             <Route path="recipes" element={<RecipeBuilderPage />} />
-            <Route path="requests" element={<MaterialRequestsPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="orders" element={<OrdersPage />} />
