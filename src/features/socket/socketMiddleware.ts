@@ -3,6 +3,7 @@ import toast from 'react-hot-toast'
 import { getSocket } from '@/lib/socket'
 import { setConnected, roomJoined } from './socketSlice'
 import { upsertOrder, updateOrderStatus } from '../orders/ordersSlice'
+import { ordersApi } from '../orders/ordersApi'
 
 // Action creators for things a COMPONENT can dispatch to control the socket.
 // These are plain actions — the middleware below intercepts them and
@@ -40,7 +41,14 @@ export const socketMiddleware: Middleware = (store) => {
         orderNumber: order.orderNumber,
         status:      order.status,
         branchId:    order.branchId,
+        createdAt:   order.createdAt,
+        payment:     order.payment,
+        items:       order.items,
+        type:        order.type,
+        tableNumber: order.tableNumber
       }))
+      // Invalidate RTK Query cache to auto-refresh Cashier/Waiter pages
+      store.dispatch(ordersApi.util.invalidateTags(['Order']))
       toast.success(`New order: ${order.orderNumber}`)
     })
 
@@ -52,6 +60,7 @@ export const socketMiddleware: Middleware = (store) => {
         orderId: data.orderId,
         status:  data.status,
       }))
+      store.dispatch(ordersApi.util.invalidateTags(['Order']))
     })
 
     socket.on('kitchen.order_update', (payload: any) => {
@@ -60,6 +69,7 @@ export const socketMiddleware: Middleware = (store) => {
         orderId: data.orderId,
         status:  data.status,
       }))
+      store.dispatch(ordersApi.util.invalidateTags(['Order']))
     })
 
     // Manager low-stock alerts etc

@@ -33,7 +33,15 @@ export default function BaristaPage() {
   useEffect(() => {
     if (initialOrders) {
       initialOrders.forEach(o => dispatch(upsertOrder({
-        id: o.id, orderNumber: o.orderNumber, status: o.status, branchId: o.branchId,
+        id: o.id,
+        orderNumber: o.orderNumber,
+        status: o.status,
+        branchId: o.branchId,
+        createdAt: o.createdAt,
+        payment: o.payment,
+        items: o.items,
+        type: o.type,
+        tableNumber: o.tableNumber
       })))
     }
   }, [initialOrders, dispatch])
