@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from '@/features/orders/ordersApi'
+import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { upsertOrder } from '@/features/orders/ordersSlice'
 import { selectActiveOrders } from '@/features/orders/ordersSelectors'
 import { socketActions } from '@/features/socket/socketMiddleware'
@@ -48,8 +49,15 @@ export default function KitchenDisplayPage() {
   const { branchId } = useCurrentBranch()
   const dispatch = useAppDispatch()
   const { data: initialOrders } = useGetOrdersQuery({ branchId: branchId || undefined }, { skip: !branchId })
+  const { data: categories = [] } = useGetCategoriesQuery({ branchId: branchId || undefined }, { skip: !branchId })
   const liveOrders = useAppSelector(selectActiveOrders)
   const [updateStatus, { isLoading }] = useUpdateOrderStatusMutation()
+
+  const drinkCategoryIds = useMemo(() => {
+    return categories
+      .filter(c => ['drink', 'coffee', 'tea', 'beverage'].some(k => c.name.toLowerCase().includes(k)))
+      .map(c => c.id)
+  }, [categories])
 
   useEffect(() => {
     dispatch(socketActions.connect())
@@ -82,6 +90,17 @@ export default function KitchenDisplayPage() {
     }
   }
 
+  // Filter out orders that are strictly 100% drinks (they go to the barista)
+  const kitchenOrders = useMemo(() => {
+    return liveOrders.filter((order: any) => {
+      if (!order.items || order.items.length === 0) return true
+      const isDrinkOnly = order.items.every((item: any) => 
+        drinkCategoryIds.includes(item.product?.categoryId || item.categoryId)
+      )
+      return !isDrinkOnly
+    })
+  }, [liveOrders, drinkCategoryIds])
+
   return (
     <div className="h-[100dvh] bg-[#050505] p-4 md:p-6 font-sans text-white overflow-hidden flex flex-col">
       {/* Header - Responsive padding and sizing */}
@@ -102,7 +121,7 @@ export default function KitchenDisplayPage() {
           <div className="flex items-center gap-1.5 md:gap-2">
             <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
             <span className="text-xs md:text-sm font-semibold tracking-wide text-neutral-300">
-              {liveOrders.length} <span className="hidden sm:inline">Active</span>
+              {kitchenOrders.length} <span className="hidden sm:inline">Active</span>
             </span>
           </div>
         </div>
@@ -112,7 +131,7 @@ export default function KitchenDisplayPage() {
       <div className="flex-1 overflow-x-auto overflow-y-hidden pb-4 snap-x snap-mandatory scroll-smooth -mx-4 px-4 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden md:[&::-webkit-scrollbar]:block">
         <div className="flex gap-4 md:gap-6 h-full min-w-max">
           {COLUMNS.map((col) => {
-            const ordersInColumn = liveOrders.filter(o => {
+            const ordersInColumn = kitchenOrders.filter((o: any) => {
               if (o.status !== col.status) return false
               if (col.status === 'pending' && (!o.payment || (o.payment.method === 'chapa' && o.payment.status !== 'completed'))) {
                 return false

@@ -5,7 +5,11 @@ import { useGetProductsQuery, useToggleProductAvailabilityMutation } from '@/fea
 import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { useAppSelector } from '@/app/hooks'
 
-export default function MenuAvailabilityManager() {
+interface MenuAvailabilityManagerProps {
+  filterType?: 'drink' | 'food'
+}
+
+export default function MenuAvailabilityManager({ filterType }: MenuAvailabilityManagerProps) {
   const user = useAppSelector((state) => state.auth.user)
   const branchId = user?.employee?.branchId
 
@@ -14,10 +18,18 @@ export default function MenuAvailabilityManager() {
     { skip: !branchId }
   )
 
-  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategoriesQuery(
+  const { data: allCategories = [], isLoading: isLoadingCategories } = useGetCategoriesQuery(
     { branchId: branchId || undefined },
     { skip: !branchId }
   )
+
+  const categories = useMemo(() => {
+    if (!filterType) return allCategories;
+    return allCategories.filter(c => {
+      const isDrink = ['drink', 'coffee', 'tea', 'beverage'].some(k => c.name.toLowerCase().includes(k))
+      return filterType === 'drink' ? isDrink : !isDrink
+    });
+  }, [allCategories, filterType])
 
   const [toggleAvailability] = useToggleProductAvailabilityMutation()
   const [searchQuery, setSearchQuery] = useState('')
@@ -32,12 +44,18 @@ export default function MenuAvailabilityManager() {
   }
 
   const filteredProducts = useMemo(() => {
+    // Collect all valid category IDs from the current categories list
+    const validCategoryIds = new Set(categories.map(c => c.id))
+    
     return products.filter((product) => {
+      // If we have a filterType, ensure the product belongs to a valid category
+      if (filterType && !validCategoryIds.has(product.categoryId)) return false;
+      
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = activeCategory ? product.categoryId === activeCategory : true
       return matchesSearch && matchesCategory
     })
-  }, [products, searchQuery, activeCategory])
+  }, [products, searchQuery, activeCategory, categories, filterType])
 
   if (isLoadingProducts || isLoadingCategories) {
     return (

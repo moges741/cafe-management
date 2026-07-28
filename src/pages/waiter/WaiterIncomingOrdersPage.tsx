@@ -1,4 +1,5 @@
 import { useGetOrdersQuery, useUpdateOrderStatusMutation } from '@/features/orders/ordersApi'
+import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
 import { Clock, Send, ConciergeBell, AlertCircle } from 'lucide-react'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import toast from 'react-hot-toast'
@@ -16,6 +17,16 @@ export default function WaiterIncomingOrdersPage() {
     { branchId: branchId || undefined },
     { skip: !branchId }
   )
+  const { data: categories = [] } = useGetCategoriesQuery(
+    { branchId: branchId || undefined },
+    { skip: !branchId }
+  )
+
+  const drinkCategoryIds = useMemo(() => {
+    return categories
+      .filter(c => ['drink', 'coffee', 'tea', 'beverage'].some(k => c.name.toLowerCase().includes(k)))
+      .map(c => c.id)
+  }, [categories])
 
   useEffect(() => {
     dispatch(socketActions.connect())
@@ -32,7 +43,7 @@ export default function WaiterIncomingOrdersPage() {
   const handleSendToKitchen = async (orderId: string) => {
     try {
       await updateStatus({ orderId, status: 'confirmed' }).unwrap()
-      toast.success('Order sent to kitchen!')
+      toast.success('Order sent for prep!')
     } catch (err: any) {
       toast.error(err?.data?.message || err?.data?.error?.message || 'Failed to send')
     }
@@ -58,6 +69,11 @@ export default function WaiterIncomingOrdersPage() {
             {incomingOrders.map((order) => {
               const isPaid = order.payment?.status === 'completed'
               const isTakeaway = order.type === 'takeaway'
+              
+              // Check if 100% of the items are drinks
+              const isDrinkOnly = order.items && order.items.length > 0 && order.items.every((item: any) => 
+                drinkCategoryIds.includes(item.product?.categoryId || item.categoryId)
+              )
 
               return (
                 <motion.div 
@@ -136,7 +152,7 @@ export default function WaiterIncomingOrdersPage() {
                       disabled={isUpdating || !isPaid}
                     >
                       <Send size={14} />
-                      {!isPaid ? 'Awaiting Payment' : 'Push to Kitchen'}
+                      {!isPaid ? 'Awaiting Payment' : (isDrinkOnly ? 'Push to Barista' : 'Push to Kitchen')}
                     </button>
                   </div>
                 </motion.div>

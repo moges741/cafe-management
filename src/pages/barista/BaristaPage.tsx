@@ -42,13 +42,13 @@ export default function BaristaPage() {
     if (connected && branchId) dispatch(socketActions.joinKitchen(branchId))
   }, [connected, dispatch, branchId])
 
-  // If the order has `items` with category info, filter to drink orders only.
-  // If items aren't present on the order object yet, fall back to showing everything
-  // rather than silently hiding all orders — safer default until backend confirms shape.
- const drinkOrders = liveOrders.filter((order: any) => {
-  if (!order.items) return true
-  return order.items.some((item: any) => drinkCategoryIds.includes(item.product?.categoryId))
-})
+  // Filter to show ONLY orders where 100% of the items are drinks
+  const drinkOrders = liveOrders.filter((order: any) => {
+    if (!order.items || order.items.length === 0) return false
+    return order.items.every((item: any) => 
+      drinkCategoryIds.includes(item.product?.categoryId || item.categoryId)
+    )
+  })
 
   const handleAdvance = async (orderId: string, nextStatus: string) => {
     try {

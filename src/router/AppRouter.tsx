@@ -16,6 +16,8 @@ import WaiterIncomingOrdersPage from '@/pages/waiter/WaiterIncomingOrdersPage';
 import WaiterHistoryPage from '@/pages/waiter/WaiterHistoryPage';
 import WaiterNewOrderPage from '@/pages/waiter/WaiterNewOrderPage';
 import BaristaPage from '@/pages/barista/BaristaPage';
+import BaristaLayout from '@/pages/barista/BaristaLayout';
+import BaristaMenuStatusPage from '@/pages/barista/BaristaMenuStatusPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import InventoryPage from '@/pages/admin/InventoryPage';
@@ -102,7 +104,10 @@ export default function AppRouter() {
             <Route path="new" element={<WaiterNewOrderPage />} />
             <Route path="menu-status" element={<WaiterMenuStatusPage />} />
           </Route>
-          <Route path="/barista" element={<ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaPage /></ProtectedRoute>} />
+          <Route path="/barista" element={<ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaLayout /></ProtectedRoute>}>
+            <Route index element={<BaristaPage />} />
+            <Route path="menu-status" element={<BaristaMenuStatusPage />} />
+          </Route>
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><DashboardLayout /></ProtectedRoute>}>
             <Route index element={<AdminDashboardPage />} />
             <Route path="analytics" element={<AnalyticsPage />} />
