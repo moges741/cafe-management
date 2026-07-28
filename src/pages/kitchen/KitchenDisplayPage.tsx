@@ -52,6 +52,10 @@ export default function KitchenDisplayPage() {
   const [updateStatus, { isLoading }] = useUpdateOrderStatusMutation()
 
   useEffect(() => {
+    dispatch(socketActions.connect())
+  }, [dispatch])
+
+  useEffect(() => {
     if (initialOrders) {
       initialOrders.forEach(o => dispatch(upsertOrder({
         id: o.id,

@@ -1,16 +1,26 @@
 import { useGetOrdersQuery } from '@/features/orders/ordersApi'
 import { Clock, ChefHat, SearchX, ArrowRight } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
+import { useAppDispatch } from '@/app/hooks'
+import { socketActions } from '@/features/socket/socketMiddleware'
 import { motion } from 'framer-motion'
 import { SkeletonTableRow } from '@/components/ui/Skeleton'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 export default function KitchenHistoryPage() {
   const { branchId } = useCurrentBranch()
+  const dispatch = useAppDispatch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
     { branchId: branchId || undefined, days: 10 },
-    { pollingInterval: 10000, skip: !branchId }
+    { skip: !branchId }
   )
+
+  useEffect(() => {
+    dispatch(socketActions.connect())
+    if (branchId) {
+      dispatch(socketActions.joinKitchen(branchId))
+    }
+  }, [dispatch, branchId])
 
   const historyOrders = useMemo(() => {
     return allOrders.filter(o => o.status === 'completed')

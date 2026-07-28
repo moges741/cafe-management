@@ -4,15 +4,25 @@ import { Button } from '@/components/ui/button'
 import { Clock, CheckCircle, CreditCard, History, ChefHat, AlertCircle } from 'lucide-react'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import toast from 'react-hot-toast'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
+import { useAppDispatch } from '@/app/hooks'
+import { socketActions } from '@/features/socket/socketMiddleware'
 import { cn } from '@/lib/utils'
 
 export default function CashierPosPage() {
   const { branchId } = useCurrentBranch()
+  const dispatch = useAppDispatch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
     { branchId: branchId || undefined },
-    { pollingInterval: 5000, skip: !branchId }
+    { skip: !branchId }
   )
+
+  useEffect(() => {
+    dispatch(socketActions.connect())
+    if (branchId) {
+      dispatch(socketActions.joinKitchen(branchId)) // We can use the same room for cashier
+    }
+  }, [dispatch, branchId])
 
   const [confirmCash, { isLoading: isConfirming }] = baseApi.injectEndpoints({
     endpoints: (builder) => ({

@@ -2,17 +2,27 @@ import { useGetOrdersQuery, useUpdateOrderStatusMutation } from '@/features/orde
 import { Clock, Send, ConciergeBell, AlertCircle } from 'lucide-react'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import toast from 'react-hot-toast'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
+import { useAppDispatch } from '@/app/hooks'
+import { socketActions } from '@/features/socket/socketMiddleware'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SkeletonOrderRow } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/utils'
 
 export default function WaiterIncomingOrdersPage() {
   const { branchId } = useCurrentBranch()
+  const dispatch = useAppDispatch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
     { branchId: branchId || undefined },
-    { pollingInterval: 5000, skip: !branchId }
+    { skip: !branchId }
   )
+
+  useEffect(() => {
+    dispatch(socketActions.connect())
+    if (branchId) {
+      dispatch(socketActions.joinKitchen(branchId)) // we can listen to the same room for new orders
+    }
+  }, [dispatch, branchId])
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation()
 
   const incomingOrders = useMemo(() => {

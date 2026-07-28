@@ -1,16 +1,26 @@
 import { useGetOrdersQuery } from '@/features/orders/ordersApi'
 import { Clock, SearchX } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
+import { useAppDispatch } from '@/app/hooks'
+import { socketActions } from '@/features/socket/socketMiddleware'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 export default function WaiterHistoryPage() {
   const { branchId } = useCurrentBranch()
+  const dispatch = useAppDispatch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
     { branchId: branchId || undefined },
-    { pollingInterval: 10000, skip: !branchId }
+    { skip: !branchId }
   )
+
+  useEffect(() => {
+    dispatch(socketActions.connect())
+    if (branchId) {
+      dispatch(socketActions.joinKitchen(branchId)) // we can listen to the same room for order updates
+    }
+  }, [dispatch, branchId])
 
   const historyOrders = useMemo(() => {
     return allOrders.filter(o => ['in_kitchen', 'ready', 'completed'].includes(o.status))
