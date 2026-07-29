@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   UserPlus,
   Trash2,
@@ -14,7 +14,8 @@ import {
   Utensils,
   UserCog,
   X,
-  Users
+  Users,
+  Edit2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -22,6 +23,8 @@ import {
   useCreateStaffMutation,
   useDeleteStaffMutation,
   useToggleStaffStatusMutation,
+  useUpdateStaffMutation,
+  useStaffUserQuery
 } from '@/features/staff/staffApi'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { Button } from '@/components/ui/button'
@@ -60,14 +63,43 @@ export default function StaffPage() {
 
   // Mutations
   const [createStaff, { isLoading: isCreating }] = useCreateStaffMutation()
+  const [updateStaff, { isLoading: isUpdating }] = useUpdateStaffMutation()
   const [deleteStaff, { isLoading: isDeleting }] = useDeleteStaffMutation()
   const [toggleStatus] = useToggleStaffStatusMutation()
 
   // Form state
   const [showForm, setShowForm] = useState(false)
+  const [editingStaff, setEditingStaff] = useState<ReturnType<typeof useStaffUserQuery> | null>(null)
+  
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('')
+
+  // Reset form
+  useEffect(() => {
+    if (!showForm) {
+      setEditingStaff(null)
+      setFirstName('')
+      setLastName('')
+      setEmail('')
+      setPassword('')
+      setRole('')
+    }
+  }, [showForm])
+
+  // Populate form for editing
+  useEffect(() => {
+    if (editingStaff) {
+      setFirstName(editingStaff.firstName || '')
+      setLastName(editingStaff.lastName || '')
+      setEmail(editingStaff.email || '')
+      setRole(editingStaff.role?.name || '')
+      setPassword('')
+      setShowForm(true)
+    }
+  }, [editingStaff])
 
   // Group staff by roles
   const groupedStaff = useMemo(() => {
@@ -88,9 +120,9 @@ export default function StaffPage() {
     return groups
   }, [staffList])
 
-  const handleCreate = async () => {
-    if (!email || !password || !role) {
-      toast.error('Fill in all fields')
+  const handleSubmit = async () => {
+    if (!email || !role || !firstName || !lastName || (!editingStaff && !password)) {
+      toast.error('Fill in all required fields')
       return
     }
     if (!branchId) {
@@ -99,14 +131,19 @@ export default function StaffPage() {
     }
 
     try {
-      await createStaff({ email, password, role, branchId }).unwrap()
-      toast.success(`${role} account created`)
-      setEmail('')
-      setPassword('')
-      setRole('')
+      if (editingStaff) {
+        await updateStaff({
+          id: editingStaff.id,
+          data: { firstName, lastName, email, role, password: password || undefined, branchId }
+        }).unwrap()
+        toast.success(`Staff account updated`)
+      } else {
+        await createStaff({ firstName, lastName, email, password, role, branchId }).unwrap()
+        toast.success(`${role} account created`)
+      }
       setShowForm(false)
     } catch (err: any) {
-      toast.error(err?.data?.error?.message ?? 'Could not create staff account')
+      toast.error(err?.data?.error?.message ?? `Could not ${editingStaff ? 'update' : 'create'} staff account`)
     }
   }
 
@@ -168,11 +205,11 @@ export default function StaffPage() {
             className="gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl px-6 py-6 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all hover:-translate-y-0.5"
           >
             <UserPlus size={18} />
-            {showForm ? 'Close Panel' : 'Add Staff'}
+            {showForm && !editingStaff ? 'Close Panel' : 'Add Staff'}
           </Button>
         </motion.div>
 
-        {/* ================= CREATE FORM PANEL ================= */}
+        {/* ================= CREATE / EDIT FORM PANEL ================= */}
         <AnimatePresence>
           {showForm && (
             <motion.div
@@ -192,12 +229,30 @@ export default function StaffPage() {
 
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                    <UserPlus size={18} />
+                    {editingStaff ? <Edit2 size={18} /> : <UserPlus size={18} />}
                   </div>
-                  <h2 className="text-xl font-bold text-white tracking-tight">Create New Account</h2>
+                  <h2 className="text-xl font-bold text-white tracking-tight">{editingStaff ? 'Edit Account' : 'Create New Account'}</h2>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">First Name</Label>
+                    <Input
+                      placeholder="John"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl h-12"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">Last Name</Label>
+                    <Input
+                      placeholder="Doe"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl h-12"
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">Email</Label>
                     <Input
@@ -210,7 +265,9 @@ export default function StaffPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">Temporary Password</Label>
+                    <Label className="text-xs uppercase tracking-wider text-neutral-400 font-semibold">
+                      {editingStaff ? 'New Password (Optional)' : 'Temporary Password'}
+                    </Label>
                     <Input
                       placeholder="••••••••"
                       type="password"
@@ -239,11 +296,11 @@ export default function StaffPage() {
 
                 <div className="mt-6 flex justify-end">
                   <Button 
-                    onClick={handleCreate} 
-                    disabled={isCreating} 
+                    onClick={handleSubmit} 
+                    disabled={isCreating || isUpdating} 
                     className="w-full md:w-auto bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl h-12 px-8"
                   >
-                    {isCreating ? 'Creating Account...' : 'Create Account'}
+                    {isCreating || isUpdating ? 'Saving...' : (editingStaff ? 'Update Account' : 'Create Account')}
                   </Button>
                 </div>
               </div>
@@ -352,14 +409,21 @@ export default function StaffPage() {
                           <button
                             onClick={() => handleToggleStatus(staff.id, staff.isActive)}
                             className={cn(
-                              "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all border",
+                              "flex flex-col items-center justify-center p-2.5 rounded-xl text-xs font-bold transition-all border",
                               staff.isActive
                                 ? "bg-red-500/5 text-red-400 border-red-500/10 hover:bg-red-500/20"
                                 : "bg-emerald-500/5 text-emerald-400 border-emerald-500/10 hover:bg-emerald-500/20"
                             )}
+                            title={staff.isActive ? 'Revoke Access' : 'Activate'}
                           >
-                            <Power size={14} />
-                            {staff.isActive ? 'Revoke' : 'Activate'}
+                            <Power size={16} />
+                          </button>
+
+                          <button
+                            onClick={() => setEditingStaff(staff)}
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 bg-white/5 text-neutral-400 hover:text-amber-400 hover:border-amber-500/30 hover:bg-amber-500/10 transition-all text-xs font-bold"
+                          >
+                            <Edit2 size={14} /> Edit
                           </button>
                           
                           <button

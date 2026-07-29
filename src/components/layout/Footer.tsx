@@ -209,7 +209,7 @@ export default function Footer() {
           <div className="flex gap-6">
             <p className="text-muted-foreground">
               Crafted by{' '}
-              <a href="#" className="text-foreground hover:text-primary font-semibold transition-colors">
+              <a href="https://dev-moges.me" target='_blank' rel="noopener noreferrer" className="text-foreground hover:text-primary font-semibold transition-colors">
                 Moges
               </a>
             </p>

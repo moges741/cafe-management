@@ -25,6 +25,7 @@ type NavItem = { name: string; href: string }
 
 const NAV_LINKS: NavItem[] = [
   { name: 'Menu', href: '/menu' },
+  { name: 'How It Works', href: '/how-it-works' },
   { name: 'About', href: '/about' },
   { name: 'Gallery', href: '/gallery' },
   { name: 'Contact', href: '/contact' },

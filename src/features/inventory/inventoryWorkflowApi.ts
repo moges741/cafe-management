@@ -89,8 +89,11 @@ export interface InventoryTransaction {
 
 export const inventoryWorkflowApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getRawMaterials: builder.query<RawMaterial[], void>({
-      query: () => '/inventory/raw-materials',
+    getRawMaterials: builder.query<RawMaterial[], { branchId?: string } | void>({
+      query: (params) => ({
+        url: '/inventory/raw-materials',
+        params: params || undefined,
+      }),
       providesTags: ['RawMaterial'],
     }),
 

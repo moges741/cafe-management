@@ -18,6 +18,7 @@ import WaiterNewOrderPage from '@/pages/waiter/WaiterNewOrderPage';
 import BaristaPage from '@/pages/barista/BaristaPage';
 import BaristaLayout from '@/pages/barista/BaristaLayout';
 import BaristaMenuStatusPage from '@/pages/barista/BaristaMenuStatusPage';
+import BaristaHistoryPage from '@/pages/barista/BaristaHistoryPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import AnalyticsPage from '@/pages/admin/AnalyticsPage';
 import InventoryPage from '@/pages/admin/InventoryPage';
@@ -44,6 +45,7 @@ import CulinaryGateway from '@/components/home/CulinaryGateway';
 import Navbar from '@/components/layout/Navbar';
 import HomePage from '@/components/home/HomePage';
 import ContactPage from '@/components/home/ContactPage';
+import HowItWorksPage from '@/components/home/HowItWorksPage';
 
 import RawMaterialsPage from '@/pages/admin/RawMaterialsPage';
 import MainStorePage from '@/pages/admin/MainStorePage';
@@ -79,6 +81,7 @@ export default function AppRouter() {
           <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/" element={<RootRedirect />} />
           <Route path="/about" element={<AboutSection />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/gallery" element={<GallerySection />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/menu/:id" element={<ProductDetailPage />} />
@@ -106,6 +109,8 @@ export default function AppRouter() {
           </Route>
           <Route path="/barista" element={<ProtectedRoute allowedRoles={['barista', 'admin']}><BaristaLayout /></ProtectedRoute>}>
             <Route index element={<BaristaPage />} />
+            <Route path="history" element={<BaristaHistoryPage />} />
+            <Route path="inventory" element={<KitchenInventoryPage />} />
             <Route path="menu-status" element={<BaristaMenuStatusPage />} />
           </Route>
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><DashboardLayout /></ProtectedRoute>}>

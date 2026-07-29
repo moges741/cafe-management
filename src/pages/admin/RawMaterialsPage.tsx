@@ -5,11 +5,15 @@ import {
   useCreateRawMaterialMutation,
   useUpdateRawMaterialMutation,
 } from '@/features/inventory/inventoryWorkflowApi';
+import { useCurrentBranch } from '@/hooks/useCurrentBranch';
 import { Button } from '@/components/ui/button';
 import toast from 'react-hot-toast';
 
 export default function RawMaterialsPage() {
-  const { data: rawMaterials = [], isLoading } = useGetRawMaterialsQuery();
+  const { branchId } = useCurrentBranch();
+  const { data: rawMaterials = [], isLoading } = useGetRawMaterialsQuery(
+    branchId ? { branchId } : undefined
+  );
   const [createMaterial] = useCreateRawMaterialMutation();
   const [updateMaterial] = useUpdateRawMaterialMutation();
 
@@ -90,6 +94,7 @@ export default function RawMaterialsPage() {
           unit,
           minStockLevel,
           description: description || undefined,
+          branchId: branchId || undefined,
         }).unwrap();
         toast.success('Raw material added to catalog');
       }

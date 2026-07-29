@@ -14,10 +14,21 @@ export interface StaffUser {
 }
 
 interface CreateStaffDto {
+  firstName: string
+  lastName: string
   email: string
-  password: string
+  password?: string
   role: string
   branchId: string
+}
+
+interface UpdateStaffDto {
+  firstName?: string
+  lastName?: string
+  email?: string
+  password?: string
+  role?: string
+  branchId?: string
 }
 
 export const staffApi = baseApi.injectEndpoints({
@@ -35,6 +46,21 @@ export const staffApi = baseApi.injectEndpoints({
         url: '/auth/staff',
         method: 'POST',
         body,
+      }),
+      invalidatesTags: ['Staff'],
+    }),
+    staffUser: builder.query<StaffUser, string>({
+      query: (id) => ({
+        url: `/auth/staff/${id}`,
+      }),
+      providesTags: ['Staff'],
+    }),
+
+    updateStaff: builder.mutation<StaffUser, { id: string; data: UpdateStaffDto }>({
+      query: ({ id, data }) => ({
+        url: `/auth/staff/${id}`,
+        method: 'PATCH',
+        body: data,
       }),
       invalidatesTags: ['Staff'],
     }),
@@ -60,6 +86,8 @@ export const staffApi = baseApi.injectEndpoints({
 export const {
   useGetStaffQuery,
   useCreateStaffMutation,
+  useUpdateStaffMutation,
   useDeleteStaffMutation,
   useToggleStaffStatusMutation,
+  useStaffUserQuery,
 } = staffApi

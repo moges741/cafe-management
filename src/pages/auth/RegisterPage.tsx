@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, ArrowRight } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +30,7 @@ const staggerContainer: any = {
 export default function RegisterPage() {
   const navigate = useNavigate()
   const [registerUser, { isLoading }] = useRegisterMutation()
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -248,14 +250,21 @@ export default function RegisterPage() {
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-amber-500 transition-colors" size={18} />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="At least 8 characters"
                     {...register('password')}
                     className={cn(
-                      "pl-11 h-12 bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl transition-all",
+                      "pl-11 pr-11 h-12 bg-black/40 border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-amber-500/50 rounded-xl transition-all",
                       errors.password && "border-red-500/50 focus-visible:ring-red-500/50"
                     )}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-amber-500 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
                 {errors.password && (
                   <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-red-400 font-medium pl-1">

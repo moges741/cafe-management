@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
-import { Coffee, ListCheck } from 'lucide-react'
+import { Coffee, ListCheck, Package, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function BaristaLayout() {
@@ -7,6 +7,8 @@ export default function BaristaLayout() {
   
   const navItems = [
     { to: '/barista', icon: Coffee, label: 'Live Queue', exact: true },
+    { to: '/barista/history', icon: Clock, label: 'History', exact: false },
+    { to: '/barista/inventory', icon: Package, label: 'Inventory', exact: false },
     { to: '/barista/menu-status', icon: ListCheck, label: 'Menu Status', exact: false },
   ]
 

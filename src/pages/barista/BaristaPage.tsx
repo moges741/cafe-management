@@ -67,51 +67,94 @@ export default function BaristaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Coffee size={20} className="text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Barista queue</h1>
-        </div>
-        <span className={cn(
-          'flex items-center gap-2 text-xs px-3 py-1 rounded-full',
-          connected ? 'bg-primary/20 text-primary' : 'bg-destructive/20 text-destructive'
-        )}>
-          <span className={cn('w-1.5 h-1.5 rounded-full', connected ? 'bg-primary animate-pulse' : 'bg-destructive')} />
-          {connected ? 'Live' : 'Reconnecting...'}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {COLUMNS.map((col) => {
-          const orders = drinkOrders.filter(o => o.status === col.status)
-
-          return (
-            <div key={col.status} className="bg-card rounded-2xl border border-border p-3 min-h-[60vh]">
-              <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-sm font-semibold text-foreground">{col.title}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
-                  {orders.length}
-                </span>
-              </div>
-
-              <div className="space-y-2">
-                {orders.map((order) => (
-                  <div key={order.id} className="bg-background rounded-xl border border-border p-3 animate-in fade-in slide-in-from-top-2">
-                    <p className="font-bold text-foreground text-lg">{order.orderNumber}</p>
-                    <Button size="sm" className="w-full mt-2" onClick={() => handleAdvance(order.id, col.action.next)}>
-                      {col.action.label}
-                    </Button>
-                  </div>
-                ))}
-
-                {orders.length === 0 && (
-                  <p className="text-xs text-center py-8" style={{ color: '#B58B67' }}>Empty</p>
-                )}
-              </div>
+    <div className="min-h-screen bg-[#050301] p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-8 border-b border-white/10 pb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-amber-500/10 rounded-xl">
+              <Coffee size={28} className="text-amber-500" />
             </div>
-          )
-        })}
+            <div>
+              <h1 className="text-3xl font-black text-white tracking-tight">Barista Station</h1>
+              <p className="text-neutral-400 text-sm mt-1">Manage live beverage orders</p>
+            </div>
+          </div>
+          <div className={cn(
+            'flex items-center gap-2 text-xs px-4 py-2 rounded-full font-medium border',
+            connected 
+              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 
+              : 'bg-red-500/10 text-red-400 border-red-500/20'
+          )}>
+            <span className={cn('w-2 h-2 rounded-full', connected ? 'bg-amber-500 animate-pulse' : 'bg-red-500')} />
+            {connected ? 'Live Sync Active' : 'Reconnecting...'}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {COLUMNS.map((col) => {
+            const orders = drinkOrders.filter(o => o.status === col.status)
+
+            return (
+              <div key={col.status} className="bg-[#120804]/80 backdrop-blur-md rounded-[32px] border border-white/5 p-5 flex flex-col min-h-[70vh]">
+                <div className="flex items-center justify-between mb-6 px-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-8 rounded-full bg-amber-500/50" />
+                    <span className="text-lg font-bold text-white tracking-wide">{col.title}</span>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold text-sm">
+                    {orders.length}
+                  </span>
+                </div>
+
+                <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                  {orders.map((order) => (
+                    <div 
+                      key={order.id} 
+                      className="bg-black/40 rounded-2xl border border-white/10 p-5 animate-in fade-in slide-in-from-top-4 hover:border-amber-500/30 transition-all duration-300"
+                    >
+                      <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+                        <span className="font-black text-white text-xl">#{order.orderNumber}</span>
+                        {order.tableNumber && (
+                          <span className="text-xs font-semibold bg-white/10 text-neutral-300 px-2 py-1 rounded-md">
+                            Table {order.tableNumber}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-3 mb-6">
+                        {order.items?.map((item: any, i: number) => (
+                          <div key={i} className="flex items-start justify-between">
+                            <div>
+                              <p className="text-neutral-200 font-medium">{item.quantity}x {item.product?.name}</p>
+                              {item.notes && (
+                                <p className="text-xs text-amber-400/80 mt-1 italic block">— {item.notes}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <Button 
+                        size="default" 
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold h-12 rounded-xl text-base"
+                        onClick={() => handleAdvance(order.id, col.action.next)}
+                      >
+                        {col.action.label}
+                      </Button>
+                    </div>
+                  ))}
+
+                  {orders.length === 0 && (
+                    <div className="h-full flex flex-col items-center justify-center opacity-30">
+                      <Coffee className="w-12 h-12 mb-4" />
+                      <p className="text-sm font-medium">No orders in this queue</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
