@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { LogOut, Menu, X, Coffee, Building2, ChevronDown } from 'lucide-react'
+import { LogOut, Menu, X, Coffee } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppSelector, useAppDispatch } from '@/app/hooks'
 import { useLogoutMutation } from '@/features/auth/authApi'
@@ -17,11 +17,9 @@ export default function DashboardLayout() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [logout] = useLogoutMutation()
-  const { branchId, setBranch, branches } = useCurrentBranch()
+  useCurrentBranch()
 
   const navItems = user ? NAV_BY_ROLE[user.role] ?? [] : []
-  const isAdmin = user?.role === 'admin'
-  const currentBranch = branches?.find(b => b.id === branchId)
 
   // Close sidebar on route change (for mobile)
   useEffect(() => {

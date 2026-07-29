@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useForgotPasswordMutation } from '@/features/auth/authApi'
 import { CheckCircle, Mail, Coffee } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -111,9 +110,7 @@ export default function ForgotPasswordPage() {
               <p className="text-neutral-400 text-sm">
                 If an account exists for <span className="text-amber-400 font-semibold">{email}</span>, a reset link has been sent.
               </p>
-              <Button asChild className="w-full mt-4 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl">
-                <Link to="/login">Return to Login</Link>
-              </Button>
+              <Link to="/login" className="inline-flex w-full mt-4 items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold h-10 px-4 text-sm transition-colors">Return to Login</Link>
             </motion.div>
           )}
         </div>

@@ -56,6 +56,7 @@ export interface User {
   branchId?: string
   isActive?: boolean
   createdAt?: string
+  employee?: { branchId?: string }
 }
 
 export interface AuthState {
@@ -90,9 +91,11 @@ const authSlice = createSlice({
     // Handle login
     builder.addMatcher(
       authApi.endpoints.login.matchFulfilled,
-      (state, { payload }) => {
-        state.user = payload.user
-        state.isAuthenticated = true
+      (state, { payload }: any) => {
+        if (payload?.user) {
+          state.user = payload.user
+          state.isAuthenticated = true
+        }
         state.isInitializing = false
       }
     )
@@ -100,9 +103,11 @@ const authSlice = createSlice({
     // Handle register
     builder.addMatcher(
       authApi.endpoints.register.matchFulfilled,
-      (state, { payload }) => {
-        state.user = payload.user
-        state.isAuthenticated = true
+      (state, { payload }: any) => {
+        if (payload?.user) {
+          state.user = payload.user
+          state.isAuthenticated = true
+        }
         state.isInitializing = false
       }
     )

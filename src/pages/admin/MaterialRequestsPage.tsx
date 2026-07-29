@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, X, Search, Info, ShoppingBag, Eye } from 'lucide-react';
+import { Check, X, Search, ShoppingBag } from 'lucide-react';
 import {
   useGetMaterialRequestsQuery,
   useReviewMaterialRequestMutation,

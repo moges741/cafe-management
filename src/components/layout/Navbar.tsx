@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   motion,
   AnimatePresence,
@@ -215,7 +215,7 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
                           <Settings className="w-4 h-4" /> Dashboard
                         </button>
                       )}
-                      {(user.role === 'customer' || (user.role !== 'customer' && !isOwnBranch)) && (
+                      {((user.role as string) === 'customer' || ((user.role as string) !== 'customer' && !isOwnBranch)) && (
                         <button
                           onClick={() => {
                             navigate('/menu')

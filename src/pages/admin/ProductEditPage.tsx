@@ -293,7 +293,7 @@ export default function ProductEditPage() {
 
           <div className="flex gap-4 pt-4 border-t border-white/5">
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogTrigger asChild>
+              <DialogTrigger>
                 <Button 
                   type="button" 
                   disabled={isDeleting} 
@@ -311,7 +311,7 @@ export default function ProductEditPage() {
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                  <DialogClose asChild>
+                  <DialogClose>
                     <Button disabled={isDeleting} className="bg-white/5 border border-white/10 text-neutral-300 hover:bg-white/10 hover:text-white transition-colors">
                       Cancel
                     </Button>

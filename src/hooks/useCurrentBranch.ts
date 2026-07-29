@@ -51,10 +51,14 @@ export function useCurrentBranch() {
     return selectedBranchId === staffBranchId;
   }, [staffBranchId, selectedBranchId]);
 
+  // True when a staff member is browsing a branch other than their own
+  const isCustomerMode = !!staffBranchId && selectedBranchId !== staffBranchId;
+
   return {
     branchId: selectedBranchId,
     staffBranchId,
     isOwnBranch,
+    isCustomerMode,
     setBranch,
     isLoading,
     branches,

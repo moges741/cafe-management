@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { selectCartItems, selectCartTotal, selectCartBranchId } from '@/features/cart/cartSelectors'
@@ -15,7 +15,6 @@ export default function CheckoutPage() {
   const total = useAppSelector(selectCartTotal)
   const branchId = useAppSelector(selectCartBranchId)
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
 
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
   const [tableNumber, setTableNumber] = useState('')

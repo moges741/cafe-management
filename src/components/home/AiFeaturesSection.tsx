@@ -24,7 +24,7 @@ export default function AiFeaturesSection() {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { duration: 0.7, ease: [0.2, 0.65, 0.3, 0.9] },
+      transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] },
     },
   };
 
@@ -86,13 +86,13 @@ export default function AiFeaturesSection() {
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, amount: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 w-full"
         >
           {AI_FEATURES.map((feature) => (
             <motion.div
               key={feature.title}
-              variants={itemVariants}
+              variants={itemVariants as any}
               whileHover={{ y: -12 }}
               className="group relative h-full"
             >

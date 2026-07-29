@@ -86,13 +86,13 @@ export default function WhyChooseUsSection() {
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, threshold: 0.1 }}
+          viewport={{ once: true, amount: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full"
         >
           {FEATURES.map((feature) => (
             <motion.div
               key={feature.title}
-              variants={itemVariants}
+              variants={itemVariants as any}
               whileHover={{ y: -8, scale: 1.02 }}
               className="group relative bg-white/5 border border-white/10 rounded-2xl p-8 overflow-hidden backdrop-blur-xl transition-all duration-300 hover:border-amber-500/40 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)]"
             >

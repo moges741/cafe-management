@@ -97,10 +97,6 @@ interface RegisterDto {
   password: string
 }
 
-interface LoginResponse {
-  user: User
-  accessToken: string
-}
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

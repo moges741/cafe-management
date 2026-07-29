@@ -41,7 +41,7 @@ interface CreateInventoryRequest {
 export const inventoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getInventory: builder.query<InventoryItem[], GetInventoryParams | void>({
-      query: (params) => ({ url: '/inventory', params }),
+      query: (params) => ({ url: '/inventory', params: params || undefined }),
       providesTags: ['Inventory'],
     }),
 

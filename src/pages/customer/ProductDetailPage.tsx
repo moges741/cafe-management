@@ -2,13 +2,12 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Minus, Plus, ShoppingBag, Coffee, Sparkles } from 'lucide-react'
+import { Minus, Plus, ShoppingBag, Coffee, Sparkles } from 'lucide-react'
 import { useGetProductByIdQuery } from '@/features/products/productsApi'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { addItem, setBranch } from '@/features/cart/cartSlice'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import Navbar from '@/components/layout/Navbar'
 
 // Framer Motion Variants
 const fadeUp: any = {

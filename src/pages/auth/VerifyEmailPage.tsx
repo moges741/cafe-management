@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { useVerifyEmailMutation } from '@/features/auth/authApi'
-import { Button } from '@/components/ui/button'
 
 export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams()
@@ -52,9 +51,7 @@ export default function VerifyEmailPage() {
             </div>
             <h2 className="text-2xl font-bold text-foreground">Email Verified!</h2>
             <p className="text-muted-foreground">{message}</p>
-            <Button asChild className="w-full mt-4">
-              <Link to="/login">Go to Login</Link>
-            </Button>
+            <Link to="/login" className="inline-flex w-full mt-4 items-center justify-center rounded-lg border border-border bg-background px-4 h-8 text-sm font-medium transition-colors hover:bg-muted">Go to Login</Link>
           </>
         )}
 
@@ -65,9 +62,7 @@ export default function VerifyEmailPage() {
             </div>
             <h2 className="text-2xl font-bold text-foreground">Verification Failed</h2>
             <p className="text-muted-foreground">{message}</p>
-            <Button asChild variant="outline" className="w-full mt-4">
-              <Link to="/login">Back to Login</Link>
-            </Button>
+            <Link to="/login" className="inline-flex w-full mt-4 items-center justify-center rounded-lg border border-border bg-background px-4 h-8 text-sm font-medium transition-colors hover:bg-muted">Back to Login</Link>
           </>
         )}
 

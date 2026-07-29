@@ -11,7 +11,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import toast from 'react-hot-toast'
@@ -27,7 +27,7 @@ const STATUS_CONFIG: Record<string, { label: string, color: string, icon: any }>
 }
 
 // Framer Motion Variants
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -35,9 +35,9 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 }
 
 export default function OrdersPage() {

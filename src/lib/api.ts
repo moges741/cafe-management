@@ -25,6 +25,9 @@ export const baseApi = createApi({
     'KitchenStock',
     'MaterialRequest',
     'Recipe',
+    'Auth',
+    'Staff',
+    'InventoryTransaction',
   ],
   endpoints: () => ({}),
 })

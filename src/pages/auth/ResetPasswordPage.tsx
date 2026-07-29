@@ -25,9 +25,7 @@ export default function ResetPasswordPage() {
           </div>
           <h2 className="text-2xl font-bold text-foreground">Invalid Link</h2>
           <p className="text-muted-foreground">No reset token provided. Please request a new password reset link.</p>
-          <Button asChild className="w-full mt-4">
-            <Link to="/forgot-password">Request Reset Link</Link>
-          </Button>
+          <Link to="/forgot-password" className="inline-flex w-full mt-4 items-center justify-center rounded-lg border border-border bg-background px-4 h-8 text-sm font-medium transition-colors hover:bg-muted">Request Reset Link</Link>
         </div>
       </div>
     )

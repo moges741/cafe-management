@@ -1,11 +1,10 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingBag, ArrowLeft, Trash2, Plus, Minus, Coffee } from 'lucide-react'
+import { ShoppingBag, Trash2, Plus, Minus, Coffee } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { removeItem, updateQuantity } from '@/features/cart/cartSlice'
 import { selectCartItems, selectCartTotal } from '@/features/cart/cartSelectors'
 import { Button } from '@/components/ui/button'
-import Navbar from '@/components/layout/Navbar'
 
 // Framer Motion Variants
 const containerVariants: any = {

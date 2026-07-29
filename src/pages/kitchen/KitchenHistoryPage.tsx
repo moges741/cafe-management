@@ -1,5 +1,5 @@
 import { useGetOrdersQuery } from '@/features/orders/ordersApi'
-import { Clock, ChefHat, SearchX, ArrowRight } from 'lucide-react'
+import { Clock, SearchX } from 'lucide-react'
 import { useMemo, useEffect } from 'react'
 import { useAppDispatch } from '@/app/hooks'
 import { socketActions } from '@/features/socket/socketMiddleware'

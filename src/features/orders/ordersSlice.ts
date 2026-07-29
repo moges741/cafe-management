@@ -1,12 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-interface TrackedOrder {
+export interface TrackedOrder {
   id:          string
   orderNumber: string
   status:      string
   branchId:    string
   createdAt?:  string
   payment?:    { id: string; status: string; method: string } | null
+  items?:      Array<{ id?: string; productId?: string; quantity: number; product?: { name: string; price?: string | number } }>
+  type?:       string
+  tableNumber?: number | string | null
 }
 
 interface OrdersState {

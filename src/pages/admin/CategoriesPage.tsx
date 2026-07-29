@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, ImagePlus, Trash2, PencilLine, RefreshCw, Tag, Sparkles, Layers, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   useCreateCategoryMutation,
   useDeleteCategoryMutation,
@@ -14,7 +14,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 

@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Package, ChefHat, Users, BarChart3,
   UtensilsCrossed, Coffee, ClipboardList, Boxes, Store, Tags,
-  Database, Scroll
+  Database
 } from 'lucide-react'
 
 export interface NavItem {

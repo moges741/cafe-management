@@ -5,9 +5,8 @@ import { useGetOrderByIdQuery } from '@/features/orders/ordersApi'
 import { upsertOrder } from '@/features/orders/ordersSlice'
 import { socketActions } from '@/features/socket/socketMiddleware'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Coffee, CheckCircle2, Clock, ChefHat, Check, XCircle, ArrowLeft } from 'lucide-react'
-import Navbar from '@/components/layout/Navbar'
 
 const STEPS = [
   { key: 'pending',    label: 'Order Received',   icon: Clock },
@@ -114,57 +113,81 @@ export default function OrderTrackingPage() {
         </motion.div>
 
         {/* Tracking Timeline */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="mt-8 bg-white/[0.02] border border-white/5 rounded-[32px] p-8 backdrop-blur-xl"
-        >
-          <div className="relative space-y-8 before:absolute before:inset-0 before:ml-[23px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/10 before:to-transparent">
-            {STEPS.map((step, i) => {
-              const isDone   = i < currentStepIndex || isCompleted
-              const isActive = i === currentStepIndex
-              const isFuture = i > currentStepIndex
-              const StepIcon = step.icon
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.1 }}
+  className="mt-8 bg-white/[0.02] border border-white/5 rounded-[32px] p-8 backdrop-blur-xl"
+>
+  <div className="relative space-y-8 before:absolute before:inset-0 before:ml-[23px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/10 before:to-transparent">
+    {STEPS.map((step, i) => {
+      const isDone = i < currentStepIndex || isCompleted
+      const isActive = i === currentStepIndex
 
-              return (
-                <div key={step.key} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  
-                  {/* Icon Marker */}
-                  <div className={cn(
-                    "flex items-center justify-center w-12 h-12 rounded-2xl border-2 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xl transition-all duration-500 z-10",
-                    isActive 
-                      ? "bg-amber-500 border-amber-400 text-black scale-110 shadow-[0_0_20px_rgba(245,158,11,0.3)]" 
-                      : isDone 
-                        ? "bg-white/10 border-white/20 text-white" 
-                        : "bg-black/50 border-white/5 text-neutral-600"
-                  )}>
-                    <StepIcon size={20} className={cn(isActive && "animate-pulse")} />
-                  </div>
-                  
-                  {/* Content Box */}
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-4 rounded-2xl bg-black/40 border border-white/5 shadow-inner">
-                    <div className="flex items-center justify-between">
-                      <h3 className={cn(
-                        "font-bold text-base tracking-tight transition-colors",
-                        isActive ? "text-amber-500" : isDone ? "text-white" : "text-neutral-500"
-                      )}>
-                        {step.label}
-                      </h3>
-                      {isActive && (
-                        <span className="flex gap-1 ml-3 shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+      // ✅ Get the icon component for this step
+      const StepIcon = step.icon
+
+      return (
+        <div
+          key={step.key}
+          className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
+        >
+          {/* Icon Marker */}
+          <div
+            className={cn(
+              "flex items-center justify-center w-12 h-12 rounded-2xl border-2 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-xl transition-all duration-500 z-10",
+              isActive
+                ? "bg-amber-500 border-amber-400 text-black scale-110 shadow-[0_0_20px_rgba(245,158,11,0.3)]"
+                : isDone
+                ? "bg-white/10 border-white/20 text-white"
+                : "bg-black/50 border-white/5 text-neutral-600"
+            )}
+          >
+            <StepIcon
+              size={20}
+              className={cn(isActive && "animate-pulse")}
+            />
           </div>
-        </motion.div>
+
+          {/* Content Box */}
+          <div className="w-[calc(100%-4rem)] md:w-[calc(50%-3rem)] p-4 rounded-2xl bg-black/40 border border-white/5 shadow-inner">
+            <div className="flex items-center justify-between">
+              <h3
+                className={cn(
+                  "font-bold text-base tracking-tight transition-colors",
+                  isActive
+                    ? "text-amber-500"
+                    : isDone
+                    ? "text-white"
+                    : "text-neutral-500"
+                )}
+              >
+                {step.label}
+              </h3>
+
+              {isActive && (
+                <span className="flex gap-1 ml-3 shrink-0">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )
+    })}
+  </div>
+</motion.div>
 
       </div>
     </div>

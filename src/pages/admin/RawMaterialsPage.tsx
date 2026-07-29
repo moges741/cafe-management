@@ -95,7 +95,7 @@ export default function RawMaterialsPage() {
           minStockLevel,
           description: description || undefined,
           branchId: branchId || undefined,
-        }).unwrap();
+        } as any).unwrap();
         toast.success('Raw material added to catalog');
       }
       setIsModalOpen(false);

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react'
-import { Plus, Search, Store, MapPin, Globe, Trash2, Edit, Sparkles, Building2 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, Search, Store, MapPin, Globe, Trash2, Edit, Building2 } from 'lucide-react'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { 
   useGetBranchesQuery, 
   useCreateBranchMutation, 
@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 // Framer Motion Variants
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -34,9 +34,9 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 }
 
 export default function BranchesPage() {
@@ -129,7 +129,7 @@ export default function BranchesPage() {
           </div>
 
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
+            <DialogTrigger>
               <Button 
                 onClick={handleOpenCreate} 
                 className="gap-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl px-6 py-6 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all hover:-translate-y-0.5"
