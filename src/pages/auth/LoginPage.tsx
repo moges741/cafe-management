@@ -47,6 +47,7 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
+const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -301,7 +302,7 @@ export default function LoginPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => window.location.href = 'http://localhost:4000/api/v1/auth/google'}
+                onClick={() => window.location.href = GOOGLE_AUTH_URL}
                 className="w-full h-12 bg-white/5 border-white/10 hover:bg-white/10 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-3"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5">
