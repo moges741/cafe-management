@@ -20,6 +20,7 @@ import { useAppSelector, useAppDispatch } from '@/app/hooks'
 import { clearUser, type UserRole } from '@/features/auth/authSlice'
 // import BranchSelector from '@/components/shared/BranchSelector'
 import Logo from '/logo.svg'
+import { getDashboardRouteForRole } from '@/features/auth/roleRoutes'
 
 type NavItem = { name: string; href: string }
 
@@ -30,16 +31,6 @@ const NAV_LINKS: NavItem[] = [
   { name: 'Gallery', href: '/gallery' },
   { name: 'Contact', href: '/contact' },
 ]
-
-const ROLE_ROUTES: Record<UserRole, string> = {
-  admin: '/admin',
-  manager: '/admin',
-  kitchen: '/kitchen',
-  cashier: '/cashier',
-  waiter: '/waiter',
-  barista: '/barista',
-  customer: '/menu',
-}
 
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
@@ -80,8 +71,7 @@ export default function Navbar() {
 
   const handleDashboardNavigate = () => {
     if (user?.role) {
-      const dashboardRoute = ROLE_ROUTES[user.role]
-      navigate(dashboardRoute)
+      navigate(getDashboardRouteForRole(user.role))
       setIsDropdownOpen(false)
       setIsMobileMenuOpen(false)
     }
@@ -207,14 +197,12 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
                       transition={{ duration: 0.2 }}
                       className="absolute right-0 mt-4 w-48 rounded-2xl bg-[#120804]/90 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden py-2"
                     >
-                      {user.role !== 'customer' && isOwnBranch && (
-                        <button
-                          onClick={handleDashboardNavigate}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-amber-500/10 hover:text-amber-400 transition-colors text-left"
-                        >
-                          <Settings className="w-4 h-4" /> Dashboard
-                        </button>
-                      )}
+                      <button
+                        onClick={handleDashboardNavigate}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-amber-500/10 hover:text-amber-400 transition-colors text-left"
+                      >
+                        <Settings className="w-4 h-4" /> Dashboard
+                      </button>
                       {((user.role as string) === 'customer' || ((user.role as string) !== 'customer' && !isOwnBranch)) && (
                         <button
                           onClick={() => {
@@ -325,19 +313,37 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ delay: 0.4 }}
-              className="p-8 pb-12 grid grid-cols-2 gap-4 border-t border-white/10 bg-white/5"
+              className="p-8 pb-12 border-t border-white/10 bg-white/5"
             >
               {isAuthenticated && user ? (
-                <button
-                  onClick={() => {
-                    handleLogout()
-                    setIsMobileMenuOpen(false)
-                  }}
-                  className="col-span-2 py-4 rounded-xl border border-white/20 text-white font-semibold flex items-center justify-center gap-2"
-                >
-                  <LogOut className="w-5 h-5 text-amber-400" />
-                  Sign Out
-                </button>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={handleCartClick}
+                      className="py-4 rounded-xl border border-white/20 text-white font-semibold flex items-center justify-center gap-2 hover:bg-white/5 transition-colors"
+                    >
+                      <ShoppingBag className="w-5 h-5 text-neutral-400" />
+                      Cart ({cartItems.length})
+                    </button>
+                    <button
+                      onClick={handleDashboardNavigate}
+                      className="py-4 rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-400 font-semibold flex items-center justify-center gap-2 hover:bg-amber-500/15 transition-colors"
+                    >
+                      <Settings className="w-5 h-5" />
+                      Dashboard
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => {
+                      handleLogout()
+                      setIsMobileMenuOpen(false)
+                    }}
+                    className="w-full py-4 rounded-xl border border-white/20 text-white font-semibold flex items-center justify-center gap-2"
+                  >
+                    <LogOut className="w-5 h-5 text-amber-400" />
+                    Sign Out
+                  </button>
+                </div>
               ) : (
                 <>
                   <button

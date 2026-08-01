@@ -16,6 +16,7 @@ import { useAppDispatch } from '@/app/hooks'
 import { cn } from '@/lib/utils'
 import Spinner from '@/components/ui/Spinner'
 import Logo from '/logo.svg'
+import { getDashboardRouteForRole } from '@/features/auth/roleRoutes'
 // Framer Motion Variants
 const fadeUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -78,11 +79,7 @@ const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
         if (from) {
           navigate(from, { replace: true })
         } else {
-          if (role === 'admin' || role === 'manager') navigate('/admin')
-          else if (role === 'kitchen') navigate('/kitchen')
-          else if (role === 'cashier') navigate('/cashier') 
-          else if (role === 'waiter') navigate('/waiter')
-          else navigate('/')
+          navigate(getDashboardRouteForRole(role), { replace: true })
         }
       }
     } catch (err: any) {

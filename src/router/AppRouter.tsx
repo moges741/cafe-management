@@ -7,6 +7,7 @@ import CartPage from '@/pages/customer/CartPage';
 import CheckoutPage from '@/pages/customer/CheckoutPage';
 import PaymentSuccessPage from '@/pages/customer/PaymentSuccessPage';
 import OrderTrackingPage from '@/pages/customer/OrderTrackingPage';
+import CustomerDashboardPage from '@/pages/customer/CustomerDashboardPage';
 import KitchenDisplayPage from '@/pages/kitchen/KitchenDisplayPage';
 import KitchenLayout from '@/pages/kitchen/KitchenLayout';
 import KitchenHistoryPage from '@/pages/kitchen/KitchenHistoryPage';
@@ -85,6 +86,8 @@ export default function AppRouter() {
           <Route path="/gallery" element={<GallerySection />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/menu/:id" element={<ProductDetailPage />} />
+          <Route path="/customer/dashboard" element={<ProtectedRoute allowedRoles={['customer']}><CustomerDashboardPage /></ProtectedRoute>} />
+          <Route path="/customer" element={<ProtectedRoute allowedRoles={['customer']}><CustomerDashboardPage /></ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
           <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
           <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} />

@@ -6,6 +6,7 @@ import { authApi } from '@/features/auth/authApi';
 import { useAppDispatch } from '@/app/hooks';
 import { useSyncCartMutation } from '@/features/cart/cartApi';
 import Spinner from '@/components/ui/Spinner';
+import { getDashboardRouteForRole } from '@/features/auth/roleRoutes';
 
 /**
  * This page is the frontend redirect target after Google OAuth completes.
@@ -54,11 +55,7 @@ export default function GoogleCallbackPage() {
             },
           });
 
-          if (role === 'admin' || role === 'manager') navigate('/admin', { replace: true });
-          else if (role === 'kitchen') navigate('/kitchen', { replace: true });
-          else if (role === 'cashier') navigate('/cashier', { replace: true });
-          else if (role === 'waiter') navigate('/waiter', { replace: true });
-          else navigate('/', { replace: true });
+          navigate(getDashboardRouteForRole(role), { replace: true });
         } else {
           toast.error('Authentication failed. Please try again.');
           navigate('/login', { replace: true });
