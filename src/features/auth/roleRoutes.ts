@@ -10,7 +10,8 @@ export const ROLE_DASHBOARD_ROUTES: Record<UserRole, string> = {
   customer: '/customer/dashboard',
 }
 
-export function getDashboardRouteForRole(role?: UserRole | null) {
+export function getDashboardRouteForRole(role?: UserRole | string | null) {
   if (!role) return '/'
-  return ROLE_DASHBOARD_ROUTES[role] ?? '/'
+  const normalizedRole = role.toLowerCase() as UserRole
+  return ROLE_DASHBOARD_ROUTES[normalizedRole] ?? '/'
 }

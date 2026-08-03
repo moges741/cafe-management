@@ -242,13 +242,28 @@ className="fixed top-6 left-0 right-0 mx-auto w-[calc(100%-2rem)] md:w-[calc(100
             )}
           </div>
 
-          {/* ----- MOBILE MENU TOGGLE ----- */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="lg:hidden relative z-10 p-2 text-neutral-300 hover:text-white transition-colors"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* ----- MOBILE MENU TOGGLE AND CART ----- */}
+          <div className="flex lg:hidden items-center gap-3 relative z-10">
+            <motion.button
+              onClick={handleCartClick}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative p-2 rounded-full bg-white/5 border border-white/10 text-neutral-300 hover:text-amber-400 hover:bg-amber-500/10 transition-all"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {cartItems.length > 0 && (
+                <span className="absolute top-0 right-0 w-4 h-4 bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center rounded-full translate-x-1 -translate-y-1 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+                  {cartItems.length}
+                </span>
+              )}
+            </motion.button>
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 text-neutral-300 hover:text-white transition-colors"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          </div>
         </motion.div>
       </motion.nav>
 
