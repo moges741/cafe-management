@@ -30,14 +30,16 @@ export default function ContactPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to send message')
+        const errText = await response.text()
+        console.error('Server error response:', errText)
+        throw new Error(`Server returned ${response.status}: ${errText}`)
       }
 
       toast.success('Message sent successfully! I will get back to you soon.')
       setFormData({ name: '', email: '', subject: '', message: '' })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Contact form error:', error)
-      toast.error('Failed to send message. Please try again later or contact me directly via email.')
+      toast.error(`Failed to send message: ${error.message || 'Please try again later'}`)
     } finally {
       setIsSubmitting(false)
     }
