@@ -12,20 +12,35 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name || !formData.email || !formData.message) {
-      toast.error('Please fill in all required fields.')
+    if (!formData.name || !formData.email || !formData.message || !formData.subject) {
+      toast.error('Please fill in all fields.')
       return
     }
     
     setIsSubmitting(true)
-    // Simulate form submission (e.g. EmailJS or backend API)
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send message')
+      }
+
       toast.success('Message sent successfully! I will get back to you soon.')
       setFormData({ name: '', email: '', subject: '', message: '' })
+    } catch (error) {
+      console.error('Contact form error:', error)
+      toast.error('Failed to send message. Please try again later or contact me directly via email.')
+    } finally {
       setIsSubmitting(false)
-    }, 1000)
+    }
   }
 
   return (
