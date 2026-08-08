@@ -34,8 +34,8 @@ export default function CashierPosPage() {
   }).useConfirmCashMutation()
 
   const incomingPayments = useMemo(() => {
-    // Only pending orders that are NOT paid
-    return allOrders.filter(o => o.status === 'pending' && o.payment?.status !== 'completed')
+    // Only pending orders that are NOT paid AND are cash method
+    return allOrders.filter(o => o.status === 'pending' && o.payment?.status !== 'completed' && o.payment?.method === 'cash')
   }, [allOrders])
 
   const paymentHistory = useMemo(() => {

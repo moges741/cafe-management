@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { selectCartItems, selectCartTotal, selectCartBranchId } from '@/features/cart/cartSelectors'
@@ -19,13 +19,15 @@ export default function CheckoutPage() {
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
   const [tableNumber, setTableNumber] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'chapa'>('chapa')
+  const navigate = useNavigate()
 
   const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation()
   const [initializePayment, { isLoading: isInitializingPayment }] = useInitializePaymentMutation()
 
   const isSubmitting = isCreatingOrder || isInitializingPayment
 
-  const handlePayWithChapa = async () => {
+  const handleCheckout = async () => {
     // Validation
     if (!items || items.length === 0) {
       toast.error('Your cart is empty')
@@ -42,8 +44,8 @@ export default function CheckoutPage() {
       return
     }
 
-    if (!phoneNumber) {
-      toast.error('Phone number is required for payment')
+    if (paymentMethod === 'chapa' && !phoneNumber) {
+      toast.error('Phone number is required for Chapa payment')
       return
     }
 
@@ -69,7 +71,8 @@ export default function CheckoutPage() {
       // Step 2 — initialize Chapa payment for that order
       const paymentPayload = {
         orderId: order.id.trim(),
-        phoneNumber: phoneNumber.trim(),
+        phoneNumber: phoneNumber.trim() || undefined,
+        method: paymentMethod,
       }
 
       console.log('Initializing payment with payload:', paymentPayload)
@@ -80,8 +83,10 @@ export default function CheckoutPage() {
       // Step 3 — clear the cart now that the order is safely created
       dispatch(clearCart())
 
-      // Step 4 — redirect the browser to Chapa's hosted checkout
-      if (payment.checkoutUrl) {
+      // Step 4 — redirect the browser based on payment method
+      if (payment.method === 'cash') {
+        navigate(`/order/${order.id}/track`)
+      } else if (payment.checkoutUrl) {
         window.location.href = payment.checkoutUrl
       } else {
         toast.error('No checkout URL received from payment provider')
@@ -159,17 +164,39 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Phone number */}
-        <div className="space-y-1.5">
-          <Label htmlFor="phone">Phone number (for payment)</Label>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="0912345678"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
+        {/* Payment Method */}
+        <div className="space-y-2">
+          <Label>Payment Method</Label>
+          <div className="flex gap-2">
+            {(['chapa', 'cash'] as const).map((method) => (
+              <button
+                key={method}
+                onClick={() => setPaymentMethod(method)}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors ${
+                  paymentMethod === method
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-transparent text-foreground border-border'
+                }`}
+              >
+                {method === 'chapa' ? 'Pay with Chapa' : 'Pay Cash at Counter'}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Phone number */}
+        {paymentMethod === 'chapa' && (
+          <div className="space-y-1.5">
+            <Label htmlFor="phone">Phone number (for payment)</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="0912345678"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Order summary */}
         <div className="border border-border rounded-xl p-4 bg-card space-y-2">
@@ -193,10 +220,10 @@ export default function CheckoutPage() {
         <Button
           className="w-full"
           size="lg"
-          onClick={handlePayWithChapa}
+          onClick={handleCheckout}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Processing...' : `Pay ${total.toFixed(0)} ETB with Chapa`}
+          {isSubmitting ? 'Processing...' : paymentMethod === 'chapa' ? `Pay ${total.toFixed(0)} ETB with Chapa` : `Place Order (Pay ${total.toFixed(0)} ETB Cash)`}
         </Button>
 
         <Link to="/cart">
