@@ -2,6 +2,7 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useAppSelector } from '@/app/hooks'
 import type { RootState } from '@/app/store'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
+import GlobalLoader from '@/components/shared/GlobalLoader'
 
 interface ProtectedRouteProps {
   children:     React.ReactNode
@@ -14,7 +15,7 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   const { isCustomerMode } = useCurrentBranch()
 
   // Still checking session — don't decide anything yet
-  if (isInitializing) return null
+  if (isInitializing) return <GlobalLoader />
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />
