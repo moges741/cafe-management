@@ -1,16 +1,35 @@
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CheckCircle2, ArrowRight, FileText, Clock, Coffee } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useGetOrderByIdQuery } from '@/features/orders/ordersApi'
+import { useVerifyChapaPaymentMutation } from '@/features/payments/paymentsApi'
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
   const orderId = searchParams.get('orderId')
 
-  const { data: order, isLoading } = useGetOrderByIdQuery(orderId!, {
+  const { data: order, isLoading: isOrderLoading, refetch } = useGetOrderByIdQuery(orderId!, {
     skip: !orderId,
   })
+
+  const [verifyPayment, { isLoading: isVerifying }] = useVerifyChapaPaymentMutation()
+
+  useEffect(() => {
+    if (orderId) {
+      verifyPayment(orderId)
+        .unwrap()
+        .then(() => {
+          refetch()
+        })
+        .catch((err) => {
+          console.error('Chapa verification failed:', err)
+        })
+    }
+  }, [orderId, verifyPayment, refetch])
+
+  const isLoading = isOrderLoading || isVerifying
 
   return (
     <div className="min-h-screen bg-[#050301] flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-amber-500/30">

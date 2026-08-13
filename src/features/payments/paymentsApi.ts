@@ -23,10 +23,19 @@ export const paymentsApi = baseApi.injectEndpoints({
     }),
 
     confirmCashPayment: builder.mutation<any, { orderId: string }>({
-  query: (body) => ({ url: '/payments/cash-confirm', method: 'POST', body }),
-  invalidatesTags: ['Order', 'Payment'],
-}),
+      query: (body) => ({ url: '/payments/cash-confirm', method: 'POST', body }),
+      invalidatesTags: ['Order', 'Payment'],
+    }),
+
+    verifyChapaPayment: builder.mutation<{ status: string; orderNumber: string }, string>({
+      query: (orderId) => ({ url: `/payments/verify/${orderId}`, method: 'POST' }),
+      invalidatesTags: ['Order', 'Payment'],
+    }),
   }),
 })
 
-export const { useInitializePaymentMutation, useConfirmCashPaymentMutation } = paymentsApi
+export const {
+  useInitializePaymentMutation,
+  useConfirmCashPaymentMutation,
+  useVerifyChapaPaymentMutation,
+} = paymentsApi
