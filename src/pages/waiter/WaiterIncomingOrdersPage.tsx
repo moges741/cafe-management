@@ -4,7 +4,7 @@ import { Clock, Send, ConciergeBell, AlertCircle } from 'lucide-react'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import toast from 'react-hot-toast'
 import { useMemo, useEffect } from 'react'
-import { useAppDispatch } from '@/app/hooks'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { socketActions } from '@/features/socket/socketMiddleware'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SkeletonOrderRow } from '@/components/ui/Skeleton'
@@ -36,14 +36,24 @@ export default function WaiterIncomingOrdersPage() {
   }, [dispatch, branchId])
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation()
 
+  // Also read from the live Redux socket slice so payment status updates
+  // (e.g. Chapa webhook) are reflected immediately without a full refetch
+  const liveOrdersById = useAppSelector(state => state.orders.byId)
+
   const incomingOrders = useMemo(() => {
-    return allOrders.filter(o => {
-      if (o.status !== 'pending') return false;
-      // Hide unpaid Chapa orders until webhook confirms them
-      if (o.payment?.method === 'chapa' && o.payment?.status !== 'completed') return false;
-      return true;
-    })
-  }, [allOrders])
+    return allOrders
+      .map(o => {
+        // Merge live payment state from socket updates over the API data
+        const liveOrder = liveOrdersById[o.id]
+        return liveOrder ? { ...o, payment: liveOrder.payment ?? o.payment } : o
+      })
+      .filter(o => {
+        if (o.status !== 'pending') return false
+        // Hide Chapa orders until the webhook confirms payment
+        if (o.payment?.method === 'chapa' && o.payment?.status !== 'completed') return false
+        return true
+      })
+  }, [allOrders, liveOrdersById])
 
   const handleSendToKitchen = async (orderId: string) => {
     try {

@@ -2,7 +2,7 @@ import type { Middleware } from '@reduxjs/toolkit'
 import toast from 'react-hot-toast'
 import { getSocket } from '@/lib/socket'
 import { setConnected, roomJoined } from './socketSlice'
-import { upsertOrder, updateOrderStatus } from '../orders/ordersSlice'
+import { upsertOrder, updateOrderStatus, updateOrderPayment } from '../orders/ordersSlice'
 import { ordersApi } from '../orders/ordersApi'
 
 // Action creators for things a COMPONENT can dispatch to control the socket.
@@ -60,6 +60,10 @@ export const socketMiddleware: Middleware = (store) => {
         orderId: data.orderId,
         status:  data.status,
       }))
+      // If payment data is included (e.g. Chapa just confirmed), patch it too
+      if (data.payment) {
+        store.dispatch(updateOrderPayment({ orderId: data.orderId, payment: data.payment }))
+      }
       store.dispatch(ordersApi.util.invalidateTags(['Order']))
     })
 
@@ -69,6 +73,10 @@ export const socketMiddleware: Middleware = (store) => {
         orderId: data.orderId,
         status:  data.status,
       }))
+      // If payment data is included, patch it too
+      if (data.payment) {
+        store.dispatch(updateOrderPayment({ orderId: data.orderId, payment: data.payment }))
+      }
       store.dispatch(ordersApi.util.invalidateTags(['Order']))
     })
 

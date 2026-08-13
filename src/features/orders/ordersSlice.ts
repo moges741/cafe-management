@@ -32,8 +32,7 @@ const ordersSlice = createSlice({
       state.byId[action.payload.id] = action.payload
     },
 
-    // Called when order.status.updated fires — only patches the status field,
-    // doesn't need the full order object
+    // Called when order.status.updated fires — only patches the status field
     updateOrderStatus: (
       state,
       action: PayloadAction<{ orderId: string; status: string }>
@@ -43,8 +42,20 @@ const ordersSlice = createSlice({
         order.status = action.payload.status
       }
     },
+
+    // Called when a payment status changes (e.g. Chapa webhook confirms) —
+    // patches only the payment field so waiter sees "Paid" instantly
+    updateOrderPayment: (
+      state,
+      action: PayloadAction<{ orderId: string; payment: { id: string; status: string; method: string } | null }>
+    ) => {
+      const order = state.byId[action.payload.orderId]
+      if (order) {
+        order.payment = action.payload.payment
+      }
+    },
   },
 })
 
-export const { upsertOrder, updateOrderStatus } = ordersSlice.actions
+export const { upsertOrder, updateOrderStatus, updateOrderPayment } = ordersSlice.actions
 export default ordersSlice.reducer
