@@ -5,7 +5,7 @@ import { Clock, CheckCircle, CreditCard, History, ChefHat, AlertCircle } from 'l
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import toast from 'react-hot-toast'
 import { useMemo, useEffect } from 'react'
-import { useAppDispatch } from '@/app/hooks'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { socketActions } from '@/features/socket/socketMiddleware'
 import { cn } from '@/lib/utils'
 
@@ -33,17 +33,43 @@ export default function CashierPosPage() {
     })
   }).useConfirmCashMutation()
 
+  // Read live socket orders so new cash orders appear instantly without refresh
+  const liveOrdersById = useAppSelector(state => state.orders.byId)
+
+  // Merge RTK Query data with live Redux data.
+  // If an order exists in the live store, use its fresh payment/status from socket.
+  const mergedOrders = useMemo(() => {
+    const liveMap = liveOrdersById
+    // Start from RTK Query as the source of truth for full order objects (items, customer, etc)
+    const merged = allOrders.map(o => {
+      const live = liveMap[o.id]
+      if (!live) return o
+      return { ...o, status: live.status, payment: live.payment ?? o.payment }
+    })
+    // Also add orders that came in purely via socket (not yet in RTK cache)
+    Object.values(liveMap).forEach(live => {
+      if (!merged.find(o => o.id === live.id)) {
+        merged.push(live as any)
+      }
+    })
+    return merged
+  }, [allOrders, liveOrdersById])
+
   const incomingPayments = useMemo(() => {
-    // Only pending orders that are NOT paid AND are cash method
-    return allOrders.filter(o => o.status === 'pending' && o.payment?.status !== 'completed' && o.payment?.method === 'cash')
-  }, [allOrders])
+    // Only pending cash orders that are NOT yet paid
+    return mergedOrders.filter(o =>
+      o.status === 'pending' &&
+      o.payment?.method === 'cash' &&
+      o.payment?.status !== 'completed'
+    )
+  }, [mergedOrders])
 
   const paymentHistory = useMemo(() => {
     // Any order that has been paid, sorted by newest first
-    return allOrders
+    return mergedOrders
       .filter(o => o.payment?.status === 'completed')
       .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime())
-  }, [allOrders])
+  }, [mergedOrders])
 
   const handleConfirmCash = async (orderId: string) => {
     try {
