@@ -41,29 +41,23 @@ export default function WaiterIncomingOrdersPage() {
   const liveOrdersById = useAppSelector(state => state.orders.byId)
 
   const incomingOrders = useMemo(() => {
-    // Merge RTK Query orders with live socket Redux state
-    const merged = allOrders.map(o => {
-      const live = liveOrdersById[o.id]
-      if (!live) return o
-      return {
-        ...o,
-        status: live.status,
-        payment: live.payment !== undefined ? live.payment : o.payment,
-      }
-    })
-    // Also surface orders that arrived purely via socket
-    Object.values(liveOrdersById).forEach(live => {
-      if (!merged.find(o => o.id === live.id)) {
-        merged.push(live as any)
-      }
-    })
-
-    return merged.filter(o => {
-      if (o.status !== 'pending') return false
-      // Hide Chapa orders until the Chapa webhook confirms payment as completed
-      if (o.payment?.method === 'chapa' && o.payment?.status !== 'completed') return false
-      return true
-    })
+    return allOrders
+      .map(o => {
+        // Patch payment from live Redux slice if socket has updated it
+        // (e.g. Chapa webhook just confirmed) — RTK Query will catch up on next refetch
+        const live = liveOrdersById[o.id]
+        const payment = (live?.payment && live.payment.status !== o.payment?.status)
+          ? live.payment
+          : o.payment
+        return { ...o, payment }
+      })
+      .filter(o => {
+        // Waiter only sees pending orders
+        if (o.status !== 'pending') return false
+        // Chapa orders are hidden until the webhook marks payment as completed
+        if (o.payment?.method === 'chapa' && o.payment?.status !== 'completed') return false
+        return true
+      })
   }, [allOrders, liveOrdersById])
 
   const handleSendToKitchen = async (orderId: string) => {

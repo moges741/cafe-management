@@ -60,7 +60,7 @@ export const socketMiddleware: Middleware = (store) => {
         orderId: data.orderId,
         status:  data.status,
       }))
-      // If payment data is included (e.g. Chapa just confirmed), patch it too
+      // Only update payment if backend actually sent it (not null)
       if (data.payment) {
         store.dispatch(updateOrderPayment({ orderId: data.orderId, payment: data.payment }))
       }
@@ -73,9 +73,17 @@ export const socketMiddleware: Middleware = (store) => {
         orderId: data.orderId,
         status:  data.status,
       }))
-      // If payment data is included, patch it too
+      // Only update payment if backend actually sent it (not null)
+      // data.payment is explicitly set to null for orders without payment — only
+      // update if the backend sent a non-null payment object
       if (data.payment) {
+        const wasUnpaid = !store.getState().orders.byId[data.orderId]?.payment?.status
+          || store.getState().orders.byId[data.orderId]?.payment?.status === 'pending'
         store.dispatch(updateOrderPayment({ orderId: data.orderId, payment: data.payment }))
+        // Toast when Chapa payment is confirmed
+        if (data.payment.method === 'chapa' && data.payment.status === 'completed' && wasUnpaid) {
+          toast.success(`Order paid via Chapa — ready for kitchen!`, { icon: '✅' })
+        }
       }
       store.dispatch(ordersApi.util.invalidateTags(['Order']))
     })
