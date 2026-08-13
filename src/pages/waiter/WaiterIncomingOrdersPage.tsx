@@ -37,7 +37,12 @@ export default function WaiterIncomingOrdersPage() {
   const [updateStatus, { isLoading: isUpdating }] = useUpdateOrderStatusMutation()
 
   const incomingOrders = useMemo(() => {
-    return allOrders.filter(o => o.status === 'pending')
+    return allOrders.filter(o => {
+      if (o.status !== 'pending') return false;
+      // Hide unpaid Chapa orders until webhook confirms them
+      if (o.payment?.method === 'chapa' && o.payment?.status !== 'completed') return false;
+      return true;
+    })
   }, [allOrders])
 
   const handleSendToKitchen = async (orderId: string) => {

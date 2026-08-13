@@ -12,15 +12,13 @@ import { Timer, AlertCircle, ChefHat } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const COLUMNS = [
-  { status: 'pending',    title: 'New Orders',  accent: 'from-blue-500/20 to-blue-500/5',   border: 'border-blue-500/30',   text: 'text-blue-400' },
-  { status: 'confirmed',  title: 'Confirmed',   accent: 'from-purple-500/20 to-purple-500/5', border: 'border-purple-500/30', text: 'text-purple-400' },
+  { status: 'confirmed',  title: 'New Orders',   accent: 'from-blue-500/20 to-blue-500/5', border: 'border-blue-500/30', text: 'text-blue-400' },
   { status: 'in_kitchen', title: 'Preparing',   accent: 'from-amber-500/20 to-amber-500/5', border: 'border-amber-500/30',  text: 'text-amber-400' },
   { status: 'ready',      title: 'Ready',       accent: 'from-emerald-500/20 to-emerald-500/5', border: 'border-emerald-500/30', text: 'text-emerald-400' },
 ]
 
 const NEXT_STATUS: Record<string, { label: string; next: string; color: string }> = {
-  pending:    { label: 'Acknowledge', next: 'confirmed',  color: 'bg-blue-500 hover:bg-blue-400' },
-  confirmed:  { label: 'Start Prep',  next: 'in_kitchen', color: 'bg-purple-500 hover:bg-purple-400' },
+  confirmed:  { label: 'Start Prep',  next: 'in_kitchen', color: 'bg-blue-500 hover:bg-blue-400' },
   in_kitchen: { label: 'Mark Ready',  next: 'ready',      color: 'bg-amber-500 hover:bg-amber-400 text-black' },
   ready:      { label: 'Complete',    next: 'completed',  color: 'bg-emerald-500 hover:bg-emerald-400 text-black' },
 }
