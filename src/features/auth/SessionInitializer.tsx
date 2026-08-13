@@ -4,7 +4,6 @@ import { useGetMeQuery } from './authApi'
 import { setUser, clearUser } from './authSlice'
 import { socketActions } from '@/features/socket/socketMiddleware'
 import { useLazyGetCartQuery } from '@/features/cart/cartApi'
-import { motion } from 'framer-motion'
 
 export default function SessionInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
