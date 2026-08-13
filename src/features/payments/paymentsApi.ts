@@ -3,12 +3,15 @@ import { baseApi } from '@/lib/api'
 interface InitializePaymentRequest {
   orderId:      string
   phoneNumber?: string
+  method?:      'cash' | 'chapa'
 }
 
 interface InitializePaymentResponse {
-  checkoutUrl: string
-  txRef:       string
-  amount:      string
+  success?:    boolean
+  method?:     'cash' | 'chapa'
+  checkoutUrl?: string
+  txRef?:       string
+  amount:      string | number
   orderNumber: string
 }
 

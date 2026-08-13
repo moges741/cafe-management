@@ -5,7 +5,6 @@ import { Coffee, Home, ChevronRight, CornerDownLeft } from 'lucide-react'
 export default function NotFoundPage() {
   return (
     <div className="min-h-screen bg-[#050301] flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-amber-500/30">
-      {/* ================= BACKGROUND GLOWS ================= */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-amber-950/15 rounded-full blur-[140px] pointer-events-none mix-blend-screen" />
       <div className="absolute top-[10%] right-[10%] w-[30vw] h-[30vw] bg-orange-950/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
       <div className="absolute bottom-[10%] left-[10%] w-[40vw] h-[40vw] bg-amber-900/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
