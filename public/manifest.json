@@ -1,0 +1,52 @@
+{
+  "name": "Mr. Cafe - Smart Cafe & Kitchen System",
+  "short_name": "Mr. Cafe",
+  "description": "Real-time smart cafe management and customer ordering app",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "theme_color": "#050505",
+  "background_color": "#050505",
+  "dir": "ltr",
+  "lang": "en",
+  "categories": ["food", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Menu",
+      "short_name": "Menu",
+      "description": "Browse cafe menu",
+      "url": "/menu",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Cart",
+      "short_name": "Cart",
+      "description": "View shopping cart",
+      "url": "/cart",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
