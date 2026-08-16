@@ -42,6 +42,14 @@ export default function RegisterPage() {
   })
 
   const onSubmit = async (data: RegisterFormData) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to register.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await registerUser(data).unwrap()
       toast.success('Registration successful! Please check your email for a verification link.', { 
@@ -51,7 +59,14 @@ export default function RegisterPage() {
       })
       navigate('/login')
     } catch (err: any) {
-      toast.error(err?.data?.message || err?.data?.error?.message || 'Registration failed')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to register.', {
+          icon: '📡',
+          style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+        })
+      } else {
+        toast.error(err?.data?.message || err?.data?.error?.message || 'Registration failed')
+      }
     }
   }
 

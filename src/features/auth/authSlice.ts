@@ -41,7 +41,7 @@
 // export const { setUser, clearUser } = authSlice.actions
 // export default authSlice.reducer
 
-import { createSlice,  } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { authApi } from './authApi'
 
@@ -65,9 +65,34 @@ export interface AuthState {
   isInitializing: boolean
 }
 
+const PROFILE_KEY = 'mr_cafe_user_profile'
+
+function loadSavedProfile(): User | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function saveProfile(user: User | null) {
+  if (typeof window === 'undefined') return
+  try {
+    if (user) {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(user))
+    } else {
+      localStorage.removeItem(PROFILE_KEY)
+    }
+  } catch {}
+}
+
+const savedUser = loadSavedProfile()
+
 const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
+  user: savedUser,
+  isAuthenticated: !!savedUser,
   isInitializing: true,
 }
 
@@ -78,10 +103,12 @@ const authSlice = createSlice({
     setUser(state, action: PayloadAction<User>) {
       state.user = action.payload
       state.isAuthenticated = true
+      saveProfile(action.payload)
     },
     clearUser(state) {
       state.user = null
       state.isAuthenticated = false
+      saveProfile(null)
     },
     setInitializing(state, action: PayloadAction<boolean>) {
       state.isInitializing = action.payload
@@ -95,6 +122,7 @@ const authSlice = createSlice({
         if (payload?.user) {
           state.user = payload.user
           state.isAuthenticated = true
+          saveProfile(payload.user)
         }
         state.isInitializing = false
       }
@@ -107,6 +135,7 @@ const authSlice = createSlice({
         if (payload?.user) {
           state.user = payload.user
           state.isAuthenticated = true
+          saveProfile(payload.user)
         }
         state.isInitializing = false
       }
@@ -119,16 +148,30 @@ const authSlice = createSlice({
         state.user = payload
         state.isAuthenticated = true
         state.isInitializing = false
+        saveProfile(payload)
       }
     )
 
-    // Handle getMe error (no active session)
+    // Handle getMe error (no active session vs network offline)
     builder.addMatcher(
       authApi.endpoints.getMe.matchRejected,
-      (state) => {
-        state.user = null
-        state.isAuthenticated = false
-        state.isInitializing = false
+      (state, action: any) => {
+        const isNetworkError =
+          action.payload?.status === 'FETCH_ERROR' ||
+          action.error?.name === 'FetchError' ||
+          (typeof navigator !== 'undefined' && !navigator.onLine)
+
+        if (isNetworkError) {
+          // Network is offline: preserve existing user profile state if available
+          // so PWA application shell can load, but mark initialization complete.
+          state.isInitializing = false
+        } else {
+          // Explicit authentication failure (401, 403, etc.): session invalid/expired.
+          state.user = null
+          state.isAuthenticated = false
+          state.isInitializing = false
+          saveProfile(null)
+        }
       }
     )
 
@@ -138,6 +181,7 @@ const authSlice = createSlice({
       (state) => {
         state.user = null
         state.isAuthenticated = false
+        saveProfile(null)
       }
     )
   },

@@ -41,12 +41,27 @@ export default function ResetPasswordPage() {
       return toast.error('Passwords do not match')
     }
 
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to reset password.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await resetPassword({ token, password }).unwrap()
       toast.success('Password successfully reset! Please log in.')
       navigate('/login')
     } catch (err: any) {
-      toast.error(err?.data?.message || err?.data?.error?.message || 'Failed to reset password')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to reset password.', {
+          icon: '📡',
+          style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+        })
+      } else {
+        toast.error(err?.data?.message || err?.data?.error?.message || 'Failed to reset password')
+      }
     }
   }
 

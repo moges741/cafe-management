@@ -17,11 +17,26 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     if (!email) return toast.error('Please enter your email')
 
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to reset password.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await forgotPassword({ email }).unwrap()
       setIsSubmitted(true)
     } catch (err: any) {
-      toast.error(err?.data?.message || err?.data?.error?.message || 'Failed to send reset link')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to reset password.', {
+          icon: '📡',
+          style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+        })
+      } else {
+        toast.error(err?.data?.message || err?.data?.error?.message || 'Failed to send reset link')
+      }
     }
   }
 

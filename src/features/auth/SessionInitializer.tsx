@@ -7,7 +7,7 @@ import { useLazyGetCartQuery } from '@/features/cart/cartApi'
 
 export default function SessionInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch()
-  const { data, isLoading, isError } = useGetMeQuery()
+  const { data, isLoading, isError, error } = useGetMeQuery(undefined, { refetchOnReconnect: true })
   const [getCart] = useLazyGetCartQuery()
 
   useEffect(() => {
@@ -17,13 +17,16 @@ export default function SessionInitializer({ children }: { children: React.React
       dispatch(setUser(data))
       getCart() // Load user's backend cart on init
     } else if (isError) {
-      dispatch(clearUser())
+      const isAuthFailure = (error as any)?.status === 401 || (error as any)?.status === 403
+      if (isAuthFailure) {
+        dispatch(clearUser())
+      }
     }
 
     // Connect the socket regardless of guest/logged-in —
     // guests can still track an order they just placed
     dispatch(socketActions.connect())
-  }, [data, isLoading, isError, dispatch, getCart])
+  }, [data, isLoading, isError, error, dispatch, getCart])
 
   return <>{children}</>
 }

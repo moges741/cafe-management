@@ -16,7 +16,10 @@ import { useAppDispatch } from '@/app/hooks'
 import { cn } from '@/lib/utils'
 import Spinner from '@/components/ui/Spinner'
 import Logo from '/logo.svg'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import { getDashboardRouteForRole } from '@/features/auth/roleRoutes'
+import { WifiOff } from 'lucide-react'
+
 // Framer Motion Variants
 const fadeUpVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -35,6 +38,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const location = useLocation()
+  const { isOnline } = useNetworkStatus()
 
   const [login, { isLoading }] = useLoginMutation()
   const [syncCart] = useSyncCartMutation()
@@ -48,9 +52,17 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
-const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
+  const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
 
   const onSubmit = async (data: LoginFormData) => {
+    if (!navigator.onLine) {
+      toast.error('You are currently offline. An active internet connection is required to sign in.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await login(data).unwrap()
 
@@ -83,7 +95,14 @@ const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
         }
       }
     } catch (err: any) {
-      toast.error(err?.data?.message || err?.data?.error?.message || 'Login failed')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to log in.', {
+          icon: '📡',
+          style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+        })
+      } else {
+        toast.error(err?.data?.message || err?.data?.error?.message || 'Login failed')
+      }
     }
   }
 
@@ -207,6 +226,13 @@ const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
           <motion.div variants={fadeUpVariants} className="bg-white/[0.02] border border-white/10 backdrop-blur-xl rounded-[32px] p-8 shadow-2xl relative">
             <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-[32px] pointer-events-none" />
             
+            {!isOnline && (
+              <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2.5 relative z-20">
+                <WifiOff size={16} className="shrink-0 text-red-400" />
+                <span>Internet connection required to sign in.</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 relative z-10" noValidate>
               
               {/* Email Input */}
