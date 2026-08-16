@@ -33,6 +33,9 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import { WifiOff } from 'lucide-react'
+
 const ROLES = ['manager', 'cashier', 'waiter', 'barista', 'kitchen']
 
 // Premium Role Configurations
@@ -57,9 +60,20 @@ const itemVariants = {
 
 export default function StaffPage() {
   const { branchId } = useCurrentBranch()
+  const { isOnline } = useNetworkStatus()
   
-  // Fetch staff
-  const { data: staffList = [], isLoading: isLoadingStaff } = useGetStaffQuery({ branchId: branchId || undefined }, { skip: !branchId })
+  // Fetch staff with refetchOnReconnect
+  const { data: staffList = [], isLoading: isLoadingStaff, refetch } = useGetStaffQuery(
+    { branchId: branchId || undefined },
+    { skip: !branchId, refetchOnReconnect: true }
+  )
+
+  // Refetch when network returns online
+  useEffect(() => {
+    if (isOnline && branchId) {
+      refetch()
+    }
+  }, [isOnline, branchId, refetch])
 
   // Mutations
   const [createStaff, { isLoading: isCreating }] = useCreateStaffMutation()
@@ -121,6 +135,14 @@ export default function StaffPage() {
   }, [staffList])
 
   const handleSubmit = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to create or edit staff accounts.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!email || !role || !firstName || !lastName || (!editingStaff && !password)) {
       toast.error('Fill in all required fields')
       return
@@ -143,11 +165,23 @@ export default function StaffPage() {
       }
       setShowForm(false)
     } catch (err: any) {
-      toast.error(err?.data?.error?.message ?? `Could not ${editingStaff ? 'update' : 'create'} staff account`)
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to manage staff.')
+      } else {
+        toast.error(err?.data?.error?.message ?? `Could not ${editingStaff ? 'update' : 'create'} staff account`)
+      }
     }
   }
 
   const handleDelete = async (id: string) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to remove staff members.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!window.confirm('Remove this staff member?')) return
     try {
       await deleteStaff(id).unwrap()
@@ -158,6 +192,14 @@ export default function StaffPage() {
   }
 
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to change staff status.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await toggleStatus(id).unwrap()
       toast.success(currentStatus ? 'Staff deactivated' : 'Staff activated')
@@ -208,6 +250,17 @@ export default function StaffPage() {
             {showForm && !editingStaff ? 'Close Panel' : 'Add Staff'}
           </Button>
         </motion.div>
+
+        {!isOnline && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs md:text-sm flex items-center justify-between gap-3 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+            <div className="flex items-center gap-3">
+              <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+              <div>
+                <span className="font-bold">Offline Mode (Cached View):</span> Internet connection is required to create, update, or remove staff members. Reconnect to sync changes with the server.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ================= CREATE / EDIT FORM PANEL ================= */}
         <AnimatePresence>
