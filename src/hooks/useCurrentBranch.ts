@@ -1,10 +1,45 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAppSelector } from '@/app/hooks';
-import { useGetBranchesQuery } from '@/features/branches/branchesApi';
+import { useGetBranchesQuery, type Branch } from '@/features/branches/branchesApi';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+
+const CACHED_BRANCHES_KEY = 'mr_cafe_cached_branches';
+
+function getSavedBranches(): Branch[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(CACHED_BRANCHES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
 
 export function useCurrentBranch() {
   const user = useAppSelector((state) => state.auth.user);
-  const { data: branches, isLoading, isSuccess } = useGetBranchesQuery();
+  const { isOnline } = useNetworkStatus();
+  const { data: serverBranches, isLoading, refetch } = useGetBranchesQuery(undefined, {
+    refetchOnReconnect: true,
+  });
+
+  // Save fresh server branches or fallback to cached snapshot when offline
+  const branches: Branch[] = useMemo(() => {
+    if (serverBranches && serverBranches.length > 0) {
+      try {
+        localStorage.setItem(CACHED_BRANCHES_KEY, JSON.stringify(serverBranches));
+      } catch {}
+      return serverBranches;
+    }
+    return getSavedBranches();
+  }, [serverBranches]);
+
+  // Refetch when returning online
+  useEffect(() => {
+    if (isOnline) {
+      refetch();
+    }
+  }, [isOnline, refetch]);
+
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(
     localStorage.getItem('selectedBranchId')
   );
@@ -13,8 +48,8 @@ export function useCurrentBranch() {
   const staffBranchId = user?.employee?.branchId ?? user?.branchId ?? null;
 
   useEffect(() => {
-    // If no branch is selected yet, or the selected one isn't in the list, default appropriately.
-    if (isSuccess && branches && branches.length > 0) {
+    // If no branch is selected yet, or the selected one isn't in the list/active, default appropriately.
+    if (branches && branches.length > 0) {
       if (!selectedBranchId) {
         // Staff defaults to their own branch; others default to first active branch
         const defaultBranch = staffBranchId
@@ -37,7 +72,7 @@ export function useCurrentBranch() {
         }
       }
     }
-  }, [user, branches, isSuccess, selectedBranchId, staffBranchId]);
+  }, [user, branches, selectedBranchId, staffBranchId]);
 
   const setBranch = (branchId: string) => {
     setSelectedBranchId(branchId);

@@ -39,8 +39,20 @@ const itemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
 }
 
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import { WifiOff } from 'lucide-react'
+import { useEffect } from 'react'
+
 export default function BranchesPage() {
-  const { data: branches = [], isLoading } = useGetBranchesQuery()
+  const { isOnline } = useNetworkStatus()
+  const { data: branches = [], isLoading, refetch } = useGetBranchesQuery(undefined, { refetchOnReconnect: true })
+  
+  useEffect(() => {
+    if (isOnline) {
+      refetch()
+    }
+  }, [isOnline, refetch])
+
   const [createBranch, { isLoading: isCreating }] = useCreateBranchMutation()
   const [updateBranch, { isLoading: isUpdating }] = useUpdateBranchMutation()
   const [deactivateBranch] = useDeactivateBranchMutation()
@@ -74,6 +86,15 @@ export default function BranchesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to create or edit branches.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       if (editingId) {
         await updateBranch({ id: editingId, ...formData }).unwrap()
@@ -84,11 +105,23 @@ export default function BranchesPage() {
       }
       setIsCreateOpen(false)
     } catch (err: any) {
-      toast.error(err?.data?.message || 'Action failed')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to manage branches.')
+      } else {
+        toast.error(err?.data?.message || 'Action failed')
+      }
     }
   }
 
   const handleDelete = async (id: string, name: string) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to deactivate branches.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (confirm(`Are you sure you want to deactivate ${name}?`)) {
       try {
         await deactivateBranch(id).unwrap()
@@ -192,6 +225,17 @@ export default function BranchesPage() {
             </DialogContent>
           </Dialog>
         </motion.div>
+
+        {!isOnline && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs md:text-sm flex items-center justify-between gap-3 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+            <div className="flex items-center gap-3">
+              <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+              <div>
+                <span className="font-bold">Offline Mode (Cached View):</span> Internet connection is required to create, update, or deactivate branches. Reconnect to sync location updates with the server.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ================= CONTROLS & SEARCH ================= */}
         <motion.div 
