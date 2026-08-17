@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useGetProductsQuery } from '@/features/products/productsApi'
-import { useGetCategoriesQuery } from '@/features/categories/categoriesApi'
+import { usePwaCategories } from '@/hooks/usePwaCategories'
 import { MENU_TABS } from '@/features/categories/categoryFilters'
 import { cn } from '@/lib/utils'
 import BranchSelector from '@/components/shared/BranchSelector'
@@ -29,7 +29,7 @@ export default function MenuPage() {
     return branches?.find(b => b.id === branchId)
   }, [branches, branchId])
 
-  const { data: categories = [] } = useGetCategoriesQuery({ branchId: branchId || undefined }, { skip: !branchId })
+  const { categories } = usePwaCategories({ branchId: branchId || undefined }, { skip: !branchId })
   const { data: products = [], isLoading } = useGetProductsQuery({
     branchId: branchId || undefined,
     isAvailable: true,

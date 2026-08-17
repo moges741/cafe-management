@@ -7,7 +7,6 @@ import { motion } from 'framer-motion'
 import {
   useCreateCategoryMutation,
   useDeleteCategoryMutation,
-  useGetCategoriesQuery,
   useUpdateCategoryMutation,
   useUploadCategoryImageMutation,
 } from '@/features/categories/categoriesApi'
@@ -16,6 +15,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
+
+import { usePwaCategories } from '@/hooks/usePwaCategories'
+import { WifiOff } from 'lucide-react'
 
 type CategoryFormState = {
   name: string
@@ -38,7 +40,10 @@ const itemVariants: any = {
 
 export default function CategoriesPage() {
   const { branchId } = useCurrentBranch()
-  const { data: categories = [], isLoading } = useGetCategoriesQuery({ includeInactive: true, branchId: branchId || undefined }, { skip: !branchId })
+  const { categories, isLoading, isOnline } = usePwaCategories(
+    { includeInactive: true, branchId: branchId || undefined },
+    { skip: !branchId }
+  )
   const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation()
   const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation()
   const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation()
@@ -70,6 +75,14 @@ export default function CategoriesPage() {
   }, [selectedCategory])
 
   const handleCreateCategory = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to create categories.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!createForm.name.trim()) {
       toast.error('Category name is required')
       return
@@ -90,11 +103,23 @@ export default function CategoriesPage() {
       setSelectedCategoryId(created.id)
       toast.success('Category created')
     } catch (err: any) {
-      toast.error(err?.data?.message?.[0] ?? err?.data?.error?.message ?? 'Could not create category')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to create categories.')
+      } else {
+        toast.error(err?.data?.message?.[0] ?? err?.data?.error?.message ?? 'Could not create category')
+      }
     }
   }
 
   const handleUpdateCategory = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to update categories.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!selectedCategory) return
     if (!editForm.name.trim()) {
       toast.error('Category name is required')
@@ -112,11 +137,23 @@ export default function CategoriesPage() {
 
       toast.success('Category updated')
     } catch (err: any) {
-      toast.error(err?.data?.message?.[0] ?? err?.data?.error?.message ?? 'Could not update category')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to update categories.')
+      } else {
+        toast.error(err?.data?.message?.[0] ?? err?.data?.error?.message ?? 'Could not update category')
+      }
     }
   }
 
   const handleImageUpload = async (file?: File) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to upload category images.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!selectedCategory || !file) return
 
     const formData = new FormData()
@@ -135,6 +172,14 @@ export default function CategoriesPage() {
   }
 
   const handleDeleteCategory = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to deactivate categories.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!selectedCategory) return
 
     const confirmed = window.confirm(`Deactivate category "${selectedCategory.name}"?`)
@@ -182,6 +227,17 @@ export default function CategoriesPage() {
             {categories.length} Total Categories
           </div>
         </motion.div>
+
+        {!isOnline && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs md:text-sm flex items-center justify-between gap-3 shadow-[0_0_20px_rgba(245,158,11,0.1)] mb-8">
+            <div className="flex items-center gap-3">
+              <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+              <div>
+                <span className="font-bold">Offline Mode (Cached Categories):</span> Internet connection is required to create, update, or deactivate categories. Reconnect to sync changes with the server.
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-[360px_minmax(0,1fr)] items-start">
           
