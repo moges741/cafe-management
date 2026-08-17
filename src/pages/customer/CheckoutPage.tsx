@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { WifiOff } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { selectCartItems, selectCartTotal, selectCartBranchId } from '@/features/cart/cartSelectors'
 import { clearCart } from '@/features/cart/cartSlice'
 import { useCreateOrderMutation } from '@/features/orders/ordersApi'
 import { useInitializePaymentMutation } from '@/features/payments/paymentsApi'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,6 +17,7 @@ export default function CheckoutPage() {
   const total = useAppSelector(selectCartTotal)
   const branchId = useAppSelector(selectCartBranchId)
   const dispatch = useAppDispatch()
+  const { isOnline } = useNetworkStatus()
 
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
   const [tableNumber, setTableNumber] = useState('')
@@ -28,6 +31,14 @@ export default function CheckoutPage() {
   const isSubmitting = isCreatingOrder || isInitializingPayment
 
   const handleCheckout = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: An active internet connection is required to place an order.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     // Validation
     if (!items || items.length === 0) {
       toast.error('Your cart is empty')
@@ -128,6 +139,15 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-xl mx-auto px-6 py-8 space-y-6">
         <h1 className="text-2xl font-bold text-foreground">Checkout</h1>
+
+        {!isOnline && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs md:text-sm flex items-center gap-3 shadow-md">
+            <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+            <div>
+              <span className="font-bold">Offline Mode:</span> An active internet connection is required to place your order and initialize payment.
+            </div>
+          </div>
+        )}
 
         {/* Order type */}
         <div className="space-y-2">

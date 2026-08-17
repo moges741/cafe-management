@@ -14,7 +14,7 @@ export const cartSyncMiddleware: Middleware =
     const result = next(action)
 
     const state = store.getState() as any
-    if (!state.auth?.isAuthenticated) return result
+    if (!state.auth?.isAuthenticated || (typeof window !== 'undefined' && !navigator.onLine)) return result
 
     // Use `as any` on dispatch because RTK Query's initiate() returns
     // a thunk that doesn't match the default Dispatch type constraint.

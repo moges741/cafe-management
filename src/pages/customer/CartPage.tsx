@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingBag, Trash2, Plus, Minus, Coffee } from 'lucide-react'
+import { ShoppingBag, Trash2, Plus, Minus, Coffee, WifiOff, AlertTriangle } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
 import { removeItem, updateQuantity } from '@/features/cart/cartSlice'
 import { selectCartItems, selectCartTotal } from '@/features/cart/cartSelectors'
 import { Button } from '@/components/ui/button'
+import { usePwaCartValidation } from '@/hooks/usePwaCartValidation'
+import toast from 'react-hot-toast'
 
 // Framer Motion Variants
 const containerVariants: any = {
@@ -26,6 +28,7 @@ export default function CartPage() {
   const navigate = useNavigate()
   const items = useAppSelector(selectCartItems)
   const total = useAppSelector(selectCartTotal)
+  const { isOnline, invalidItems, hasUnavailableItems } = usePwaCartValidation()
 
   // ── Empty State ──
   if (items.length === 0) {
@@ -64,21 +67,7 @@ export default function CartPage() {
       <div className="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-amber-900/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
       <div className="fixed bottom-0 left-[-10%] w-[400px] h-[400px] bg-orange-950/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
 
-      {/* Top Navigation */}
-      <div className="sticky top-0 z-40 bg-[#050301]/80 backdrop-blur-xl border-b border-white/5">
-        {/* <div className="max-w-2xl mx-auto px-6 py-4 flex items-center"> */}
-          {/* <Link 
-            to="/menu" 
-            className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-400 hover:text-amber-500 transition-colors group"
-          >
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            Continue shopping
-          </Link> */}
-
-        {/* </div> */}
-      </div>
-
-      <div className="ax-w-2xl mx-auto px-6 py-10 relative z-10">
+      <div className="max-w-2xl mx-auto px-6 py-10 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -90,6 +79,24 @@ export default function CartPage() {
           </h1>
         </motion.div>
 
+        {!isOnline && (
+          <div className="p-4 mb-6 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs md:text-sm flex items-center gap-3 shadow-md">
+            <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+            <div>
+              <span className="font-bold">Offline Cart Mode:</span> You can continue reviewing and managing your cart. Internet connection is required to proceed to checkout and place an order.
+            </div>
+          </div>
+        )}
+
+        {hasUnavailableItems && (
+          <div className="p-4 mb-6 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs md:text-sm flex items-center gap-3 shadow-md">
+            <AlertTriangle size={18} className="shrink-0 text-red-400" />
+            <div>
+              <span className="font-bold">Action Required:</span> Some items in your cart are currently unavailable or removed. Please remove them before proceeding.
+            </div>
+          </div>
+        )}
+
         {/* Cart Items List */}
         <motion.div 
           variants={containerVariants}
@@ -98,63 +105,77 @@ export default function CartPage() {
           className="space-y-4 mb-10"
         >
           <AnimatePresence>
-            {items.map((item) => (
-              <motion.div
-                key={item.productId}
-                variants={itemVariants}
-                exit="exit"
-                layout
-                className="group relative flex flex-col sm:flex-row sm:items-center gap-4 bg-white/[0.02] border border-white/10 rounded-[24px] p-4 backdrop-blur-xl hover:border-amber-500/30 transition-colors"
-              >
-                {/* Item Info */}
-                <div className="flex-1 min-w-0 flex items-start gap-4">
-                  <div className="w-12 h-12 shrink-0 rounded-2xl bg-black/50 border border-white/5 flex items-center justify-center text-amber-500/50">
-                    <Coffee size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white truncate leading-tight">{item.productName}</h3>
-                    <p className="text-sm text-amber-500 font-semibold mt-0.5">{item.unitPrice} ETB</p>
-                    {item.notes && (
-                      <p className="text-xs mt-1.5 text-neutral-400 bg-black/40 inline-block px-2 py-1 rounded-md border border-white/5">
-                        <span className="text-neutral-500">Note:</span> {item.notes}
-                      </p>
-                    )}
-                  </div>
-                </div>
+            {items.map((item) => {
+              const invalidInfo = invalidItems.find(i => i.productId === item.productId)
+              const isItemUnavailable = invalidInfo?.reason === 'unavailable' || invalidInfo?.reason === 'removed'
 
-                {/* Controls Area */}
-                <div className="flex items-center justify-between sm:justify-end gap-6 sm:pl-4 mt-2 sm:mt-0">
-                  
-                  {/* Quantity Controls */}
-                  <div className="flex items-center bg-black/60 border border-white/10 rounded-full p-1 shadow-inner">
-                    <button
-                      onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: Math.max(1, item.quantity - 1) }))}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <span className="w-8 text-center text-sm font-bold text-white">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: item.quantity + 1 }))}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
-                    >
-                      <Plus size={14} />
-                    </button>
+              return (
+                <motion.div
+                  key={item.productId}
+                  variants={itemVariants}
+                  exit="exit"
+                  layout
+                  className={`group relative flex flex-col sm:flex-row sm:items-center gap-4 bg-white/[0.02] border rounded-[24px] p-4 backdrop-blur-xl transition-colors ${
+                    isItemUnavailable ? 'border-red-500/40 bg-red-500/5' : 'border-white/10 hover:border-amber-500/30'
+                  }`}
+                >
+                  {/* Item Info */}
+                  <div className="flex-1 min-w-0 flex items-start gap-4">
+                    <div className="w-12 h-12 shrink-0 rounded-2xl bg-black/50 border border-white/5 flex items-center justify-center text-amber-500/50">
+                      <Coffee size={20} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white truncate leading-tight flex items-center gap-2">
+                        {item.productName}
+                        {isItemUnavailable && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 font-bold uppercase tracking-wider">
+                            Unavailable
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-sm text-amber-500 font-semibold mt-0.5">{item.unitPrice} ETB</p>
+                      {item.notes && (
+                        <p className="text-xs mt-1.5 text-neutral-400 bg-black/40 inline-block px-2 py-1 rounded-md border border-white/5">
+                          <span className="text-neutral-500">Note:</span> {item.notes}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => dispatch(removeItem(item.productId))}
-                    className="p-2.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
-                    aria-label="Remove item"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
+                  {/* Controls Area */}
+                  <div className="flex items-center justify-between sm:justify-end gap-6 sm:pl-4 mt-2 sm:mt-0">
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center bg-black/60 border border-white/10 rounded-full p-1 shadow-inner">
+                      <button
+                        onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: Math.max(1, item.quantity - 1) }))}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="w-8 text-center text-sm font-bold text-white">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: item.quantity + 1 }))}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+
+                    {/* Remove Button */}
+                    <button
+                      onClick={() => dispatch(removeItem(item.productId))}
+                      className="p-2.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+                      aria-label="Remove item"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </motion.div>
+              )
+            })}
           </AnimatePresence>
         </motion.div>
 
@@ -174,10 +195,24 @@ export default function CartPage() {
           </div>
 
           <Button 
-            className="w-full h-14 bg-amber-500 hover:bg-amber-400 text-black text-lg font-bold rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all relative z-10"
-            onClick={() => navigate('/checkout')}
+            className="w-full h-14 bg-amber-500 hover:bg-amber-400 text-black text-lg font-bold rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all relative z-10 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => {
+              if (!navigator.onLine) {
+                toast.error('Network offline: An active internet connection is required to proceed to checkout.', {
+                  icon: '📡',
+                  style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+                })
+                return
+              }
+              if (hasUnavailableItems) {
+                toast.error('Please remove unavailable items before proceeding to checkout.')
+                return
+              }
+              navigate('/checkout')
+            }}
+            disabled={hasUnavailableItems}
           >
-            Proceed to Checkout
+            {!isOnline ? 'Checkout (Offline)' : hasUnavailableItems ? 'Unavailable Items in Cart' : 'Proceed to Checkout'}
           </Button>
         </motion.div>
       </div>
