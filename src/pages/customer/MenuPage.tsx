@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useGetProductsQuery } from '@/features/products/productsApi'
+import { usePwaProducts } from '@/hooks/usePwaProducts'
 import { usePwaCategories } from '@/hooks/usePwaCategories'
 import { MENU_TABS } from '@/features/categories/categoryFilters'
 import { cn } from '@/lib/utils'
@@ -30,10 +30,10 @@ export default function MenuPage() {
   }, [branches, branchId])
 
   const { categories } = usePwaCategories({ branchId: branchId || undefined }, { skip: !branchId })
-  const { data: products = [], isLoading } = useGetProductsQuery({
+  const { products, isLoading } = usePwaProducts({
     branchId: branchId || undefined,
     isAvailable: true,
-  }, { skip: !branchId }) as { data?: Product[]; isLoading: boolean }
+  }, { skip: !branchId }) as { products: Product[]; isLoading: boolean }
 
   // Resolve the active tab into a set of real category IDs
   const activeCategoryIds = useMemo(() => {

@@ -83,6 +83,14 @@ export default function ProductEditPage() {
   }
 
   const handleSave = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to update a product.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!name.trim() || !price || !categoryId) {
       toast.error('Fill in name, price, and category')
       return
@@ -108,11 +116,23 @@ export default function ProductEditPage() {
       toast.success('Product updated')
       navigate('/admin/products')
     } catch (err: any) {
-      toast.error(err?.data?.message || err?.data?.error?.message || 'Update failed')
+      if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+        toast.error('Network offline: Internet connection is required to update a product.')
+      } else {
+        toast.error(err?.data?.message || err?.data?.error?.message || 'Update failed')
+      }
     }
   }
 
   const handleDelete = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to delete a product.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await deleteProduct(productId).unwrap()
       toast.success('Product deleted')

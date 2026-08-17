@@ -39,6 +39,14 @@ export default function ProductCreatePage() {
   const galleryInputRef = useRef<HTMLInputElement>(null)
 
 const handleCreateDetails = async () => {
+  if (!navigator.onLine) {
+    toast.error('Network offline: Internet connection is required to create a product.', {
+      icon: '📡',
+      style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+    })
+    return
+  }
+
   if (!name || !price || !categoryId) {
     toast.error('Fill in name, price, and category')
     return
@@ -64,8 +72,6 @@ const handleCreateDetails = async () => {
       branchId: branchId.trim(),
     }
 
-    console.log('Creating product with payload:', payload) // Debug log
-
     const product = await createProduct(payload).unwrap()
 
     setCreatedProductId(product.id)
@@ -73,16 +79,18 @@ const handleCreateDetails = async () => {
     setStep(2)
     toast.success('Product created — now add photos')
   } catch (err: any) {
-    console.error('Create product error:', err) // Debug log
-    
-    const errorMessage =
-      err?.data?.message ??
-      err?.data?.error?.message ??
-      err?.data?.error ??
-      err?.message ??
-      'Could not create product'
+    if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to create a product.')
+    } else {
+      const errorMessage =
+        err?.data?.message ??
+        err?.data?.error?.message ??
+        err?.data?.error ??
+        err?.message ??
+        'Could not create product'
 
-    toast.error(errorMessage)
+      toast.error(errorMessage)
+    }
   }
 }
 
@@ -104,6 +112,14 @@ const handleCreateDetails = async () => {
   }
 
   const handleFinish = async () => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to upload product images.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     if (!createdProductId) return
     if (!coverFile) {
       toast.error('Add a main image before finishing')
