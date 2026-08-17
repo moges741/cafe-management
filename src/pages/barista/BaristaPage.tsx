@@ -59,6 +59,14 @@ export default function BaristaPage() {
   })
 
   const handleAdvance = async (orderId: string, nextStatus: string) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to update order status.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await updateStatus({ orderId, status: nextStatus }).unwrap()
     } catch (err: any) {

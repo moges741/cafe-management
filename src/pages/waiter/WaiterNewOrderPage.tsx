@@ -8,6 +8,10 @@ import toast from 'react-hot-toast'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { motion, AnimatePresence } from 'framer-motion'
 
+import { enqueuePendingOrder } from '@/utils/pendingOrdersQueue'
+import { usePwaOrdersSync } from '@/hooks/usePwaOrdersSync'
+import { WifiOff, RefreshCw, AlertCircle } from 'lucide-react'
+
 interface DraftItem {
   productId:   string
   productName: string
@@ -17,6 +21,7 @@ interface DraftItem {
 
 export default function WaiterNewOrderPage() {
   const { branchId } = useCurrentBranch()
+  const { isOnline, pendingOrders, isSyncing, syncQueue } = usePwaOrdersSync()
   const [tableNumber, setTableNumber] = useState('')
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
   const [draftItems, setDraftItems] = useState<DraftItem[]>([])
@@ -76,6 +81,27 @@ export default function WaiterNewOrderPage() {
       return
     }
 
+    if (!navigator.onLine) {
+      enqueuePendingOrder({
+        branchId,
+        type: orderType,
+        tableNumber: orderType === 'dine_in' ? Number(tableNumber) : undefined,
+        items: draftItems.map(i => ({
+          productId: i.productId,
+          productName: i.productName,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+        })),
+      })
+      toast.success('Offline Order saved to Pending Queue. Will auto-sync when online!', {
+        icon: '⏳',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(245, 158, 11, 0.4)' },
+      })
+      setDraftItems([])
+      setTableNumber('')
+      return
+    }
+
     try {
       const order = await createOrder({
         branchId,
@@ -100,6 +126,27 @@ export default function WaiterNewOrderPage() {
         
         {/* Categories Header */}
         <div className="px-4 py-4 md:px-6 shrink-0 bg-[#050505] z-10 border-b border-white/5">
+          {(!isOnline || pendingOrders.length > 0) && (
+            <div className="p-3 mb-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                {!isOnline ? <WifiOff size={16} className="text-amber-400 animate-pulse shrink-0" /> : <AlertCircle size={16} className="text-amber-400 shrink-0" />}
+                <span>
+                  {!isOnline ? 'Offline Mode:' : 'Pending Sync:'} <strong>{pendingOrders.length}</strong> queued order(s) waiting for server sync.
+                </span>
+              </div>
+              {isOnline && (
+                <button
+                  onClick={syncQueue}
+                  disabled={isSyncing}
+                  className="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg text-[11px] flex items-center gap-1 shrink-0 transition-colors"
+                >
+                  <RefreshCw size={12} className={isSyncing ? 'animate-spin' : ''} />
+                  {isSyncing ? 'Syncing...' : 'Sync Now'}
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center gap-2 mb-4">
             <LayoutGrid className="w-5 h-5 text-blue-500" />
             <h2 className="text-xl font-black text-white uppercase tracking-tight">Catalog</h2>
