@@ -1,12 +1,11 @@
 import { useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { CheckCircle2, ArrowRight, FileText, Clock, Coffee, WifiOff, RefreshCw } from 'lucide-react'
+import { CheckCircle2, ArrowRight, FileText, Clock, Coffee, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useGetOrderByIdQuery } from '@/features/orders/ordersApi'
 import { useVerifyChapaPaymentMutation } from '@/features/payments/paymentsApi'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
-import toast from 'react-hot-toast'
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
