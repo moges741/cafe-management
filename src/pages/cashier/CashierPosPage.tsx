@@ -1,8 +1,9 @@
 import { useGetOrdersQuery } from '@/features/orders/ordersApi'
 import { baseApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Clock, CheckCircle, CreditCard, History, ChefHat, AlertCircle } from 'lucide-react'
+import { Clock, CheckCircle, CreditCard, History, ChefHat, AlertCircle, WifiOff } from 'lucide-react'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 import toast from 'react-hot-toast'
 import { useMemo, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils'
 
 export default function CashierPosPage() {
   const { branchId } = useCurrentBranch()
+  const { isOnline } = useNetworkStatus()
   const dispatch = useAppDispatch()
   const { data: allOrders = [], isLoading } = useGetOrdersQuery(
     { branchId: branchId || undefined },
@@ -72,6 +74,14 @@ export default function CashierPosPage() {
   }, [mergedOrders])
 
   const handleConfirmCash = async (orderId: string) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to confirm cash payments.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     try {
       await confirmCash({ orderId }).unwrap()
       toast.success('Cash payment confirmed')
