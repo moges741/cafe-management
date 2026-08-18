@@ -102,6 +102,15 @@ export default function CashierPosPage() {
   return (
     <div className="min-h-[100dvh] bg-background p-4 md:p-6 pb-20 md:pb-6 overflow-y-auto space-y-8 md:space-y-12">
       
+      {!isOnline && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs md:text-sm flex items-center gap-3 shadow-md">
+          <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+          <div>
+            <span className="font-bold">Offline Mode:</span> Internet connection is required to confirm cash payments and sync payment transactions with the server.
+          </div>
+        </div>
+      )}
+
       {/* ── Section 1: Incoming Payments ── */}
       <section>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 md:mb-6 border-b border-border pb-4">
