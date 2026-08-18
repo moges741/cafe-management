@@ -86,6 +86,18 @@ export default function PaymentSuccessPage() {
             </p>
           </motion.div>
 
+          {!isOnline && (
+            <div className="w-full p-4 mb-6 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex flex-col items-center gap-2 shadow-md">
+              <div className="flex items-center gap-2">
+                <WifiOff size={16} className="shrink-0 text-amber-400 animate-pulse" />
+                <span className="font-bold">Offline Mode:</span> Connection lost during verification.
+              </div>
+              <p className="text-neutral-400 text-[11px] text-center">
+                Payment status will be verified with backend once network connection is restored.
+              </p>
+            </div>
+          )}
+
           {/* Order Details Box */}
           {isLoading ? (
              <div className="w-full py-8 flex justify-center">
