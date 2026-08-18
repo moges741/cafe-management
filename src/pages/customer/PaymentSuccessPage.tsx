@@ -1,33 +1,40 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { CheckCircle2, ArrowRight, FileText, Clock, Coffee } from 'lucide-react'
+import { CheckCircle2, ArrowRight, FileText, Clock, Coffee, WifiOff, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useGetOrderByIdQuery } from '@/features/orders/ordersApi'
 import { useVerifyChapaPaymentMutation } from '@/features/payments/paymentsApi'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+import toast from 'react-hot-toast'
 
 export default function PaymentSuccessPage() {
   const [searchParams] = useSearchParams()
   const orderId = searchParams.get('orderId')
+  const { isOnline } = useNetworkStatus()
 
   const { data: order, isLoading: isOrderLoading, refetch } = useGetOrderByIdQuery(orderId!, {
-    skip: !orderId,
+    skip: !orderId || !isOnline,
+    refetchOnReconnect: true,
   })
 
   const [verifyPayment, { isLoading: isVerifying }] = useVerifyChapaPaymentMutation()
 
-  useEffect(() => {
-    if (orderId) {
-      verifyPayment(orderId)
-        .unwrap()
-        .then(() => {
-          refetch()
-        })
-        .catch((err) => {
-          console.error('Chapa verification failed:', err)
-        })
+  const handleVerify = useCallback(async () => {
+    if (!orderId || !navigator.onLine) return
+    try {
+      await verifyPayment(orderId).unwrap()
+      refetch()
+    } catch (err: any) {
+      console.error('Chapa verification error:', err)
     }
   }, [orderId, verifyPayment, refetch])
+
+  useEffect(() => {
+    if (isOnline && orderId) {
+      handleVerify()
+    }
+  }, [isOnline, orderId, handleVerify])
 
   const isLoading = isOrderLoading || isVerifying
 
