@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
-import { Plus, Minus, Search, AlertCircle, TrendingDown, Box, CheckCircle2 } from 'lucide-react'
-import { useGetInventoryQuery, useAdjustInventoryMutation } from '@/features/inventory/inventoryApi'
+import { Plus, Minus, Search, AlertCircle, TrendingDown, Box, CheckCircle2, WifiOff } from 'lucide-react'
+import { useAdjustInventoryMutation } from '@/features/inventory/inventoryApi'
 import type { InventoryItem } from '@/features/inventory/inventoryApi'  
+import { usePwaInventory } from '@/hooks/usePwaInventory'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import toast from 'react-hot-toast'
@@ -10,7 +11,7 @@ import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 export default function InventoryPage() {
   const { branchId } = useCurrentBranch()
-  const { data: items = [], isLoading } = useGetInventoryQuery({ branchId: branchId || undefined }, { skip: !branchId })
+  const { items, isLoading, isOnline } = usePwaInventory({ branchId: branchId || undefined }, { skip: !branchId })
   const [adjust] = useAdjustInventoryMutation()
   const [adjustingId, setAdjustingId] = useState<string | null>(null)
   
@@ -18,6 +19,14 @@ export default function InventoryPage() {
   const [filter, setFilter] = useState<'all' | 'low'>('all')
 
   const handleAdjust = async (id: string, delta: number) => {
+    if (!navigator.onLine) {
+      toast.error('Network offline: Internet connection is required to adjust stock levels.', {
+        icon: '📡',
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(239, 68, 68, 0.4)' }
+      })
+      return
+    }
+
     setAdjustingId(id)
     try {
       await adjust({ id, delta, reason: delta > 0 ? 'manual_addition' : 'manual_removal' }).unwrap()
@@ -42,6 +51,15 @@ export default function InventoryPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {!isOnline && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs md:text-sm flex items-center gap-3 shadow-md">
+          <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+          <div>
+            <span className="font-bold">Offline Mode (Cached Inventory View):</span> Stock levels displayed may be stale. Internet connection is required to adjust stock quantities or restock.
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
