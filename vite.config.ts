@@ -31,6 +31,26 @@ export default defineConfig({
   build: {
     minify: 'terser', 
     cssMinify: false, 
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts'
+            }
+            if (id.includes('framer-motion') || id.includes('lucide-react')) {
+              return 'vendor-ui'
+            }
+            if (id.includes('react-dom') || id.includes('react-router-dom') || id.includes('react')) {
+              return 'vendor-core'
+            }
+            if (id.includes('@reduxjs') || id.includes('redux')) {
+              return 'vendor-redux'
+            }
+          }
+        }
+      }
+    }
   },
 })
