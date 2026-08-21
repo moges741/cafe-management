@@ -5,9 +5,9 @@ import {
   BarChart, Bar, AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, 
   CartesianGrid, PieChart, Pie, Cell 
 } from 'recharts'
-import { TrendingUp, ShoppingBag, DollarSign, AlertTriangle, Package, BarChart3 } from 'lucide-react'
+import { WifiOff, TrendingUp, ShoppingBag, DollarSign, AlertTriangle, Package, BarChart3 } from 'lucide-react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
-import { usePwaDashboard } from '@/hooks/usePwaDashboard'
+import { usePwaAnalytics } from '@/hooks/usePwaAnalytics'
 import { cn } from '@/lib/utils'
 
 const PERIODS = [
@@ -66,7 +66,10 @@ import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 export default function AnalyticsPage() {
   const { branchId } = useCurrentBranch()
   const [period, setPeriod] = useState('this_week')
-  const { data, isLoading } = usePwaDashboard({ period, branchId: branchId || undefined }, { skip: !branchId })
+  const { data, isLoading, isCached, isToday } = usePwaAnalytics(
+    { period, branchId: branchId || undefined },
+    { skip: !branchId }
+  )
 
   const statusData = data
     ? Object.entries(data.salesSummary.ordersByStatus).map(([status, count]) => ({
@@ -87,6 +90,21 @@ export default function AnalyticsPage() {
 
       <div className="p-6 max-w-7xl mx-auto relative z-10 pt-10">
         
+        {/* Cached Analytics Notice Banner */}
+        {isCached && (
+          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 backdrop-blur-xl text-amber-300 text-xs md:text-sm flex items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <WifiOff size={18} className="shrink-0 text-amber-400 animate-pulse" />
+              <div>
+                <span className="font-bold">Cached Analytics Snapshot:</span> Displaying saved {period.replace('_', ' ')} metrics. {isToday ? 'Current-day analytics require active internet connection for live sales counts.' : 'Historical data will auto-revalidate when online.'}
+              </div>
+            </div>
+            <span className="text-[10px] uppercase font-bold px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
+              Offline View
+            </span>
+          </div>
+        )}
+
         {/* ================= HEADER ================= */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
