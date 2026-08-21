@@ -7,7 +7,7 @@ import {
 } from 'recharts'
 import { TrendingUp, ShoppingBag, DollarSign, AlertTriangle, Package, BarChart3 } from 'lucide-react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
-import { useGetDashboardQuery } from '@/features/analytics/analyticsApi'
+import { usePwaDashboard } from '@/hooks/usePwaDashboard'
 import { cn } from '@/lib/utils'
 
 const PERIODS = [
@@ -66,7 +66,7 @@ import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 export default function AnalyticsPage() {
   const { branchId } = useCurrentBranch()
   const [period, setPeriod] = useState('this_week')
-  const { data, isLoading } = useGetDashboardQuery({ period, branchId: branchId || undefined }, { skip: !branchId })
+  const { data, isLoading } = usePwaDashboard({ period, branchId: branchId || undefined }, { skip: !branchId })
 
   const statusData = data
     ? Object.entries(data.salesSummary.ordersByStatus).map(([status, count]) => ({

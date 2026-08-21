@@ -2,7 +2,7 @@
 
 import { Link } from 'react-router-dom'
 import { ArrowRight, Package, ReceiptText, Tags, TriangleAlert, Sparkles, TrendingUp, Users, Activity } from 'lucide-react'
-import { useGetDashboardQuery } from '@/features/analytics/analyticsApi'
+import { usePwaDashboard } from '@/hooks/usePwaDashboard'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -28,7 +28,7 @@ const itemVariants: any = {
 
 export default function AdminDashboardPage() {
   const { branchId } = useCurrentBranch()
-  const { data, isLoading } = useGetDashboardQuery({ period: 'this_week', branchId: branchId || undefined }, { skip: !branchId })
+  const { data, isLoading } = usePwaDashboard({ period: 'this_week', branchId: branchId || undefined }, { skip: !branchId })
 
   return (
     <div className="min-h-screen bg-[#050301] relative overflow-hidden pb-20">

@@ -9,6 +9,8 @@ import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 import { NAV_BY_ROLE } from './navConfig'
 import { cn } from '@/lib/utils'
 import BranchSelector from '@/components/shared/BranchSelector'
+import PwaNetworkBanner from '@/components/shared/PwaNetworkBanner'
+
 export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
@@ -162,6 +164,7 @@ export default function DashboardLayout() {
           </div>
 
           <div className="p-4 md:p-8">
+            <PwaNetworkBanner moduleName="Staff Dashboard" />
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
