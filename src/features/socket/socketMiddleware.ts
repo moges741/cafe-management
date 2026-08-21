@@ -4,36 +4,61 @@ import { getSocket } from '@/lib/socket'
 import { setConnected, roomJoined } from './socketSlice'
 import { upsertOrder, updateOrderStatus, updateOrderPayment } from '../orders/ordersSlice'
 import { ordersApi } from '../orders/ordersApi'
+import { baseApi } from '@/lib/api'
 
-// Action creators for things a COMPONENT can dispatch to control the socket.
-// These are plain actions — the middleware below intercepts them and
-// performs the actual side effect (connecting, joining a room, etc)
 export const socketActions = {
   connect:        () => ({ type: 'socket/connectRequested' as const }),
   joinKitchen:    (branchId: string) => ({ type: 'socket/joinKitchen' as const, payload: branchId }),
   joinOrderRoom:  (orderId: string)  => ({ type: 'socket/joinOrder' as const, payload: orderId }),
 }
 
-
 export const socketMiddleware: Middleware = (store) => {
   const socket = getSocket()
   let listenersAttached = false
+  let activeBranchId: string | null = null
+  const activeOrderIds = new Set<string>()
 
-  // Attach Socket.io event listeners exactly once —
-  // these translate raw server events into Redux dispatches
   function attachListeners() {
     if (listenersAttached) return
     listenersAttached = true
 
     socket.on('connect', () => {
       store.dispatch(setConnected(true))
+      // Re-fetch authoritative state upon reconnection to recover missed events during offline period
+      store.dispatch(baseApi.util.invalidateTags(['Order', 'Product', 'Inventory', 'Category']))
+
+      // Re-subscribe to active rooms upon socket reconnect
+      if (activeBranchId) {
+        socket.emit('kitchen.join', { branchId: activeBranchId }, () => {
+          store.dispatch(roomJoined(`kitchen:${activeBranchId}`))
+        })
+      }
+      activeOrderIds.forEach((orderId) => {
+        socket.emit('order.join', { orderId }, () => {
+          store.dispatch(roomJoined(`order:${orderId}`))
+        })
+      })
     })
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
       store.dispatch(setConnected(false))
+      if (reason === 'io server disconnect' && navigator.onLine) {
+        socket.connect()
+      }
     })
 
-    // Kitchen sees a brand new order
+    // Network offline/online window listeners
+    if (typeof window !== 'undefined') {
+      window.addEventListener('offline', () => {
+        store.dispatch(setConnected(false))
+      })
+      window.addEventListener('online', () => {
+        if (!socket.connected) {
+          socket.connect()
+        }
+      })
+    }
+
     socket.on('kitchen.new_order', (payload: any) => {
       const order = payload.data
       store.dispatch(upsertOrder({
@@ -47,20 +72,16 @@ export const socketMiddleware: Middleware = (store) => {
         type:        order.type,
         tableNumber: order.tableNumber
       }))
-      // Invalidate RTK Query cache to auto-refresh Cashier/Waiter pages
       store.dispatch(ordersApi.util.invalidateTags(['Order']))
       toast.success(`New order: ${order.orderNumber}`)
     })
 
-    // Any order's status changed — kitchen board AND customer tracker
-    // both listen for this same event
     socket.on('order.status.updated', (payload: any) => {
       const data = payload.data
       store.dispatch(updateOrderStatus({
         orderId: data.orderId,
         status:  data.status,
       }))
-      // Only update payment if backend actually sent it (not null)
       if (data.payment) {
         store.dispatch(updateOrderPayment({ orderId: data.orderId, payment: data.payment }))
       }
@@ -73,14 +94,10 @@ export const socketMiddleware: Middleware = (store) => {
         orderId: data.orderId,
         status:  data.status,
       }))
-      // Only update payment if backend actually sent it (not null)
-      // data.payment is explicitly set to null for orders without payment — only
-      // update if the backend sent a non-null payment object
       if (data.payment) {
         const wasUnpaid = !store.getState().orders.byId[data.orderId]?.payment?.status
           || store.getState().orders.byId[data.orderId]?.payment?.status === 'pending'
         store.dispatch(updateOrderPayment({ orderId: data.orderId, payment: data.payment }))
-        // Toast when Chapa payment is confirmed
         if (data.payment.method === 'chapa' && data.payment.status === 'completed' && wasUnpaid) {
           toast.success(`Order paid via Chapa — ready for kitchen!`, { icon: '✅' })
         }
@@ -88,37 +105,39 @@ export const socketMiddleware: Middleware = (store) => {
       store.dispatch(ordersApi.util.invalidateTags(['Order']))
     })
 
-    // Manager low-stock alerts etc
     socket.on('notification', (payload: any) => {
       toast(payload.message, { icon: '🔔' })
     })
-    }
+  }
 
-  // This returned function runs for EVERY action dispatched in the app
   return (next) => (action: any) => {
     switch (action.type) {
       case 'socket/connectRequested':
         attachListeners()
-        if (!socket.connected) socket.connect()
+        if (!socket.connected && (typeof window === 'undefined' || navigator.onLine)) {
+          socket.connect()
+        }
         break
 
       case 'socket/joinKitchen':
-        socket.emit('kitchen.join', { branchId: action.payload }, () => {
-          store.dispatch(roomJoined(`kitchen:${action.payload}`))
-        })
+        activeBranchId = action.payload
+        if (socket.connected) {
+          socket.emit('kitchen.join', { branchId: action.payload }, () => {
+            store.dispatch(roomJoined(`kitchen:${action.payload}`))
+          })
+        }
         break
 
       case 'socket/joinOrder':
-        socket.emit('order.join', { orderId: action.payload }, () => {
-          store.dispatch(roomJoined(`order:${action.payload}`))
-        })
+        activeOrderIds.add(action.payload)
+        if (socket.connected) {
+          socket.emit('order.join', { orderId: action.payload }, () => {
+            store.dispatch(roomJoined(`order:${action.payload}`))
+          })
+        }
         break
     }
 
-    // Always call next() — this passes the action forward so
-    // reducers still process it normally. Forgetting this line
-    // is the most common middleware bug — it silently breaks
-    // every other action in the app.
     return next(action)
   }
 }
