@@ -35,7 +35,7 @@ export default function AboutSection() {
     { text: "a", color: "text-amber-100/70" },
     { text: "simple", color: "text-amber-100/70" },
     { text: "idea", color: "text-amber-100/70" },
-    { text: "—", color: "text-amber-100/70" },
+{ text: " {built by Moges btw} ", color: "text-amber-100/70 font-mono" },
     { text: "good", color: "text-amber-100/70" },
     { text: "coffee", color: "text-amber-100/70" },
     { text: "shouldn't", color: "text-amber-100/70" },
