@@ -29,11 +29,11 @@ export default function MenuPage() {
     return branches?.find(b => b.id === branchId)
   }, [branches, branchId])
 
-  const { categories } = usePwaCategories({ branchId: branchId || undefined }, { skip: !branchId })
+  const { categories } = usePwaCategories({ branchId: branchId || undefined })
   const { products, isLoading } = usePwaProducts({
     branchId: branchId || undefined,
     isAvailable: true,
-  }, { skip: !branchId }) as { products: Product[]; isLoading: boolean }
+  }) as { products: Product[]; isLoading: boolean }
 
   // Resolve the active tab into a set of real category IDs
   const activeCategoryIds = useMemo(() => {

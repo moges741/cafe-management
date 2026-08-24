@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
-import { useAppSelector } from '@/app/hooks';
 import Navbar from '@/components/layout/Navbar';
 
 // Core synchronous customer/public pages for fast first load
@@ -80,8 +79,6 @@ function RouteLoadingFallback() {
 }
 
 const RootRedirect = () => {
-  const { isInitializing } = useAppSelector((state) => state.auth);
-  if (isInitializing) return null;
   return <HomePage />;
 };
 

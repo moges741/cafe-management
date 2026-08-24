@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { useGetProductsQuery } from '@/features/products/productsApi'
+import { usePwaProducts } from '@/hooks/usePwaProducts'
 import { useCurrentBranch } from '@/hooks/useCurrentBranch'
 
 export default function FeaturedMenuSection() {
   const { branchId } = useCurrentBranch()
-  const { data: products = [], isLoading } = useGetProductsQuery({
+  const { products = [], isLoading } = usePwaProducts({
     branchId: branchId || undefined,
     isAvailable: true,
-  }, { skip: !branchId })
+  }) as { products: any[]; isLoading: boolean }
   const featured = products.slice(0, 4)
 
   const containerVariants = {
