@@ -7,10 +7,28 @@ import { useAppDispatch } from '@/app/hooks';
 import { useSyncCartMutation } from '@/features/cart/cartApi';
 import Spinner from '@/components/ui/Spinner';
 import { getDashboardRouteForRole } from '@/features/auth/roleRoutes';
+import { setUser as setAuthUser } from '@/features/auth/authSlice';
+
+function parseJwt(token: string): { sub: string; email: string; role: any } | null {
+  try {
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Frontend redirect target after Google OAuth completes.
- * Includes mobile browser cookie settlement retry logic and URL error parsing.
+ * Fully compatible with privacy-focused browsers (Brave Shields, Safari ITP, iOS WebKit).
  */
 export default function GoogleCallbackPage() {
   const navigate = useNavigate();
@@ -34,9 +52,14 @@ export default function GoogleCallbackPage() {
         return;
       }
 
-      // 2. Extract tokens from URL if provided (for cross-origin mobile / Safari support)
-      const tokenFromUrl = searchParams.get('token');
-      const refreshTokenFromUrl = searchParams.get('refreshToken');
+      // 2. Extract tokens from URL query OR hash fragment (handles Brave tracking protection)
+      const hashParams = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.hash.replace(/^#/, ''))
+        : null;
+
+      const tokenFromUrl = searchParams.get('token') || hashParams?.get('token');
+      const refreshTokenFromUrl = searchParams.get('refreshToken') || hashParams?.get('refreshToken');
+
       if (tokenFromUrl) {
         localStorage.setItem('access_token', tokenFromUrl);
       }
@@ -57,7 +80,7 @@ export default function GoogleCallbackPage() {
         }
       }
 
-      // 3. Retry loop for mobile browser cookie settlement
+      // 4. Resolve authenticated user from /auth/me or JWT fallback
       let user = null;
       let attempts = 0;
       const maxAttempts = 3;
@@ -75,8 +98,21 @@ export default function GoogleCallbackPage() {
         } catch (_err) {}
 
         if (!user && attempts < maxAttempts) {
-          // Short delay to allow mobile browsers (iOS Safari / Chrome Mobile) to settle httpOnly cookies after cross-domain redirect
-          await new Promise((res) => setTimeout(res, 400));
+          await new Promise((res) => setTimeout(res, 350));
+        }
+      }
+
+      // 5. Fallback: If getMe is blocked by Brave Shields or Safari ITP,
+      // recover user identity directly from the signed JWT access token
+      if (!user && tokenFromUrl) {
+        const decoded = parseJwt(tokenFromUrl);
+        if (decoded && decoded.sub) {
+          user = {
+            id: decoded.sub,
+            email: decoded.email,
+            role: decoded.role || 'customer',
+          };
+          dispatch(setAuthUser(user as any));
         }
       }
 
