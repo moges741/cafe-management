@@ -103,6 +103,7 @@ const authSlice = createSlice({
     setUser(state, action: PayloadAction<User>) {
       state.user = action.payload
       state.isAuthenticated = true
+      state.isInitializing = false
       saveProfile(action.payload)
     },
     clearUser(state) {

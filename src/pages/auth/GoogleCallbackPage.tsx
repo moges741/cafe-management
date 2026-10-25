@@ -80,31 +80,11 @@ export default function GoogleCallbackPage() {
         }
       }
 
-      // 4. Resolve authenticated user from /auth/me or JWT fallback
+      // 4. Resolve authenticated user:
+      // If token is present from URL/hash (Brave Shields / Safari ITP / mobile), decode user immediately
       let user = null;
-      let attempts = 0;
-      const maxAttempts = 3;
 
-      while (attempts < maxAttempts && !user) {
-        attempts++;
-        try {
-          const result = await dispatch(
-            authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true })
-          );
-          if ('data' in result && result.data) {
-            user = result.data;
-            break;
-          }
-        } catch (_err) {}
-
-        if (!user && attempts < maxAttempts) {
-          await new Promise((res) => setTimeout(res, 350));
-        }
-      }
-
-      // 5. Fallback: If getMe is blocked by Brave Shields or Safari ITP,
-      // recover user identity directly from the signed JWT access token
-      if (!user && tokenFromUrl) {
+      if (tokenFromUrl) {
         const decoded = parseJwt(tokenFromUrl);
         if (decoded && decoded.sub) {
           user = {
@@ -116,7 +96,33 @@ export default function GoogleCallbackPage() {
         }
       }
 
+      // Fallback: If no token in URL/hash, try resolving user via HttpOnly cookies
+      if (!user) {
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (attempts < maxAttempts && !user) {
+          attempts++;
+          try {
+            const result = await dispatch(
+              authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true })
+            );
+            if ('data' in result && result.data) {
+              user = result.data;
+              dispatch(setAuthUser(user as any));
+              break;
+            }
+          } catch (_err) {}
+
+          if (!user && attempts < maxAttempts) {
+            await new Promise((res) => setTimeout(res, 350));
+          }
+        }
+      }
+
       if (user) {
+        dispatch(setAuthUser(user as any));
+
         toast.success('Signed in with Google successfully!', {
           icon: '🎉',
           style: {
@@ -126,7 +132,8 @@ export default function GoogleCallbackPage() {
           },
         });
 
-        navigate(getDashboardRouteForRole(user.role), { replace: true });
+        const targetRoute = getDashboardRouteForRole(user.role);
+        navigate(targetRoute, { replace: true });
       } else {
         toast.error('Authentication failed. Please try signing in again.');
         navigate('/login', { replace: true });
