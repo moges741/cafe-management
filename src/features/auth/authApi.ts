@@ -100,20 +100,28 @@ interface RegisterDto {
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<{ message: string }, LoginDto>({
+    login: builder.mutation<any, LoginDto>({
       query: (body) => ({
         url: '/auth/login',
         method: 'POST',
         body,
       }),
-      transformResponse: (response: any) => ({
-        ...response,
-        user: {
-          ...response.user,
-          role: response.user?.role?.name || response.user?.role,
-          branchId: response.user?.employee?.branchId,
+      transformResponse: (response: any) => {
+        if (response?.accessToken && typeof window !== 'undefined') {
+          localStorage.setItem('access_token', response.accessToken)
         }
-      }),
+        if (response?.refreshToken && typeof window !== 'undefined') {
+          localStorage.setItem('refresh_token', response.refreshToken)
+        }
+        return {
+          ...response,
+          user: response.user ? {
+            ...response.user,
+            role: response.user?.role?.name || response.user?.role,
+            branchId: response.user?.employee?.branchId || response.user?.branchId,
+          } : undefined,
+        }
+      },
       invalidatesTags: ['Auth'],
     }),
    verifyEmail: builder.mutation<{ message: string }, { token: string }>({
@@ -163,6 +171,16 @@ export const authApi = baseApi.injectEndpoints({
         url: '/auth/logout',
         method: 'POST',
       }),
+      onQueryStarted: async (_arg, { queryFulfilled }) => {
+        try {
+          await queryFulfilled
+        } finally {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('refresh_token')
+          }
+        }
+      },
       invalidatesTags: ['Auth'],
     }),
   }),

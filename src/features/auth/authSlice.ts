@@ -109,6 +109,10 @@ const authSlice = createSlice({
       state.user = null
       state.isAuthenticated = false
       saveProfile(null)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+      }
     },
     setInitializing(state, action: PayloadAction<boolean>) {
       state.isInitializing = action.payload

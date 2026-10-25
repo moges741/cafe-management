@@ -52,7 +52,7 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
-  const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
+  const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL || 'https://mr-cafe.onrender.com/api/v1/auth/google';
 
   const onSubmit = async (data: LoginFormData) => {
     if (!navigator.onLine) {
@@ -64,7 +64,14 @@ export default function LoginPage() {
     }
 
     try {
-      await login(data).unwrap()
+      const loginRes: any = await login(data).unwrap()
+
+      if (loginRes?.accessToken) {
+        localStorage.setItem('access_token', loginRes.accessToken)
+      }
+      if (loginRes?.refreshToken) {
+        localStorage.setItem('refresh_token', loginRes.refreshToken)
+      }
 
       // Sync guest cart to user account
       const localCartStr = localStorage.getItem('mr_cafe_cart')
@@ -77,11 +84,20 @@ export default function LoginPage() {
         } catch(e) {}
       }
 
-      const result = await dispatch(authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true }))
+      let user = loginRes?.user
 
-      if ('data' in result && result.data) {
-        const role = result.data.role
+      if (!user) {
+        const result = await dispatch(authApi.endpoints.getMe.initiate(undefined, { forceRefetch: true }))
+        if ('data' in result && result.data) {
+          user = result.data
+        } else if ('error' in result) {
+          const errMsg = (result.error as any)?.data?.message || 'Failed to authenticate session.'
+          toast.error(errMsg)
+          return
+        }
+      }
 
+      if (user) {
         toast.success('Logged in successfully', {
           icon: '☕',
           style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(245, 158, 11, 0.2)' }
@@ -91,8 +107,10 @@ export default function LoginPage() {
         if (from) {
           navigate(from, { replace: true })
         } else {
-          navigate(getDashboardRouteForRole(role), { replace: true })
+          navigate(getDashboardRouteForRole(user.role), { replace: true })
         }
+      } else {
+        toast.error('Login failed. Please verify your credentials and try again.')
       }
     } catch (err: any) {
       if (err?.status === 'FETCH_ERROR' || !navigator.onLine) {
@@ -103,6 +121,13 @@ export default function LoginPage() {
       } else {
         toast.error(err?.data?.message || err?.data?.error?.message || 'Login failed')
       }
+    }
+  }
+
+  const onFormError = (formErrors: any) => {
+    const firstKey = Object.keys(formErrors)[0]
+    if (firstKey && formErrors[firstKey]?.message) {
+      toast.error(formErrors[firstKey].message)
     }
   }
 
@@ -233,7 +258,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 relative z-10" noValidate>
+            <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-5 relative z-10" noValidate>
               
               {/* Email Input */}
               <div className="space-y-2">

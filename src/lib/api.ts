@@ -8,6 +8,13 @@ export const baseApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_URL,
     credentials: 'include',
+    prepareHeaders: (headers) => {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`)
+      }
+      return headers
+    },
   }),
   // tagTypes lets different endpoints invalidate each other's cache
   // e.g. after creating an order, the "Orders" list refetches automatically

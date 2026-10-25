@@ -18,7 +18,7 @@ const fadeUpVariants: any = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
 }
-const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL;
+const GOOGLE_AUTH_URL = import.meta.env.VITE_GOOGLE_AUTH_URL || 'https://mr-cafe.onrender.com/api/v1/auth/google';
 
 const staggerContainer: any = {
   hidden: { opacity: 0 },
@@ -51,8 +51,8 @@ export default function RegisterPage() {
     }
 
     try {
-      await registerUser(data).unwrap()
-      toast.success('Registration successful! Please check your email for a verification link.', { 
+      const res: any = await registerUser(data).unwrap()
+      toast.success(res?.message || 'Registration successful! Please check your email for a verification link.', { 
         duration: 6000,
         icon: '✨',
         style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(245, 158, 11, 0.2)' }
@@ -67,6 +67,13 @@ export default function RegisterPage() {
       } else {
         toast.error(err?.data?.message || err?.data?.error?.message || 'Registration failed')
       }
+    }
+  }
+
+  const onFormError = (formErrors: any) => {
+    const firstKey = Object.keys(formErrors)[0]
+    if (firstKey && formErrors[firstKey]?.message) {
+      toast.error(formErrors[firstKey].message)
     }
   }
 
@@ -180,7 +187,7 @@ export default function RegisterPage() {
           <motion.div variants={fadeUpVariants} className="bg-white/[0.02] border border-white/10 backdrop-blur-xl rounded-[32px] p-8 shadow-2xl relative">
             <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-[32px] pointer-events-none" />
             
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 relative z-10" noValidate>
+            <form onSubmit={handleSubmit(onSubmit, onFormError)} className="space-y-5 relative z-10" noValidate>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* First Name Input */}

@@ -34,7 +34,17 @@ export default function GoogleCallbackPage() {
         return;
       }
 
-      // 2. Sync guest cart (if any)
+      // 2. Extract tokens from URL if provided (for cross-origin mobile / Safari support)
+      const tokenFromUrl = searchParams.get('token');
+      const refreshTokenFromUrl = searchParams.get('refreshToken');
+      if (tokenFromUrl) {
+        localStorage.setItem('access_token', tokenFromUrl);
+      }
+      if (refreshTokenFromUrl) {
+        localStorage.setItem('refresh_token', refreshTokenFromUrl);
+      }
+
+      // 3. Sync guest cart (if any)
       const localCartStr = localStorage.getItem('mr_cafe_cart');
       if (localCartStr) {
         try {
